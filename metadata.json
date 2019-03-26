@@ -1,0 +1,7 @@
+{
+	"name": "WinTile: Windows 10 window tiling for GNOME",
+	"description": "Window tiling based on Windows 10 hotkey patterns.",
+	"uuid": "wintile@nowsci.com",
+	"url": "https://github.com/fmstrat/wintile",
+	"shell-version": ["3.28"]
+}
