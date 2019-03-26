@@ -10,10 +10,10 @@ By default, this extension uses `<Super><Control><Shift>`+`<Arrows>` to move win
 
 To use `<Super>`+`<Arrows>` for this extension:
 ```
-$ bash ~/.local/share/gnome-shell/extensions/windows.window.tile@nowsci.com/setHotKey.sh Super
+$ bash ~/.local/share/gnome-shell/extensions/wintile@nowsci.com/setHotKey.sh Super
 ```
 
 To reset `<Super>`+`<Arrows>` to default for GNOME:
 ```
-$ bash ~/.local/share/gnome-shell/extensions/windows.window.tile@nowsci.com/setHotKey.sh ControlShiftSuper
+$ bash ~/.local/share/gnome-shell/extensions/wintile@nowsci.com/setHotKey.sh ControlShiftSuper
 ```
