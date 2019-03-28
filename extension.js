@@ -1,8 +1,7 @@
-const Lang = imports.lang
 const Meta = imports.gi.Meta
-const Shell = imports.gi.Shell
 const Main = imports.ui.main
 const Mainloop = imports.mainloop;
+const Gio = imports.gi.Gio;
 
 let _close = 50;
 var debug = false;
@@ -11,57 +10,21 @@ var _log = function(){}
 if (debug)
 	_log = log.bind(window.console);
 
+const Config = imports.misc.config;
+window.gsconnect = {
+	    extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
+	    shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10)
+};
+imports.searchPath.unshift(gsconnect.extdatadir);
 
-const KeyManager = new Lang.Class({
-    Name: 'MyKeyManager',
-
-    _init: function() {
-        this.grabbers = new Map()
-
-        global.display.connect(
-            'accelerator-activated',
-            Lang.bind(this, function(display, action, deviceId, timestamp){
-                _log('Accelerator Activated: [display={}, action={}, deviceId={}, timestamp={}]',
-                    display, action, deviceId, timestamp)
-                this._onAccelerator(action)
-            }))
-    },
-
-    listenFor: function(accelerator, callback){
-        _log('Trying to listen for hot key [accelerator={}]', accelerator)
-        let action = global.display.grab_accelerator(accelerator)
-
-        if(action == Meta.KeyBindingAction.NONE) {
-            _log('Unable to grab accelerator [binding={}]', accelerator)
-        } else {
-            _log('Grabbed accelerator [action={}]', action)
-            let name = Meta.external_binding_name_for_action(action)
-            _log('Received binding name for action [name={}, action={}]',
-                name, action)
-
-            _log('Requesting WM to allow binding [name={}]', name)
-            Main.wm.allowKeybinding(name, Shell.ActionMode.ALL)
-
-            this.grabbers.set(action, {
-                name: name,
-                accelerator: accelerator,
-                callback: callback,
-                action: action
-            })
-        }
-
-    },
-
-    _onAccelerator: function(action) {
-        let grabber = this.grabbers.get(action)
-
-        if(grabber) {
-            this.grabbers.get(action).callback()
-        } else {
-            _log('No listeners [action={}]', action)
-        }
-    }
-})
+const KeyBindings = imports.keybindings
+let keyManager = new KeyBindings.Manager();
+var oldbindings = {
+	unmaximize: [],
+	maximize: [],
+	toggle_tiled_left: [],
+	toggle_tiled_right: []
+}
 
 function isClose(a, b) {
 	if (a <= b && a > b - _close)
@@ -304,17 +267,48 @@ function requestMove(direction) {
 	});
 }
 
-var enable = function() {
-	let modifier = "<ctrl><super><shift>";
-	let modifier2 = "<super>";
-	let keyManager = new KeyManager()
-	keyManager.listenFor(modifier+"left", function() { requestMove("left") })
-	keyManager.listenFor(modifier+"right", function() { requestMove("right") })
-	keyManager.listenFor(modifier+"up", function() { requestMove("up") })
-	keyManager.listenFor(modifier+"down", function() { requestMove("down") })
-	keyManager.listenFor(modifier2+"left", function() { requestMove("left") })
-	keyManager.listenFor(modifier2+"right", function() { requestMove("right") })
-	keyManager.listenFor(modifier2+"up", function() { requestMove("up") })
-	keyManager.listenFor(modifier2+"down", function() { requestMove("down") })
+function changeBinding(settings, key, oldBinding, newBinding) {
+	var binding = oldbindings[key.replace(/-/g, '_')];
+	var _newbindings = [];
+	for (var i = 0; i < binding.length; i++) {
+		let currentbinding = binding[i];
+		if (currentbinding == oldBinding)
+			currentbinding = newBinding;
+		_newbindings.push(currentbinding)
+	}
+	settings.set_strv(key, _newbindings);
 }
 
+function resetBinding(settings, key) {
+	var binding = oldbindings[key.replace(/-/g, '_')];
+	settings.set_strv(key, binding);
+}
+
+var enable = function() {
+	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+	oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
+	oldbindings['maximize'] = desktopSettings.get_strv('maximize');
+	oldbindings['toggle_tiled_left'] = mutterSettings.get_strv('toggle-tiled-left');
+	oldbindings['toggle_tiled_right'] = mutterSettings.get_strv('toggle-tiled-right');
+	changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
+	changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
+	changeBinding(mutterSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
+	changeBinding(mutterSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+	Mainloop.timeout_add(3000, function() {
+		keyManager.add("<Super>left", function() { requestMove("left") })
+		keyManager.add("<Super>right", function() { requestMove("right") })
+		keyManager.add("<Super>up", function() { requestMove("up") })
+		keyManager.add("<Super>down", function() { requestMove("down") })
+	});
+}
+
+var disable = function() {
+	keyManager.removeAll();
+	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+	resetBinding(desktopSettings, 'unmaximize');
+	resetBinding(desktopSettings, 'maximize');
+	resetBinding(mutterSettings, 'toggle-tiled-left');
+	resetBinding(mutterSettings, 'toggle-tiled-right');
+}
