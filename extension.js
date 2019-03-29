@@ -18,7 +18,7 @@ window.gsconnect = {
 imports.searchPath.unshift(gsconnect.extdatadir);
 
 const KeyBindings = imports.keybindings
-let keyManager = new KeyBindings.Manager();
+let keyManager = null;
 var oldbindings = {
 	unmaximize: [],
 	maximize: [],
@@ -285,30 +285,37 @@ function resetBinding(settings, key) {
 }
 
 var enable = function() {
-	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
-	oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
-	oldbindings['maximize'] = desktopSettings.get_strv('maximize');
-	oldbindings['toggle_tiled_left'] = mutterSettings.get_strv('toggle-tiled-left');
-	oldbindings['toggle_tiled_right'] = mutterSettings.get_strv('toggle-tiled-right');
-	changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
-	changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
-	changeBinding(mutterSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
-	changeBinding(mutterSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
-	Mainloop.timeout_add(3000, function() {
-		keyManager.add("<Super>left", function() { requestMove("left") })
-		keyManager.add("<Super>right", function() { requestMove("right") })
-		keyManager.add("<Super>up", function() { requestMove("up") })
-		keyManager.add("<Super>down", function() { requestMove("down") })
-	});
+	if (!keyManager) {
+		keyManager = new KeyBindings.Manager();
+		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+		oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
+		oldbindings['maximize'] = desktopSettings.get_strv('maximize');
+		oldbindings['toggle_tiled_left'] = mutterSettings.get_strv('toggle-tiled-left');
+		oldbindings['toggle_tiled_right'] = mutterSettings.get_strv('toggle-tiled-right');
+		changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
+		changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
+		changeBinding(mutterSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
+		changeBinding(mutterSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+		Mainloop.timeout_add(3000, function() {
+			keyManager.add("<Super>left", function() { requestMove("left") })
+			keyManager.add("<Super>right", function() { requestMove("right") })
+			keyManager.add("<Super>up", function() { requestMove("up") })
+			keyManager.add("<Super>down", function() { requestMove("down") })
+		});
+	}
 }
 
 var disable = function() {
-	keyManager.removeAll();
-	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
-	resetBinding(desktopSettings, 'unmaximize');
-	resetBinding(desktopSettings, 'maximize');
-	resetBinding(mutterSettings, 'toggle-tiled-left');
-	resetBinding(mutterSettings, 'toggle-tiled-right');
+	if (keyManager) {
+		keyManager.removeAll();
+		keyManager.destroy();
+		keyManager = null;
+		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+		resetBinding(desktopSettings, 'unmaximize');
+		resetBinding(desktopSettings, 'maximize');
+		resetBinding(mutterSettings, 'toggle-tiled-left');
+		resetBinding(mutterSettings, 'toggle-tiled-right');
+	}
 }
