@@ -4,7 +4,7 @@ const Mainloop = imports.mainloop;
 const Gio = imports.gi.Gio;
 
 let _close = 50;
-var debug = true;
+var debug = false;
 
 var _log = function(){}
 if (debug)
