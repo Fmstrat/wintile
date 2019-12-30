@@ -3,6 +3,13 @@ const Main = imports.ui.main
 const Mainloop = imports.mainloop;
 const Gio = imports.gi.Gio;
 
+let config = {
+	default: {
+		rows: 2,
+		cols: 2
+	}
+}
+
 let _close = 50;
 var debug = true;
 
@@ -178,12 +185,14 @@ function getMonitorArray() {
 	for (var i = 0; i < monitors.length; i++) {
 		_log(JSON.stringify(monitors[i]));
 	}
-	//var monitors = Main.layoutManager.monitors;
-	//monitors.sort(function(a, b) {
-	//});
-	//let monWidth = Main.layoutManager.monitors[mon].width;
-	//let monHeight = Main.layoutManager.monitors[mon].height;
-	//_log("mon: " + mon);
+	if (debug) {
+		var monitors = Main.layoutManager.monitors;
+		monitors.sort(function(a, b) {
+		});
+		let monWidth = Main.layoutManager.monitors[mon].width;
+		let monHeight = Main.layoutManager.monitors[mon].height;
+		_log("mon: " + mon);
+	}
 }
 
 function moveWindow(direction) {
