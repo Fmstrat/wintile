@@ -87,76 +87,81 @@ function placeWindow(loc, app) {
 	_log("placeWindow: " + loc);
 	let x, y, w, h = 0
 	var space = app.get_work_area_current_monitor()
+
+	unMaximizeIfMaximized(app);
+
 	switch (loc) {
 		case "left":
 			x = space.x;
 			y = space.y;
 			w = Math.floor(space.width/2);
 			h = space.height;
-			if (!app.maximizedVertically)
-				app.maximize(Meta.MaximizeFlags.VERTICAL)
-			if (app.maximized_horizontally)
-				app.unmaximize(Meta.MaximizeFlags.HORIZONTAL);
-			app.move_resize_frame(true, x, y, w, h)
 			break;
 		case "topleft":
 			x = space.x;
 			y = space.y;
 			w = Math.floor(space.width/2);
 			h = Math.floor(space.height/2);
-			if (app.maximized_horizontally || app.maximizedVertically)
-				app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-			app.move_resize_frame(true, x, y, w, h)
 			break;
 		case "bottomleft":
 			x = space.x;
 			y = Math.floor(space.height/2)+space.y;
 			w = Math.floor(space.width/2);
 			h = Math.floor(space.height/2);
-			if (app.maximized_horizontally || app.maximizedVertically)
-				app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-			app.move_resize_frame(true, x, y, w, h)
 			break;
 		case "right":
 			x = Math.floor(space.width/2+space.x);
 			y = space.y;
 			w = Math.floor(space.width/2);
 			h = space.height;
-			if (!app.maximizedVertically)
-				app.maximize(Meta.MaximizeFlags.VERTICAL)
-			if (app.maximized_horizontally)
-				app.unmaximize(Meta.MaximizeFlags.HORIZONTAL);
-			app.move_resize_frame(true, x, y, w, h)
 			break;
 		case "topright":
 			x = Math.floor(space.width/2+space.x);
 			y = space.y;
 			w = Math.floor(space.width/2);
 			h = Math.floor(space.height/2);
-			if (app.maximized_horizontally || app.maximizedVertically)
-				app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-			app.move_resize_frame(true, x, y, w, h)
 			break;
 		case "bottomright":
 			x = Math.floor(space.width/2+space.x);
 			y = Math.floor(space.height/2)+space.y;
 			w = Math.floor(space.width/2);
 			h = Math.floor(space.height/2);
-			if (app.maximized_horizontally || app.maximizedVertically)
-				app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-			app.move_resize_frame(true, x, y, w, h)
 			break;
 		case "maximize":
-			if (!app.maximized_horizontally || !app.maximizedVertically)
-				app.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+			x = space.x;
+			y = space.y;
+			w = space.width;
+			h = space.height;
 			break;
 		case "floating":
-			if (app.maximized_horizontally || app.maximizedVertically)
-				app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+			let rect = app.originalFloatingRectangle || getDefaultFloatingRectangle(space);
+			x = rect.x;
+			y = rect.y;
+			w = rect.width;
+			h = rect.height;
 			break;
 	}
+
+	app.move_resize_frame(true, x, y, w, h);
+
 	let window = app.get_frame_rect()
 	_log("window.x: "+window.x+" window.y: "+window.y+" window.width: "+window.width+" window.height: "+window.height)
+}
+
+function unMaximizeIfMaximized(app) {
+	if (app.maximized_horizontally || app.maximized_vertically) {
+		app.unmaximize(Meta.MaximizeFlags.BOTH);
+	}
+}
+
+function getDefaultFloatingRectangle(workspace) {
+    let padding = 100;
+    return {
+        x: workspace.x + padding,
+        y: workspace.y + padding,
+        width: workspace.width - padding * 2,
+        height: workspace.height - padding * 2
+    };
 }
 
 function getMonitorArray() {
@@ -179,11 +184,17 @@ function getMonitorArray() {
 }
 
 function moveWindow(direction) {
+	_log("---");
 	_log("moveWindow: " + direction);
 	var app = global.display.focus_window;
 	var space = app.get_work_area_current_monitor()
 	let pos = getPosition(app, space);
 	_log("pos: " + pos);
+
+	if (pos == "floating") {
+		app.originalFloatingRectangle = app.get_frame_rect();
+	}
+
 	//var monitors = getMonitorArray();
 	var curMonitor = app.get_monitor();
 	let monitorToLeft = -1;
