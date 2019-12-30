@@ -13,7 +13,7 @@ let config = {
 let _close = 50;
 var debug = true;
 
-// View logs with `journalctl -f |grep WinTile`
+// View logs with `journalctl -qf |grep WinTile`
 var _log = function(str) {
 	if (debug) {
 		log('[WinTile]', str);
@@ -175,23 +175,10 @@ function getDefaultFloatingRectangle(workspace) {
 }
 
 function getMonitorArray() {
-	var monitors = [];
-	for (var i = 0; i < Main.layoutManager.monitors.length; i++) {
-		monitors.push({ "index": i, "x": Main.layoutManager.monitors[i].x });
-	}
-	monitors.sort(function(a, b) {
-		    return a.x - b.x;
-	});
-	for (var i = 0; i < monitors.length; i++) {
-		_log(JSON.stringify(monitors[i]));
-	}
 	if (debug) {
-		var monitors = Main.layoutManager.monitors;
-		monitors.sort(function(a, b) {
-		});
-		let monWidth = Main.layoutManager.monitors[mon].width;
-		let monHeight = Main.layoutManager.monitors[mon].height;
-		_log("mon: " + mon);
+		for (var i = 0; i < Main.layoutManager.monitors.length; i++) {
+			_log(JSON.stringify(Main.layoutManager.monitors[i]));
+		}
 	}
 }
 
@@ -207,18 +194,29 @@ function moveWindow(direction) {
 		app.originalFloatingRectangle = app.get_frame_rect();
 	}
 
-	//var monitors = getMonitorArray();
+	var monitors = getMonitorArray();
 	var curMonitor = app.get_monitor();
 	let monitorToLeft = -1;
 	let monitorToRight = -1;
+	let monitorAbove = -1;
+	let monitorBelow = -1;
 	for (var i = 0; i < Main.layoutManager.monitors.length; i++) {
+		// TODO:
+		//  Need to determine when a monitor is above/below/to the side, which one has the closest x/y.
+		//  Currently stacked or side-by-side monitors may conflict if they are different resolutions.
+		if (Main.layoutManager.monitors[i].y < Main.layoutManager.monitors[curMonitor].y && (monitorAbove == -1 || (monitorAbove >= 0 && Main.layoutManager.monitors[i].y > Main.layoutManager.monitors[monitorAbove].y)))
+			monitorAbove = i;
+		if (Main.layoutManager.monitors[i].y > Main.layoutManager.monitors[curMonitor].y && (monitorBelow == -1 || (monitorBelow >= 0 && Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[monitorBelow].x)))
+			monitorBelow = i;
 		if (Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[curMonitor].x && (monitorToLeft == -1 || (monitorToLeft >= 0 && Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[monitorToLeft].x)))
 			monitorToLeft = i;
 		if (Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[curMonitor].x && (monitorToRight == -1 || (monitorToRight >= 0 && Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[monitorToRight].x)))
 			monitorToRight = i;
 	}
 	_log("monitorToLeft: " + monitorToLeft);
-	_log("monitorToRight " + monitorToRight);
+	_log("monitorToRight: " + monitorToRight);
+	_log("monitorAbove: " + monitorAbove);
+	_log("monitorBelow: " + monitorBelow);
 
 	switch (direction) {
 		case "left":
