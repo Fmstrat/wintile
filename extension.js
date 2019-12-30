@@ -4,11 +4,14 @@ const Mainloop = imports.mainloop;
 const Gio = imports.gi.Gio;
 
 let _close = 50;
-var debug = false;
+var debug = true;
 
-var _log = function(){}
-if (debug)
-	_log = log.bind(window.console);
+// View logs with `journalctl -f |grep WinTile`
+var _log = function(str) {
+	if (debug) {
+		log('[WinTile]', str);
+	}
+}
 
 const Config = imports.misc.config;
 window.gsconnect = {
