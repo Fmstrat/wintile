@@ -5,6 +5,7 @@ const Gio = imports.gi.Gio;
 
 let config = {
 	cols: 2,
+	useMaximize: true,
 	debug: true
 }
 
@@ -39,13 +40,33 @@ function moveApp(app, loc) {
 	colWidth = Math.floor(space.width/config.cols)
 	rowHeight = Math.floor(space.height/2)
 
-	unMaximizeIfMaximized(app);
 	let x = loc.col * colWidth + space.x;
 	let y = loc.row * rowHeight + space.y;
 	let w = loc.width * colWidth;
 	let h = loc.height * rowHeight;
 
-	app.move_resize_frame(true, x, y, w, h);
+	if (!config.useMaximize) {
+		unMaximizeIfMaximized(app);
+		app.move_resize_frame(true, x, y, w, h);
+	} else {
+		if (loc.height < 2 || loc.width < config.cols) {
+			unMaximizeIfMaximized(app);
+		}
+		app.move_resize_frame(true, x, y, w, h);
+		if (loc.height == 2 && loc.width == config.cols) {
+			// Maximize
+			_log('maximize')
+			app.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+		} else if (loc.height == 2) {
+			// Maximize vertically
+			_log('maximize - v')
+			app.maximize(Meta.MaximizeFlags.VERTICAL);
+		} else if (loc.width == config.cols) {
+			// Maximize horizontally
+			_log('maximize - h')
+			app.maximize(Meta.MaximizeFlags.HORIZONTAL);
+		}
+	}
 
 	app.wintile.col = loc.col;
 	app.wintile.row = loc.row;
@@ -85,6 +106,8 @@ function getDefaultFloatingRectangle() {
 }
 
 function restoreApp(app) {
+	if (app.maximized_horizontally || app.maximizedVertically)
+		app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 	app.move_resize_frame(true, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
 	app.wintile = null;
 }
