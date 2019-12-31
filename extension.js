@@ -64,12 +64,24 @@ function unMaximizeIfMaximized(app) {
 
 function initApp(app) {
 	app.wintile = {
-		origFrame: app.get_frame_rect(),
+		origFrame: app.get_frame_rect() || getDefaultFloatingRectangle(),
 		row: -1,
 		col: -1,
 		height: -1,
 		width: -1
 	};
+}
+
+function getDefaultFloatingRectangle() {
+	_log('Getting default rectangle.')
+	let padding = 100;
+	let workspace = app.get_work_area_current_monitor();
+    return {
+        x: workspace.x + padding,
+        y: workspace.y + padding,
+        width: workspace.width - padding * 2,
+        height: workspace.height - padding * 2
+    };
 }
 
 function restoreApp(app) {
