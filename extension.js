@@ -9,8 +9,6 @@ let config = {
 	debug: true
 }
 
-let _close = 50;
-
 // View logs with `journalctl -qf |grep WinTile`
 var _log = function(str) {
 	if (config.debug) {
