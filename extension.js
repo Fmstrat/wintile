@@ -3,11 +3,12 @@ const Main = imports.ui.main
 const Mainloop = imports.mainloop;
 const Gio = imports.gi.Gio;
 
-let config = {
-	cols: 2,
-	useMaximize: true,
-	debug: true
-}
+const ModalDialog = imports.ui.modalDialog;
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
+
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
 
 // View logs with `journalctl -qf |grep WinTile`
 var _log = function(str) {
@@ -15,6 +16,40 @@ var _log = function(str) {
 		log('[WinTile]', str);
 	}
 }
+
+let config = {
+	cols: 2,
+	useMaximize: true,
+	debug: true
+}
+
+// Get the GSchema for our settings
+let gschema = Gio.SettingsSchemaSource.new_from_directory(
+	Me.dir.get_child('schemas').get_path(),
+	Gio.SettingsSchemaSource.get_default(),
+	false
+);
+
+// Create a new settings object
+let settings = new Gio.Settings({
+	settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true)
+});
+
+function updateSettings() {
+	// 0 = 2 cols, 1 = 4 cols
+	if (settings.get_value('cols').deep_unpack() == 0)
+		config.cols = 2;
+	else
+		config.cols = 4;
+	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
+	config.debug = settings.get_value('debug').deep_unpack();
+	_log(JSON.stringify(config));
+}
+
+updateSettings();
+
+// Watch the settings for changes
+let settingsChangedId = settings.connect('changed', updateSettings.bind());
 
 const Config = imports.misc.config;
 window.gsconnect = {
@@ -34,6 +69,8 @@ var oldbindings = {
 
 function moveApp(app, loc) {
 	_log("moveApp: " + JSON.stringify(loc));
+	//let ws = new Gio.Settings({ schema_id: 'org.gnome.shell.extensions.wintile' });
+	//_log(ws.get_strv('cols'));
 	var space = app.get_work_area_current_monitor()
 	colWidth = Math.floor(space.width/config.cols)
 	rowHeight = Math.floor(space.height/2)
