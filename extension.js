@@ -11,6 +11,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 let onWindowGrabBegin, onWindowGrabEnd;
+let windowMoving = false;
 
 // View logs with `journalctl -qf |grep WinTile`
 var _log = function(str) {
@@ -565,17 +566,32 @@ function requestMove(direction) {
 	});
 }
 
+function checkForMove(curFrameBefore, app) {
+	_log('checkForMove')
+	if (windowMoving) {
+		Mainloop.timeout_add(10, function () {
+			var curFrameAfter = app.get_frame_rect();
+			if (curFrameBefore.x != curFrameAfter.x || curFrameBefore.y != curFrameBefore.y) {
+				restoreApp(app, false);
+			} else {
+				checkForMove(curFrameBefore, app);
+			}
+		});
+	}
+}
 
 function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabBegin')
+	windowMoving = true;
 	var app = global.display.focus_window;
 	if (app.wintile) {
-		restoreApp(app, false);
+		checkForMove(app.get_frame_rect(), app);
 	}
 }
 
 function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabEnd')
+	windowMoving = false;
 }
 
 function changeBinding(settings, key, oldBinding, newBinding) {
