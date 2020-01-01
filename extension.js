@@ -10,6 +10,8 @@ const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
+let onWindowGrabBegin, onWindowGrabEnd;
+
 // View logs with `journalctl -qf |grep WinTile`
 var _log = function(str) {
 	if (config.debug) {
@@ -136,10 +138,16 @@ function getDefaultFloatingRectangle() {
     };
 }
 
-function restoreApp(app) {
+function restoreApp(app, move=true) {
+	_log('restoreApp')
 	if (app.maximized_horizontally || app.maximizedVertically)
 		app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-	app.move_resize_frame(true, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
+	if (move) {
+		app.move_resize_frame(true, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
+	} else {
+		var curFrame = app.get_frame_rect();
+		app.move_resize_frame(true, curFrame.x, curFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
+	}
 	app.wintile = null;
 }
 
@@ -557,6 +565,19 @@ function requestMove(direction) {
 	});
 }
 
+
+function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
+	_log('windowGrabBegin')
+	var app = global.display.focus_window;
+	if (app.wintile) {
+		restoreApp(app, false);
+	}
+}
+
+function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
+	_log('windowGrabEnd')
+}
+
 function changeBinding(settings, key, oldBinding, newBinding) {
 	var binding = oldbindings[key.replace(/-/g, '_')];
 	var _newbindings = [];
@@ -593,6 +614,8 @@ var enable = function() {
 			keyManager.add("<Super>up", function() { requestMove("up") })
 			keyManager.add("<Super>down", function() { requestMove("down") })
 		});
+		onWindowGrabBegin = global.display.connect('grab-op-begin', windowGrabBegin);
+		onWindowGrabEnd = global.display.connect('grab-op-end', windowGrabEnd);
 	}
 }
 
@@ -607,5 +630,7 @@ var disable = function() {
 		resetBinding(desktopSettings, 'maximize');
 		resetBinding(mutterSettings, 'toggle-tiled-left');
 		resetBinding(mutterSettings, 'toggle-tiled-right');
+		global.display.disconnect(onWindowGrabBegin);
+		global.display.disconnect(onWindowGrabEnd);
 	}
 }
