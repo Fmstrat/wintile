@@ -36,11 +36,7 @@ let settings = new Gio.Settings({
 });
 
 function updateSettings() {
-	// 0 = 2 cols, 1 = 4 cols
-	if (settings.get_value('cols').deep_unpack() == 0)
-		config.cols = 2;
-	else
-		config.cols = 4;
+	config.cols = (settings.get_value('cols').deep_unpack())+2;
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
 	config.debug = settings.get_value('debug').deep_unpack();
 	_log(JSON.stringify(config));
@@ -191,6 +187,29 @@ function sendMove(direction) {
 					app.minimize();
 					break;
 			}	
+		} else if (config.cols == 3) {
+				// Ultrawide 3x2 grid
+				switch (direction) {
+					case "left":
+						// Move to the left most column at full height
+						initApp(app);
+						moveApp(app, { "row": 0, "col": 0, "height": 2, "width": 1 });
+						break;
+					case "right":
+						// Move to the right most column at full height
+						initApp(app);
+						moveApp(app, { "row": 0, "col": 1, "height": 2, "width": 1 });
+						break;
+					case "up":
+						// 1st Maximize
+						initApp(app);
+						moveApp(app, { "row": 0, "col": 0, "height": 2, "width": 3 });
+						break;
+					case "down":
+						// Minimize
+						app.minimize();
+						break;
+				}
 		} else {
 			// Ultrawide 4x2 grid
 			switch (direction) {
@@ -313,6 +332,105 @@ function sendMove(direction) {
 						// We are a bottom tile, go full width
 						_log('down - 5')
 						moveApp(app, { "row": app.wintile.row, "col": 0, "height": app.wintile.height, "width": 2 });
+					} else {
+						// We are bottom half, minimize
+						_log('down - 6')
+						app.minimize();
+					}
+					break;
+			}	
+		} else if (config.cols == 3) {
+			// Ultrawide 3x2 grid
+			switch (direction) {
+				case "left":
+					_log('left')
+					if (app.wintile.col > 0) {
+						// We can move left on this monitor and keep our size
+						_log('left - 1')
+						moveApp(app, { "row": app.wintile.row, "col": app.wintile.col-1, "height": app.wintile.height, "width": app.wintile.width });
+					} else if (app.wintile.col == 0 && app.wintile.width > 1) {
+						// We are not yet to smallest width, so shrink
+						_log('left - 2')
+						moveApp(app, { "row": app.wintile.row, "col": 0, "height": app.wintile.height, "width": app.wintile.width-1 });
+					} else if (monitorToLeft != -1) {
+						// There is a monitor to the left, so let's go there
+						_log('left - 3')
+						app.move_to_monitor(monitorToLeft);
+						moveApp(app, { "row": app.wintile.row, "col": 4, "height": app.wintile.height, "width": 1 });
+					} else {
+						// We are already on the left, and there is no other monitor to the left
+						// Move to the left most column at full height
+						_log('left - 4')
+						moveApp(app, { "row": 0, "col": 0, "height": 2, "width": 1 });
+					}
+					break;
+				case "right":
+					_log('right')
+					if (app.wintile.col+app.wintile.width-1 < 2) {
+						// We can move right on this monitor and keep our size
+						_log('right - 1')
+						moveApp(app, { "row": app.wintile.row, "col": app.wintile.col+1, "height": app.wintile.height, "width": app.wintile.width });
+					} else if (app.wintile.col+app.wintile.width-1 == 2 && app.wintile.width > 1) {
+						// We are not yet to smallest width, so shrink
+						_log('right - 2')
+						moveApp(app, { "row": app.wintile.row, "col": app.wintile.col+1, "height": app.wintile.height, "width": app.wintile.width-1 });
+					} else if (monitorToRight != -1) {
+						// There is a monitor to the right, so let's go there
+						_log('right - 3')
+						app.move_to_monitor(monitorToRight);
+						moveApp(app, { "row": app.wintile.row, "col": 0, "height": app.wintile.height, "width": 1 });
+					} else {
+						// We are already on the left, and there is no other monitor to the right
+						// Move to the right most column at full height
+						_log('right - 4')
+						moveApp(app, { "row": 0, "col": 2, "height": 2, "width": 1 });
+					}
+					break;
+				case "up":
+					_log('up')
+					if (app.wintile.height == 2) {
+						// We are full height on half, go to top while keeping width
+						// This changed from 2x2
+						_log('up - 1')
+						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 1, "width": app.wintile.width });
+					} else if (app.wintile.row == 1) {
+						// We are bottom half, go to full height, keeping width
+						// This changed from 2x2
+						_log('up - 2')
+						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 2, "width": app.wintile.width });
+					} else {
+						// We are top half, go straight to 2nd maximize
+						// This changed from 2x2
+						_log('up - 3')
+						moveApp(app, { "row": 0, "col": 0, "height": 2, "width": 3 });
+					}
+					break;
+				case "down":
+					_log('down')
+					if (app.wintile.col == 0 && app.wintile.width == 3 && app.wintile.height == 2) {
+						// We are maximized, go to bottom half
+						// This is different from 2x2
+						_log('down - 1')
+						moveApp(app, { "row": 1, "col": 0, "height": 1, "width": 3 });
+					} else if (app.wintile.col == 0 && app.wintile.width == 3 && app.wintile.row == 0) {
+						// We are top half, go to bottom half
+						// This is different from 2x2
+						_log('down - 2')
+						moveApp(app, { "row": 1, "col": 0, "height": app.wintile.height, "width": app.wintile.width });
+					} else if (app.wintile.height == 2) {
+						// We are full height, go to half height
+						// This changed from 2x3
+						_log('down - 3')
+						moveApp(app, { "row": 1, "col": app.wintile.col, "height": 1, "width": app.wintile.width });
+					} else if (app.wintile.row == 0) {
+						// We are top half, go to full height
+						// This changed from 2x2
+						_log('down - 4')
+						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 2, "width": app.wintile.width });
+					} else if (app.wintile.width != 3) {
+						// We are not full bottom but are a tile, go full width
+						_log('down - 5')
+						moveApp(app, { "row": 1, "col": 0, "height": 1, "width": 3 });					
 					} else {
 						// We are bottom half, minimize
 						_log('down - 6')

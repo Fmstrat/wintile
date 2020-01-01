@@ -16,6 +16,7 @@ function init() {
 function createColOptions(){
     let options = [
         { name: _("2") },
+        { name: _("3") },
         { name: _("4"),}
     ];
     let liststore = new Gtk.ListStore();
