@@ -573,12 +573,12 @@ function checkForMove(curFrameBefore, app) {
 
 function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabBegin')
+	windowMoving = true;
+	var app = global.display.focus_window;
+	if (app.wintile) {
+		checkForMove(app.get_frame_rect(), app);
+	}
 	if (meta_window.resizeable && config.preview.enabled) {
-		windowMoving = true;
-		var app = global.display.focus_window;
-		if (app.wintile) {
-			checkForMove(app.get_frame_rect(), app);
-		}
 		Mainloop.timeout_add(500, function () {
 			checkIfNearGrid(app);
 		});	
@@ -587,8 +587,8 @@ function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, g
 
 function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabEnd')
+	windowMoving = false;
 	if (meta_window.resizeable && config.preview.enabled) {
-		windowMoving = false;
 		if (preview.visible == true) {
 			var app = global.display.focus_window;
 			if (!app.wintile)
