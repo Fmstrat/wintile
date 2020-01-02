@@ -72,8 +72,6 @@ var oldbindings = {
 
 function moveApp(app, loc) {
 	_log("moveApp: " + JSON.stringify(loc));
-	//let ws = new Gio.Settings({ schema_id: 'org.gnome.shell.extensions.wintile' });
-	//_log(ws.get_strv('cols'));
 	var space = app.get_work_area_current_monitor()
 	colWidth = Math.floor(space.width/config.cols)
 	rowHeight = Math.floor(space.height/2)
