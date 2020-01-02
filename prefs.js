@@ -91,6 +91,21 @@ function buildPrefsWidget() {
     layout.attach(maximizeLabel, 0, 2, 1, 1);
     layout.attach(maximizeInput, 1, 2, 1, 1);
 
+    // Preview setting
+    let previewLabel = new Gtk.Label({
+        label: _("Turn on mouse dragging support"),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START
+    });
+    let previewInput = new Gtk.Switch({
+        active: this.settings.get_boolean ('preview'),
+        halign: Gtk.Align.END,
+        visible: true
+    });
+    layout.attach(previewLabel, 0, 3, 1, 1);
+    layout.attach(previewInput, 1, 3, 1, 1);
+
     // Debug setting
     let debugLabel = new Gtk.Label({
         label: _("Turn on debugging"),
@@ -103,11 +118,12 @@ function buildPrefsWidget() {
         halign: Gtk.Align.END,
         visible: true
     });
-    layout.attach(debugLabel, 0, 3, 1, 1);
-    layout.attach(debugInput, 1, 3, 1, 1);
+    layout.attach(debugLabel, 0, 4, 1, 1);
+    layout.attach(debugInput, 1, 4, 1, 1);
 
     this.settings.bind('cols', colsInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     this.settings.bind('use-maximize', maximizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
+    this.settings.bind('preview', previewInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     this.settings.bind('debug', debugInput, 'active', Gio.SettingsBindFlags.DEFAULT);
 
     // Return our widget which will be added to the window

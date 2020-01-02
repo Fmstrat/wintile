@@ -28,6 +28,7 @@ let config = {
 	useMaximize: true,
 	debug: true,
 	preview: {
+		enabled: true,
 		close: 75,
 		delay: 500
 	}
@@ -48,6 +49,7 @@ let settings = new Gio.Settings({
 function updateSettings() {
 	config.cols = (settings.get_value('cols').deep_unpack())+2;
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
+	config.preview.enabled = settings.get_value('preview').deep_unpack();
 	config.debug = settings.get_value('debug').deep_unpack();
 	_log(JSON.stringify(config));
 }
@@ -571,7 +573,7 @@ function checkForMove(curFrameBefore, app) {
 
 function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabBegin')
-	if (meta_window.resizeable) {
+	if (meta_window.resizeable && config.preview.enabled) {
 		windowMoving = true;
 		var app = global.display.focus_window;
 		if (app.wintile) {
@@ -585,7 +587,7 @@ function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, g
 
 function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabEnd')
-	if (meta_window.resizeable) {
+	if (meta_window.resizeable && config.preview.enabled) {
 		windowMoving = false;
 		if (preview.visible == true) {
 			var app = global.display.focus_window;

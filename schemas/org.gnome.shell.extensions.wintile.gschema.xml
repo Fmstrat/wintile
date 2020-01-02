@@ -12,6 +12,11 @@
       <summary>Turn on/off use of maximizing windows</summary>
       <description>When on, certain windows that won't resize full screen like Terminal will, however animations may occur between tile shifts.</description>
     </key>
+    <key name="preview" type="b">
+      <default>true</default>
+      <summary>Turn on/off mouse positioning</summary>
+      <description>When on, dragging windows with the mouse will allow placement into the grid.</description>
+    </key>
     <key name="debug" type="b">
       <default>false</default>
       <summary>Turn on/off debug output</summary>
