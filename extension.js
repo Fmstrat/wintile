@@ -26,8 +26,11 @@ var _log = function(str) {
 let config = {
 	cols: 2,
 	useMaximize: true,
-	close: 75,
-	debug: true
+	debug: true,
+	preview: {
+		close: 75,
+		delay: 500
+	}
 }
 
 // Get the GSchema for our settings
@@ -573,7 +576,9 @@ function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, g
 	if (app.wintile) {
 		checkForMove(app.get_frame_rect(), app);
 	}
-	checkIfNearGrid(app);
+	Mainloop.timeout_add(500, function () {
+		checkIfNearGrid(app);
+	});
 }
 
 function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
@@ -606,9 +611,9 @@ function resetBinding(settings, key) {
 }
 
 function isClose(a, b) {
-	if (a <= b && a > b - config.close)
+	if (a <= b && a > b - config.preview.close)
 		return true;
-	else if (a >= b && a < b + config.close)
+	else if (a >= b && a < b + config.preview.close)
 		return true;
 	else
 		return false;
@@ -689,7 +694,7 @@ function checkIfNearGrid(app) {
 		}
 		if (!close)
 			hidePreview();
-		Mainloop.timeout_add(100, function () {
+		Mainloop.timeout_add(500, function () {
 			checkIfNearGrid(app);
 		});
 	}
