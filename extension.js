@@ -26,7 +26,7 @@ var _log = function(str) {
 let config = {
 	cols: 2,
 	useMaximize: true,
-	close: 50,
+	close: 75,
 	debug: true
 }
 
@@ -663,6 +663,26 @@ function checkIfNearGrid(app) {
 			} else if ((isClose(y, space.y+space.height) || y > space.y+space.height) && x > grid_x && x < grid_x+colWidth) {
 				// If we are close to the bottom, show a preview for the bottom grid item
 				showPreview(i, 1, grid_x, space.y+rowHeight, colWidth, rowHeight)
+				close = true;
+				break;
+			} else if ((isClose(x, space.x) || x < space.x) && y > space.y && y < space.y+rowHeight) {
+				// If we are close to the top left, show the top left grid item
+				showPreview(0, 0, space.x, space.y, colWidth, rowHeight)
+				close = true;
+				break;
+			} else if ((isClose(x, space.x) || x < space.x) && y > space.y+rowHeight) {
+				// If we are close to the bottom left, show the bottom left grid item
+				showPreview(0, 1, space.x, space.y+rowHeight, colWidth, rowHeight)
+				close = true;
+				break;
+			} else if ((isClose(x, space.x+space.width) || x > space.x+space.width) && y > space.y && y < space.y+rowHeight) {
+				// If we are close to the top right, show the top right grid item
+				showPreview(config.cols, 0, space.x+space.width-colWidth, space.y, colWidth, rowHeight)
+				close = true;
+				break;
+			} else if ((isClose(x, space.x+space.width) || x > space.x+space.width) && y > space.y+rowHeight) {
+				// If we are close to the bottom right, show the bottom right grid item
+				showPreview(config.cols, 1, space.x+space.width-colWidth, space.y+rowHeight, colWidth, rowHeight)
 				close = true;
 				break;
 			}
