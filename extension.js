@@ -571,25 +571,29 @@ function checkForMove(curFrameBefore, app) {
 
 function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabBegin')
-	windowMoving = true;
-	var app = global.display.focus_window;
-	if (app.wintile) {
-		checkForMove(app.get_frame_rect(), app);
+	if (meta_window.resizeable) {
+		windowMoving = true;
+		var app = global.display.focus_window;
+		if (app.wintile) {
+			checkForMove(app.get_frame_rect(), app);
+		}
+		Mainloop.timeout_add(500, function () {
+			checkIfNearGrid(app);
+		});	
 	}
-	Mainloop.timeout_add(500, function () {
-		checkIfNearGrid(app);
-	});
 }
 
 function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabEnd')
-	windowMoving = false;
-	if (preview.visible == true) {
-		var app = global.display.focus_window;
-		if (!app.wintile)
-			initApp(app)
-		moveApp(app, { "row": preview.row, "col": preview.col, "height": 1, "width": 1 });
-		hidePreview();
+	if (meta_window.resizeable) {
+		windowMoving = false;
+		if (preview.visible == true) {
+			var app = global.display.focus_window;
+			if (!app.wintile)
+				initApp(app)
+			moveApp(app, { "row": preview.row, "col": preview.col, "height": 1, "width": 1 });
+			hidePreview();
+		}
 	}
 }
 
