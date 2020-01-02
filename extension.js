@@ -7,6 +7,9 @@ const ModalDialog = imports.ui.modalDialog;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
+const St = imports.gi.St;
+const Tweener = imports.ui.tweener;
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
@@ -23,6 +26,7 @@ var _log = function(str) {
 let config = {
 	cols: 2,
 	useMaximize: true,
+	close: 50,
 	debug: true
 }
 
@@ -571,11 +575,19 @@ function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, g
 	if (app.wintile) {
 		checkForMove(app.get_frame_rect(), app);
 	}
+	checkIfNearGrid(app);
 }
 
 function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabEnd')
 	windowMoving = false;
+	if (preview.visible == true) {
+		var app = global.display.focus_window;
+		if (!app.wintile)
+			initApp(app)
+		moveApp(app, { "row": preview.row, "col": preview.col, "height": 1, "width": 1 });
+		hidePreview();
+	}
 }
 
 function changeBinding(settings, key, oldBinding, newBinding) {
@@ -593,6 +605,76 @@ function changeBinding(settings, key, oldBinding, newBinding) {
 function resetBinding(settings, key) {
 	var binding = oldbindings[key.replace(/-/g, '_')];
 	settings.set_strv(key, binding);
+}
+
+function isClose(a, b) {
+	if (a <= b && a > b - config.close)
+		return true;
+	else if (a >= b && a < b + config.close)
+		return true;
+	else
+		return false;
+}
+
+var preview = new St.BoxLayout({
+	style_class: 'tile-preview',
+	visible: true
+});
+Main.uiGroup.add_actor(preview);
+
+function showPreview(col, row, _x, _y, _w, _h) {
+	Tweener.removeTweens(preview);
+	preview.visible = true;
+	preview.col = col;
+	preview.row = row;
+	Tweener.addTween(preview, {
+		time: 0.125,
+		opacity: 255,
+		visible: true,
+		transition: 'easeOutQuad',
+		x: _x,
+		y: _y,
+		width: _w,
+		height: _h
+	});
+}
+
+function hidePreview() {
+	Tweener.removeTweens(preview);
+	preview.visible = false;
+	preview.col = null;
+	preview.row = null;
+}
+
+function checkIfNearGrid(app) {
+	_log('checkIfNearGrid')
+	if (windowMoving) {
+		var space = app.get_work_area_current_monitor()
+		colWidth = Math.floor(space.width/config.cols)
+		rowHeight = Math.floor(space.height/2)
+		let [x, y, mask] = global.get_pointer();
+		_log(`mouse - x:${x} y:${y}`);
+		var close = false;
+		for (var i = 0; i < config.cols; i++) {
+			var grid_x = i * colWidth + space.x;
+			if ((isClose(y, space.y) || y < space.y) && x > grid_x && x < grid_x+colWidth) {
+				// If we are close to the top, show a preview for the top grid item
+				showPreview(i, 0, grid_x, space.y, colWidth, rowHeight)
+				close = true;
+				break;
+			} else if ((isClose(y, space.y+space.height) || y > space.y+space.height) && x > grid_x && x < grid_x+colWidth) {
+				// If we are close to the bottom, show a preview for the bottom grid item
+				showPreview(i, 1, grid_x, space.y+rowHeight, colWidth, rowHeight)
+				close = true;
+				break;
+			}
+		}
+		if (!close)
+			hidePreview();
+		Mainloop.timeout_add(100, function () {
+			checkIfNearGrid(app);
+		});
+	}
 }
 
 var enable = function() {
