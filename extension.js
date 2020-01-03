@@ -3,15 +3,15 @@ const Main = imports.ui.main
 const Mainloop = imports.mainloop;
 const Gio = imports.gi.Gio;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Extension = ExtensionUtils.getCurrentExtension();
+
 const ModalDialog = imports.ui.modalDialog;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
 const St = imports.gi.St;
 const Tweener = imports.ui.tweener;
-
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
 
 let onWindowGrabBegin, onWindowGrabEnd;
 let windowMoving = false;
@@ -36,7 +36,7 @@ let config = {
 
 // Get the GSchema for our settings
 let gschema = Gio.SettingsSchemaSource.new_from_directory(
-	Me.dir.get_child('schemas').get_path(),
+	Extension.dir.get_child('schemas').get_path(),
 	Gio.SettingsSchemaSource.get_default(),
 	false
 );
@@ -628,11 +628,6 @@ function changeBinding(settings, key, oldBinding, newBinding) {
 	settings.set_strv(key, _newbindings);
 }
 
-function resetBinding(settings, key) {
-	var binding = oldbindings[key.replace(/-/g, '_')];
-	settings.set_strv(key, binding);
-}
-
 function isClose(a, b) {
 	if (a <= b && a > b - config.preview.close)
 		return true;
@@ -735,15 +730,19 @@ var enable = function() {
 	if (!keyManager) {
 		keyManager = new KeyBindings.Manager();
 		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+		let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+		let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
 		oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
 		oldbindings['maximize'] = desktopSettings.get_strv('maximize');
-		oldbindings['toggle_tiled_left'] = mutterSettings.get_strv('toggle-tiled-left');
-		oldbindings['toggle_tiled_right'] = mutterSettings.get_strv('toggle-tiled-right');
+		oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
+		oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
 		changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
 		changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
-		changeBinding(mutterSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
-		changeBinding(mutterSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+		changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
+		changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+		shellSettings.set_boolean("edge-tiling", false);
+		mutterSettings.set_boolean("edge-tiling", false);
 		Mainloop.timeout_add(3000, function() {
 			keyManager.add("<Super>left", function() { requestMove("left") })
 			keyManager.add("<Super>right", function() { requestMove("right") })
@@ -761,11 +760,15 @@ var disable = function() {
 		keyManager.destroy();
 		keyManager = null;
 		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
-		resetBinding(desktopSettings, 'unmaximize');
-		resetBinding(desktopSettings, 'maximize');
-		resetBinding(mutterSettings, 'toggle-tiled-left');
-		resetBinding(mutterSettings, 'toggle-tiled-right');
+		let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+		let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+		desktopSettings.reset('unmaximize');
+		desktopSettings.reset('maximize');
+		mutterKeybindingSettings.reset('toggle-tiled-left');
+		mutterKeybindingSettings.reset('toggle-tiled-right');
+		shellSettings.reset("edge-tiling");
+		mutterSettings.reset("edge-tiling")
 		global.display.disconnect(onWindowGrabBegin);
 		global.display.disconnect(onWindowGrabEnd);
 	}
