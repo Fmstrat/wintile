@@ -133,14 +133,25 @@ function unMaximizeIfMaximized(app) {
 	}
 }
 
-function initApp(app) {
-	app.wintile = {
-		origFrame: app.get_frame_rect() || getDefaultFloatingRectangle(),
-		row: -1,
-		col: -1,
-		height: -1,
-		width: -1
-	};
+function initApp(app, maximized=false) {
+	_log('initApp')
+	if (!maximized) {
+		app.wintile = {
+			origFrame: app.get_frame_rect() || getDefaultFloatingRectangle(),
+			row: -1,
+			col: -1,
+			height: -1,
+			width: -1
+		};	
+	} else {
+		app.wintile = {
+			origFrame: app.origFrameRect || getDefaultFloatingRectangle(),
+			row: 0,
+			col: 0,
+			height: 2,
+			width: config.cols
+		};	
+	}
 }
 
 function getDefaultFloatingRectangle() {
@@ -572,15 +583,16 @@ function requestMove(direction) {
 	});
 }
 
-function checkForMove(curFrameBefore, app) {
+function checkForMove(x, y, app) {
 	_log('checkForMove')
 	if (windowMoving) {
 		Mainloop.timeout_add(10, function () {
 			var curFrameAfter = app.get_frame_rect();
-			if (curFrameBefore.x != curFrameAfter.x || curFrameBefore.y != curFrameBefore.y) {
+			let [xAfter, yAfter, mask] = global.get_pointer();
+			if (x != xAfter || y != yAfter) {
 				restoreApp(app, false);
 			} else {
-				checkForMove(curFrameBefore, app);
+				checkForMove(x, y, app);
 			}
 		});
 	}
@@ -592,9 +604,11 @@ function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, g
 		windowMoving = true;
 		var app = global.display.focus_window;
 		if (app.wintile) {
-			checkForMove(app.get_frame_rect(), app);
+			let [x, y, mask] = global.get_pointer();
+			checkForMove(x, y, app);
 		}
 		if (meta_window.resizeable && config.preview.enabled) {
+			app.origFrameRect = app.get_frame_rect();
 			Mainloop.timeout_add(500, function () {
 				checkIfNearGrid(app);
 			});	
@@ -613,6 +627,14 @@ function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpo
 					initApp(app)
 				moveApp(app, { "row": preview.loc.row, "col": preview.loc.col, "height": preview.loc.height, "width": preview.loc.width, "mouse": true });
 				hidePreview();
+			} else {
+				// If maximize button was pressed or double clicked on title bar, make the wintile var
+				Mainloop.timeout_add(500, function () {
+					var app = global.display.focus_window;
+					if (app.maximized_horizontally && app.maximized_vertically) {
+						initApp(app, true)
+					}
+				});	
 			}
 		}	
 	}
