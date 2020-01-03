@@ -77,9 +77,16 @@ var oldbindings = {
 
 function moveApp(app, loc) {
 	_log("moveApp: " + JSON.stringify(loc));
-	var space = app.get_work_area_current_monitor()
-	colWidth = Math.floor(space.width/config.cols)
-	rowHeight = Math.floor(space.height/2)
+	var space = null;
+	if (loc.mouse) {
+		var curMonitor = global.screen.get_current_monitor();
+		var monitor = Main.layoutManager.monitors[curMonitor];
+		space = global.screen.get_active_workspace().get_work_area_for_monitor(curMonitor);
+	} else {
+		space = app.get_work_area_current_monitor()
+	}
+	var colWidth = Math.floor(space.width/config.cols);
+	var rowHeight = Math.floor(space.height/2);
 
 	let x = loc.col * colWidth + space.x;
 	let y = loc.row * rowHeight + space.y;
@@ -151,6 +158,13 @@ function restoreApp(app, move=true) {
 	if (app.maximized_horizontally || app.maximizedVertically)
 		app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 	if (move) {
+		var space = app.get_work_area_current_monitor();
+		if (app.wintile.origFrame.x+app.wintile.origFrame.width > space.x+space.width) {
+			app.wintile.origFrame.x = space.x + space.width - app.wintile.origFrame.width - 100;
+		}
+		if (app.wintile.origFrame.y+app.wintile.origFrame.height > space.y+space.height) {
+			app.wintile.origFrame.y = space.y + space.height - app.wintile.origFrame.height - 100;
+		}
 		app.move_resize_frame(true, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
 	} else {
 		var curFrame = app.get_frame_rect();
@@ -573,29 +587,33 @@ function checkForMove(curFrameBefore, app) {
 
 function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabBegin')
-	windowMoving = true;
-	var app = global.display.focus_window;
-	if (app.wintile) {
-		checkForMove(app.get_frame_rect(), app);
-	}
-	if (meta_window.resizeable && config.preview.enabled) {
-		Mainloop.timeout_add(500, function () {
-			checkIfNearGrid(app);
-		});	
+	if (meta_window) {
+		windowMoving = true;
+		var app = global.display.focus_window;
+		if (app.wintile) {
+			checkForMove(app.get_frame_rect(), app);
+		}
+		if (meta_window.resizeable && config.preview.enabled) {
+			Mainloop.timeout_add(500, function () {
+				checkIfNearGrid(app);
+			});	
+		}	
 	}
 }
 
 function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
 	_log('windowGrabEnd')
-	windowMoving = false;
-	if (meta_window.resizeable && config.preview.enabled) {
-		if (preview.visible == true) {
-			var app = global.display.focus_window;
-			if (!app.wintile)
-				initApp(app)
-			moveApp(app, { "row": preview.row, "col": preview.col, "height": 1, "width": 1 });
-			hidePreview();
-		}
+	if (meta_window) {
+		windowMoving = false;
+		if (meta_window.resizeable && config.preview.enabled) {
+			if (preview.visible == true) {
+				var app = global.display.focus_window;
+				if (!app.wintile)
+					initApp(app)
+				moveApp(app, { "row": preview.row, "col": preview.col, "height": 1, "width": 1, "mouse": true });
+				hidePreview();
+			}
+		}	
 	}
 }
 
@@ -658,40 +676,48 @@ function hidePreview() {
 function checkIfNearGrid(app) {
 	_log('checkIfNearGrid')
 	if (windowMoving) {
-		var space = app.get_work_area_current_monitor()
-		colWidth = Math.floor(space.width/config.cols)
-		rowHeight = Math.floor(space.height/2)
 		let [x, y, mask] = global.get_pointer();
-		_log(`mouse - x:${x} y:${y}`);
 		var close = false;
+		var curMonitor = global.screen.get_current_monitor();
+		var monitor = Main.layoutManager.monitors[curMonitor];
+		var space = global.screen.get_active_workspace().get_work_area_for_monitor(curMonitor);
+		var colWidth = Math.floor(space.width/config.cols);
+		var rowHeight = Math.floor(space.height/2);
+		var inMonitorBounds = false;
+		if (x >= monitor.x && x < monitor.x+monitor.width && y >= monitor.y && y < monitor.y+monitor.width) {
+			inMonitorBounds = true;
+		}
+		_log(`mouse - x:${x} y:${y}`);
+		_log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
+		_log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
 		for (var i = 0; i < config.cols; i++) {
 			var grid_x = i * colWidth + space.x;
-			if ((isClose(y, space.y) || y < space.y) && x > grid_x && x < grid_x+colWidth) {
+			if (inMonitorBounds && (isClose(y, space.y) || y < space.y) && x > grid_x && x < grid_x+colWidth) {
 				// If we are close to the top, show a preview for the top grid item
 				showPreview(i, 0, grid_x, space.y, colWidth, rowHeight)
 				close = true;
 				break;
-			} else if ((isClose(y, space.y+space.height) || y > space.y+space.height) && x > grid_x && x < grid_x+colWidth) {
+			} else if (inMonitorBounds && (isClose(y, space.y+space.height) || y > space.y+space.height) && x > grid_x && x < grid_x+colWidth) {
 				// If we are close to the bottom, show a preview for the bottom grid item
 				showPreview(i, 1, grid_x, space.y+rowHeight, colWidth, rowHeight)
 				close = true;
 				break;
-			} else if ((isClose(x, space.x) || x < space.x) && y > space.y && y < space.y+rowHeight) {
+			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > space.y && y < space.y+rowHeight) {
 				// If we are close to the top left, show the top left grid item
 				showPreview(0, 0, space.x, space.y, colWidth, rowHeight)
 				close = true;
 				break;
-			} else if ((isClose(x, space.x) || x < space.x) && y > space.y+rowHeight) {
+			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > space.y+rowHeight) {
 				// If we are close to the bottom left, show the bottom left grid item
 				showPreview(0, 1, space.x, space.y+rowHeight, colWidth, rowHeight)
 				close = true;
 				break;
-			} else if ((isClose(x, space.x+space.width) || x > space.x+space.width) && y > space.y && y < space.y+rowHeight) {
+			} else if (inMonitorBounds && (isClose(x, space.x+space.width) || x > space.x+space.width) && y > space.y && y < space.y+rowHeight) {
 				// If we are close to the top right, show the top right grid item
 				showPreview(config.cols, 0, space.x+space.width-colWidth, space.y, colWidth, rowHeight)
 				close = true;
 				break;
-			} else if ((isClose(x, space.x+space.width) || x > space.x+space.width) && y > space.y+rowHeight) {
+			} else if (inMonitorBounds && (isClose(x, space.x+space.width) || x > space.x+space.width) && y > space.y+rowHeight) {
 				// If we are close to the bottom right, show the bottom right grid item
 				showPreview(config.cols, 1, space.x+space.width-colWidth, space.y+rowHeight, colWidth, rowHeight)
 				close = true;
