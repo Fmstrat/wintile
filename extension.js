@@ -136,16 +136,18 @@ function unMaximizeIfMaximized(app) {
 function initApp(app, maximized=false) {
 	_log('initApp')
 	if (!maximized) {
+		_log('init as normal')
 		app.wintile = {
-			origFrame: app.get_frame_rect() || getDefaultFloatingRectangle(),
+			origFrame: app.get_frame_rect() || getDefaultFloatingRectangle(app),
 			row: -1,
 			col: -1,
 			height: -1,
 			width: -1
 		};	
 	} else {
+		_log('init as maximize')
 		app.wintile = {
-			origFrame: app.origFrameRect || getDefaultFloatingRectangle(),
+			origFrame: app.origFrameRect || getDefaultFloatingRectangle(app),
 			row: 0,
 			col: 0,
 			height: 2,
@@ -154,7 +156,7 @@ function initApp(app, maximized=false) {
 	}
 }
 
-function getDefaultFloatingRectangle() {
+function getDefaultFloatingRectangle(app) {
 	_log('Getting default rectangle.')
 	let padding = 100;
 	let workspace = app.get_work_area_current_monitor();
@@ -168,6 +170,8 @@ function getDefaultFloatingRectangle() {
 
 function restoreApp(app, move=true) {
 	_log('restoreApp')
+	_log(move)
+	_log(JSON.stringify(app.wintile))
 	if (app.maximized_horizontally || app.maximizedVertically)
 		app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 	if (move) {
@@ -180,8 +184,11 @@ function restoreApp(app, move=true) {
 		}
 		app.move_resize_frame(true, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
 	} else {
-		var curFrame = app.get_frame_rect();
-		app.move_resize_frame(true, curFrame.x, curFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
+		// BUG: when clicking the maximize button, then dragging the window off, it moves to below the mouse cursor
+		let [x, y, mask] = global.get_pointer();
+		_log(y)
+		_log(app.wintile.origFrame.width)
+		app.move_resize_frame(true, x, y, app.wintile.origFrame.width, app.wintile.origFrame.height);
 	}
 	app.wintile = null;
 }
