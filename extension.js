@@ -644,7 +644,7 @@ function isClose(a, b) {
 
 var preview = new St.BoxLayout({
 	style_class: 'tile-preview',
-	visible: true
+	visible: false
 });
 Main.uiGroup.add_actor(preview);
 
