@@ -186,9 +186,21 @@ function restoreApp(app, move=true) {
 	} else {
 		// BUG: when clicking the maximize button, then dragging the window off, it moves to below the mouse cursor
 		let [x, y, mask] = global.get_pointer();
-		_log(y)
-		_log(app.wintile.origFrame.width)
-		app.move_resize_frame(true, x, y, app.wintile.origFrame.width, app.wintile.origFrame.height);
+		if (config.debug) {
+			let window = app.get_frame_rect()
+			_log(`A) mouse - x:${x} y:${y}`);
+			_log(`A) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+			window = app.wintile.origFrame;
+			_log(`A) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+		}
+		app.move_resize_frame(true, Math.floor(x+app.wintile.origFrame.width/2), y-10, app.wintile.origFrame.width, app.wintile.origFrame.height);
+		if (config.debug) {
+			let window = app.get_frame_rect()
+			_log(`B) mouse - x:${x} y:${y}`);
+			_log(`B) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+			window = app.wintile.origFrame;
+			_log(`B) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+		}
 	}
 	app.wintile = null;
 }
@@ -710,9 +722,13 @@ function checkIfNearGrid(app) {
 		if (x >= monitor.x && x < monitor.x+monitor.width && y >= monitor.y && y < monitor.y+monitor.width) {
 			inMonitorBounds = true;
 		}
-		_log(`mouse - x:${x} y:${y}`);
-		_log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
-		_log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
+		if (config.debug) {
+			let window = app.get_frame_rect()
+			_log(`mouse - x:${x} y:${y}`);
+			_log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
+			_log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
+			_log(`window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+		}
 		for (var i = 0; i < config.cols; i++) {
 			var grid_x = i * colWidth + space.x;
 			if (inMonitorBounds && (isClose(y, space.y) || y < space.y) && x > Math.floor(space.width/2+space.x-colWidth/2) && x < Math.floor(space.width/2+space.x+colWidth/2)) {
