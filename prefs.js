@@ -50,6 +50,8 @@ function buildPrefsWidget() {
         row_spacing: 12,
         visible: true
     });
+
+    let row = 0;
     
     // Add a simple title and add it to the layout
     let title = new Gtk.Label({
@@ -58,7 +60,7 @@ function buildPrefsWidget() {
         use_markup: true,
         visible: true
     });
-    layout.attach(title, 0, 0, 2, 1);
+    layout.attach(title, 0, row++, 2, 1);
     
     // Column setting
     let colsLabel = new Gtk.Label({
@@ -73,8 +75,23 @@ function buildPrefsWidget() {
     });
     colsInput.pack_start (rendererText, false);
     colsInput.add_attribute (rendererText, "text", 0);
-    layout.attach(colsLabel, 0, 1, 1, 1);
-    layout.attach(colsInput, 1, 1, 1, 1);
+    layout.attach(colsLabel, 0, row, 1, 1);
+    layout.attach(colsInput, 1, row++, 1, 1);
+
+    // Maximize setting
+    let doubleWidthLabel = new Gtk.Label({
+        label: _("Use double width previews on sides in 4 column mode"),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START
+    });
+    let doubleWidthInput = new Gtk.Switch({
+        active: this.settings.get_boolean ('double-width'),
+        halign: Gtk.Align.END,
+        visible: true
+    });
+    layout.attach(doubleWidthLabel, 0, row, 1, 1);
+    layout.attach(doubleWidthInput, 1, row++, 1, 1);
 
     // Maximize setting
     let maximizeLabel = new Gtk.Label({
@@ -88,8 +105,8 @@ function buildPrefsWidget() {
         halign: Gtk.Align.END,
         visible: true
     });
-    layout.attach(maximizeLabel, 0, 2, 1, 1);
-    layout.attach(maximizeInput, 1, 2, 1, 1);
+    layout.attach(maximizeLabel, 0, row, 1, 1);
+    layout.attach(maximizeInput, 1, row++, 1, 1);
 
     // Preview setting
     let previewLabel = new Gtk.Label({
@@ -103,8 +120,8 @@ function buildPrefsWidget() {
         halign: Gtk.Align.END,
         visible: true
     });
-    layout.attach(previewLabel, 0, 3, 1, 1);
-    layout.attach(previewInput, 1, 3, 1, 1);
+    layout.attach(previewLabel, 0, row, 1, 1);
+    layout.attach(previewInput, 1, row++, 1, 1);
 
     // Debug setting
     let debugLabel = new Gtk.Label({
@@ -118,10 +135,11 @@ function buildPrefsWidget() {
         halign: Gtk.Align.END,
         visible: true
     });
-    layout.attach(debugLabel, 0, 4, 1, 1);
-    layout.attach(debugInput, 1, 4, 1, 1);
+    layout.attach(debugLabel, 0, row, 1, 1);
+    layout.attach(debugInput, 1, row++, 1, 1);
 
     this.settings.bind('cols', colsInput, 'active', Gio.SettingsBindFlags.DEFAULT);
+    this.settings.bind('double-width', doubleWidthInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     this.settings.bind('use-maximize', maximizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     this.settings.bind('preview', previewInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     this.settings.bind('debug', debugInput, 'active', Gio.SettingsBindFlags.DEFAULT);
