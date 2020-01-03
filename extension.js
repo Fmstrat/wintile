@@ -193,7 +193,7 @@ function restoreApp(app, move=true) {
 			window = app.wintile.origFrame;
 			_log(`A) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
 		}
-		app.move_resize_frame(true, Math.floor(x+app.wintile.origFrame.width/2), y-10, app.wintile.origFrame.width, app.wintile.origFrame.height);
+		app.move_resize_frame(true, Math.floor(x-app.wintile.origFrame.width/2), y-10, app.wintile.origFrame.width, app.wintile.origFrame.height);
 		if (config.debug) {
 			let window = app.get_frame_rect()
 			_log(`B) mouse - x:${x} y:${y}`);
