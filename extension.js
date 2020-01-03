@@ -228,7 +228,7 @@ function sendMove(direction) {
 					case "right":
 						// Move to the right most column at full height
 						initApp(app);
-						moveApp(app, { "row": 0, "col": 1, "height": 2, "width": 1 });
+						moveApp(app, { "row": 0, "col": 2, "height": 2, "width": 1 });
 						break;
 					case "up":
 						// 1st Maximize
@@ -260,7 +260,6 @@ function sendMove(direction) {
 					break;
 				case "down":
 					// Minimize
-					initApp(app);
 					app.minimize();
 					break;
 			}	
@@ -327,9 +326,9 @@ function sendMove(direction) {
 						_log('up - 1')
 						moveApp(app, { "row": app.wintile.row, "col": app.wintile.col, "height": 1, "width": 1 });
 					} else if (app.wintile.row == 1) {
-						// We are bottom half, go to top half
+						// We are bottom half, go to full height
 						_log('up - 2')
-						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 1, "width": app.wintile.width });
+						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 2, "width": app.wintile.width });
 					} else if (app.wintile.height == 2 && app.wintile.width == 2) {
 						// We are maximized, go to top half
 						_log('up - 3');
@@ -423,9 +422,9 @@ function sendMove(direction) {
 						_log('up - 1')
 						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 1, "width": app.wintile.width });
 					} else if (app.wintile.row == 1) {
-						// We are bottom half, go to top half, keeping width
+						// We are bottom half, go to full height, keeping width
 						_log('up - 2')
-						moveApp(app, { "row": 0, "col": 0, "height": 1, "width": app.wintile.width });
+						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 2, "width": app.wintile.width });
 					} else {
 						// We are top half, go straight to 2nd maximize
 						_log('up - 3')
