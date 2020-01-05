@@ -79,21 +79,6 @@ function buildPrefsWidget() {
     layout.attach(colsInput, 1, row++, 1, 1);
 
     // Maximize setting
-    let doubleWidthLabel = new Gtk.Label({
-        label: _("Use double width previews on sides in 4 column mode"),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START
-    });
-    let doubleWidthInput = new Gtk.Switch({
-        active: this.settings.get_boolean ('double-width'),
-        halign: Gtk.Align.END,
-        visible: true
-    });
-    layout.attach(doubleWidthLabel, 0, row, 1, 1);
-    layout.attach(doubleWidthInput, 1, row++, 1, 1);
-
-    // Maximize setting
     let maximizeLabel = new Gtk.Label({
         label: _("Use true maximizing of windows"),
         visible: true,
@@ -108,9 +93,9 @@ function buildPrefsWidget() {
     layout.attach(maximizeLabel, 0, row, 1, 1);
     layout.attach(maximizeInput, 1, row++, 1, 1);
 
-    // Preview setting
+    // Preview settings
     let previewLabel = new Gtk.Label({
-        label: _("Turn on mouse dragging support"),
+        label: _("Enable preview while dragging windows"),
         visible: true,
         hexpand: true,
         halign: Gtk.Align.START
@@ -122,6 +107,21 @@ function buildPrefsWidget() {
     });
     layout.attach(previewLabel, 0, row, 1, 1);
     layout.attach(previewInput, 1, row++, 1, 1);
+
+    // Double width previews
+    let doubleWidthLabel = new Gtk.Label({
+        label: _("    Use double width previews on sides in 4 column mode"),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START
+    });
+    let doubleWidthInput = new Gtk.Switch({
+        active: this.settings.get_boolean ('double-width'),
+        halign: Gtk.Align.END,
+        visible: true
+    });
+    layout.attach(doubleWidthLabel, 0, row, 1, 1);
+    layout.attach(doubleWidthInput, 1, row++, 1, 1);
 
     // Debug setting
     let debugLabel = new Gtk.Label({
