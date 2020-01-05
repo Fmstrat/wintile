@@ -110,7 +110,7 @@ function buildPrefsWidget() {
 
     // Double width previews
     let doubleWidthLabel = new Gtk.Label({
-        label: _("    Use double width previews on sides in 4 column mode"),
+        label: _("     Use double width previews on sides in 4 column mode"),
         visible: true,
         hexpand: true,
         halign: Gtk.Align.START
@@ -122,6 +122,11 @@ function buildPrefsWidget() {
     });
     layout.attach(doubleWidthLabel, 0, row, 1, 1);
     layout.attach(doubleWidthInput, 1, row++, 1, 1);
+
+    previewInput.connect('state-set', function(widget, state) {
+        doubleWidthLabel.set_sensitive(state);
+        doubleWidthInput.set_sensitive(state);
+    });
 
     // Debug setting
     let debugLabel = new Gtk.Label({
