@@ -94,6 +94,7 @@ function buildPrefsWidget() {
     layout.attach(maximizeInput, 1, row++, 1, 1);
 
     // Preview settings
+    let previewEnabled = this.settings.get_boolean ('preview');
     let previewLabel = new Gtk.Label({
         label: _("Enable preview while dragging windows"),
         visible: true,
@@ -101,7 +102,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START
     });
     let previewInput = new Gtk.Switch({
-        active: this.settings.get_boolean ('preview'),
+        active: previewEnabled,
         halign: Gtk.Align.END,
         visible: true
     });
@@ -123,11 +124,6 @@ function buildPrefsWidget() {
     layout.attach(doubleWidthLabel, 0, row, 1, 1);
     layout.attach(doubleWidthInput, 1, row++, 1, 1);
 
-    previewInput.connect('state-set', function(widget, state) {
-        doubleWidthLabel.set_sensitive(state);
-        doubleWidthInput.set_sensitive(state);
-    });
-
     // Debug setting
     let debugLabel = new Gtk.Label({
         label: _("Turn on debugging"),
@@ -148,6 +144,16 @@ function buildPrefsWidget() {
     this.settings.bind('use-maximize', maximizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     this.settings.bind('preview', previewInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     this.settings.bind('debug', debugInput, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+    let setDoubleWidthWidgetsEnabled = function(enabled) {
+        doubleWidthLabel.set_sensitive(enabled);
+        doubleWidthInput.set_sensitive(enabled);
+    };
+
+    setDoubleWidthWidgetsEnabled(previewEnabled);
+    previewInput.connect('state-set', function(widget, state) {
+        setDoubleWidthWidgetsEnabled(state);
+    });
 
     // Return our widget which will be added to the window
     return layout;
