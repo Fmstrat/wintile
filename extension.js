@@ -815,7 +815,7 @@ function getActiveWorkspace() {
 		return global.screen.get_active_workspace()
 	} else { // mutter >= 3.29
 		let workspaceManager = global.workspace_manager;
-        return workspaceManager.get_active_workspace();
+		return workspaceManager.get_active_workspace();
 	}
 }
 
