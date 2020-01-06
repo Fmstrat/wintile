@@ -96,7 +96,7 @@ function buildPrefsWidget() {
     // Preview settings
     let previewEnabled = this.settings.get_boolean ('preview');
     let previewLabel = new Gtk.Label({
-        label: _("Enable preview while dragging windows"),
+        label: _("Enable preview and snapping when dragging windows"),
         visible: true,
         hexpand: true,
         halign: Gtk.Align.START
