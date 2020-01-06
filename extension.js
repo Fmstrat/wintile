@@ -223,6 +223,10 @@ function sendMove(direction) {
 	_log("monitorToLeft: " + monitorToLeft);
 	_log("monitorToRight: " + monitorToRight);
 
+	// First, check if maximized and apply a wintile state if so
+	if (!app.wintile && app.maximized_horizontally && app.maximizedVertically) {
+		initApp(app, true);
+	}
 	if (!app.wintile) {
 		// We are not in a tile. Reset and find the most logical position
 		_log('Not in tile.')
