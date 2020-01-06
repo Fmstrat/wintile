@@ -550,9 +550,9 @@ function sendMove(direction) {
 						_log('up - 2')
 						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 1, "width": app.wintile.width });
 					} else if (app.wintile.row == 1) {
-						// We are bottom half, go to top half, keeping width
+						// We are bottom half, go to full height, keeping width
 						_log('up - 3')
-						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 1, "width": app.wintile.width });
+						moveApp(app, { "row": 0, "col": app.wintile.col, "height": 2, "width": app.wintile.width });
 					} else {
 						// We are top half, go straight to 2nd maximize
 						_log('up - 4')
