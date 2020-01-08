@@ -81,9 +81,9 @@ function moveApp(app, loc) {
 	_log("moveApp: " + JSON.stringify(loc));
 	var space = null;
 	if (loc.mouse) {
-		var curMonitor = global.screen.get_current_monitor();
+		var curMonitor = getCurrentMonitor();
 		var monitor = Main.layoutManager.monitors[curMonitor];
-		space = global.screen.get_active_workspace().get_work_area_for_monitor(curMonitor);
+		space = getActiveWorkspace().get_work_area_for_monitor(curMonitor);
 	} else {
 		space = app.get_work_area_current_monitor()
 	}
@@ -717,9 +717,9 @@ function checkIfNearGrid(app) {
 	if (windowMoving) {
 		let [x, y, mask] = global.get_pointer();
 		var close = false;
-		var curMonitor = global.screen.get_current_monitor();
+		var curMonitor = getCurrentMonitor();
 		var monitor = Main.layoutManager.monitors[curMonitor];
-		var space = global.screen.get_active_workspace().get_work_area_for_monitor(curMonitor);
+		var space = getActiveWorkspace().get_work_area_for_monitor(curMonitor);
 		var colWidth = Math.floor(space.width/config.cols);
 		var rowHeight = Math.floor(space.height/2);
 		var inMonitorBounds = false;
@@ -812,6 +812,20 @@ function checkIfNearGrid(app) {
 			checkIfNearGrid(app);
 		});
 	}
+}
+
+function getActiveWorkspace() {
+	if (global.screen) { // mutter < 3.29
+		return global.screen.get_active_workspace()
+	} else { // mutter >= 3.29
+		let workspaceManager = global.workspace_manager;
+		return workspaceManager.get_active_workspace();
+	}
+}
+
+function getCurrentMonitor() {
+	let monitorProvider = global.screen || global.display;
+	return monitorProvider.get_current_monitor();
 }
 
 var enable = function() {
