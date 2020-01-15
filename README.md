@@ -4,6 +4,7 @@ WinTile is a hotkey driven window tiling system for GNOME that imitates the stan
 
 WinTile also supports:
 - 2, 3, or 4 columns for standard or ultrawide monitors
+- Mouse preview and snapping for placing windows
 - Toggling of "maximize" mode, which adds/removes GNOME animations
 
 WinTile can be found on the GNOME Extension site:
