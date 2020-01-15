@@ -3,6 +3,11 @@
 	"description": "Window tiling based on Windows 10 hotkey patterns.",
 	"uuid": "wintile@nowsci.com",
 	"url": "https://github.com/fmstrat/wintile",
-	"shell-version": ["3.28"],
+	"shell-version": [
+		"3.28",
+		"3.30",
+		"3.32",
+		"3.34"
+	],
 	"version": 3
 }
