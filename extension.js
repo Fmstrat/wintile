@@ -829,7 +829,9 @@ function getCurrentMonitor() {
 }
 
 var enable = function() {
+	_log('Enable')
 	if (!keyManager) {
+		_log('Keymanager is being defined')
 		keyManager = new KeyBindings.Manager();
 		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
 		let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
@@ -857,7 +859,9 @@ var enable = function() {
 }
 
 var disable = function() {
+	_log('Disable')
 	if (keyManager) {
+		_log('Keymanager is being removed')
 		keyManager.removeAll();
 		keyManager.destroy();
 		keyManager = null;
