@@ -30,7 +30,7 @@ let config = {
 	preview: {
 		enabled: true,
 		doubleWidth: true,
-		close: 75,
+		distance: 75,
 		delay: 500
 	}
 }
@@ -52,6 +52,8 @@ function updateSettings() {
 	config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
 	config.preview.enabled = settings.get_value('preview').deep_unpack();
+	config.preview.distance = settings.get_value('distance').deep_unpack();
+	config.preview.delay = settings.get_value('delay').deep_unpack();
 	config.debug = settings.get_value('debug').deep_unpack();
 	_log(JSON.stringify(config));
 }
@@ -63,8 +65,8 @@ let settingsChangedId = settings.connect('changed', updateSettings.bind());
 
 const Config = imports.misc.config;
 window.gsconnect = {
-	    extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
-	    shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10)
+	extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
+	shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10)
 };
 imports.searchPath.unshift(gsconnect.extdatadir);
 
@@ -676,9 +678,9 @@ function changeBinding(settings, key, oldBinding, newBinding) {
 }
 
 function isClose(a, b) {
-	if (a <= b && a > b - config.preview.close)
+	if (a <= b && a > b - config.preview.distance)
 		return true;
-	else if (a >= b && a < b + config.preview.close)
+	else if (a >= b && a < b + config.preview.distance)
 		return true;
 	else
 		return false;
@@ -808,7 +810,7 @@ function checkIfNearGrid(app) {
 		}
 		if (!close)
 			hidePreview();
-		Mainloop.timeout_add(500, function () {
+		Mainloop.timeout_add(config.preview.delay, function () {
 			checkIfNearGrid(app);
 		});
 	}

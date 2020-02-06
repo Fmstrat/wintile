@@ -7,11 +7,6 @@
       <description></description>
       <range min="0" max="2"/>
     </key>
-    <key name="double-width" type="b">
-      <default>true</default>
-      <summary>Use double width previews on sides in 4 column mode</summary>
-      <description>When on, dragging a window to the side will preview 2 columns wide instead of 1.</description>
-    </key>
     <key name="use-maximize" type="b">
       <default>true</default>
       <summary>Turn on/off use of maximizing windows</summary>
@@ -21,6 +16,23 @@
       <default>true</default>
       <summary>Turn on/off mouse positioning</summary>
       <description>When on, dragging windows with the mouse will allow placement into the grid.</description>
+    </key>
+    <key name="double-width" type="b">
+      <default>true</default>
+      <summary>Use double width previews on sides in 4 column mode</summary>
+      <description>When on, dragging a window to the side will preview 2 columns wide instead of 1.</description>
+    </key>
+    <key name="distance" type="i">
+      <default>25</default>
+      <summary>Pixels from edge to start preview</summary>
+      <description></description>
+      <range min="0" max="150"/>
+    </key>
+    <key name="delay" type="i">
+      <default>500</default>
+      <summary>Delay in ms before preview dislpays</summary>
+      <description></description>
+      <range min="100" max="1000"/>
     </key>
     <key name="debug" type="b">
       <default>false</default>
