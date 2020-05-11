@@ -162,7 +162,7 @@ function buildPrefsWidget() {
         visible: true
     });
     let previewDelayAdjustment = new Gtk.Adjustment({
-        lower: 100,
+        lower: 25,
         upper: 1000,
         step_increment: 1
     });

@@ -634,7 +634,7 @@ function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, g
 		}
 		if (meta_window.resizeable && config.preview.enabled) {
 			app.origFrameRect = app.get_frame_rect();
-			Mainloop.timeout_add(500, function () {
+			Mainloop.timeout_add(config.preview.delay, function () {
 				checkIfNearGrid(app);
 			});	
 		}	
