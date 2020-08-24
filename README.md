@@ -12,3 +12,7 @@ WinTile can be found on the GNOME Extension site:
 https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/
 
 <img src='demo.gif'>
+
+# Configuration
+1. Visit https://extensions.gnome.org/local/
+1. click on the "Configure this extension" button.
