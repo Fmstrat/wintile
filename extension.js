@@ -11,7 +11,6 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
 const St = imports.gi.St;
-const Tweener = imports.ui.tweener;
 
 let onWindowGrabBegin, onWindowGrabEnd;
 let windowMoving = false;
@@ -693,14 +692,14 @@ var preview = new St.BoxLayout({
 Main.uiGroup.add_actor(preview);
 
 function showPreview(loc, _x, _y, _w, _h) {
-	Tweener.removeTweens(preview);
+    preview.remove_all_transitions();
 	preview.visible = true;
 	preview.loc = loc;
-	Tweener.addTween(preview, {
+    preview.bin.ease({
 		time: 0.125,
 		opacity: 255,
 		visible: true,
-		transition: 'easeOutQuad',
+        transition: Clutter.AnimationMode.EASE_OUT_QUAD,
 		x: _x,
 		y: _y,
 		width: _w,
@@ -709,7 +708,7 @@ function showPreview(loc, _x, _y, _w, _h) {
 }
 
 function hidePreview() {
-	Tweener.removeTweens(preview);
+    preview.remove_all_transitions();
 	preview.visible = false;
 	preview.loc = null;
 }
