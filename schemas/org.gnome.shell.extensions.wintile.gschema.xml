@@ -32,7 +32,7 @@
       <default>500</default>
       <summary>Delay in ms before preview dislpays</summary>
       <description></description>
-      <range min="100" max="1000"/>
+      <range min="25" max="1000"/>
     </key>
     <key name="debug" type="b">
       <default>false</default>
