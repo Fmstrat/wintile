@@ -30,7 +30,7 @@
     </key>
     <key name="delay" type="i">
       <default>500</default>
-      <summary>Delay in ms before preview dislpays</summary>
+      <summary>Delay in ms before preview displays</summary>
       <description></description>
       <range min="25" max="1000"/>
     </key>
