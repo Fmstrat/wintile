@@ -11,7 +11,7 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
 const St = imports.gi.St;
-const Tweener = imports.ui.tweener;
+const Tweener = imports.tweener && imports.tweener.tweener || imports.ui.tweener;
 
 let onWindowGrabBegin, onWindowGrabEnd;
 let windowMoving = false;
