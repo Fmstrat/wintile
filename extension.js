@@ -64,11 +64,11 @@ updateSettings();
 let settingsChangedId = settings.connect('changed', updateSettings.bind());
 
 const Config = imports.misc.config;
-window.gsconnect = {
+window.wintile = {
 	extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
 	shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10)
 };
-imports.searchPath.unshift(gsconnect.extdatadir);
+imports.searchPath.unshift(wintile.extdatadir);
 
 const KeyBindings = imports.keybindings
 let keyManager = null;
