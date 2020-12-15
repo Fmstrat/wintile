@@ -694,6 +694,9 @@ Main.uiGroup.add_actor(preview);
 
 function showPreview(loc, _x, _y, _w, _h) {
 	Tweener.removeTweens(preview);
+	let [x, y, _] = global.get_pointer();
+	preview.x = x;
+	preview.y = y;
 	preview.visible = true;
 	preview.loc = loc;
 	Tweener.addTween(preview, {
