@@ -93,6 +93,21 @@ function buildPrefsWidget() {
     layout.attach(maximizeLabel, 0, row, 1, 1);
     layout.attach(maximizeInput, 1, row++, 1, 1);
 
+    // Minimize setting
+    let minimizeLabel = new Gtk.Label({
+        label: _("Allow minimizing of windows"),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START
+    });
+    let minimizeInput = new Gtk.Switch({
+        active: gsettings.get_boolean ('use-minimize'),
+        halign: Gtk.Align.END,
+        visible: true
+    });
+    layout.attach(minimizeLabel, 0, row, 1, 1);
+    layout.attach(minimizeInput, 1, row++, 1, 1);
+
     // Preview settings
     let previewEnabled = gsettings.get_boolean ('preview');
     let previewLabel = new Gtk.Label({
@@ -193,6 +208,7 @@ function buildPrefsWidget() {
 
     gsettings.bind('cols', colsInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('use-maximize', maximizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
+    gsettings.bind('use-minimize', minimizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('preview', previewInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('double-width', doubleWidthInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     previewDistanceSettingInt.connect('value-changed', function(entry) {
