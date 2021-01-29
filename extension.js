@@ -87,7 +87,7 @@ var oldbindings = {
 // See https://github.com/gTile/gTile/commit/fc68797015e13143f74606fcbb9d48859f55dca9 by jshack88.
 function moveAppCoordinates(app, x, y, w, h) {
 	_log("Moving window to ("+x+","+y+"), size ("+w+","+h+")" );
-	app.move_frame(true, x, y, w, h);
+	app.move_frame(true, x, y);
 	app.move_resize_frame(true, x, y, w, h);
 }
 
