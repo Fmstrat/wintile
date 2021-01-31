@@ -79,6 +79,18 @@ var oldbindings = {
 	toggle_tiled_right: []
 }
 
+// Move window to specified location and size.
+// On paper, the move_resize_frame should not need the preceding move_frame, 
+// but the additional move_frame is known to fix errors with gnome-terminal 
+// and [gnome-]terminator.
+// A similar fix is used in the gTile extension:
+// See https://github.com/gTile/gTile/commit/fc68797015e13143f74606fcbb9d48859f55dca9 by jshack88.
+function moveAppCoordinates(app, x, y, w, h) {
+	_log("Moving window to ("+x+","+y+"), size ("+w+","+h+")" );
+	app.move_frame(true, x, y);
+	app.move_resize_frame(true, x, y, w, h);
+}
+
 function moveApp(app, loc) {
 	_log("moveApp: " + JSON.stringify(loc));
 	var space = null;
@@ -99,12 +111,12 @@ function moveApp(app, loc) {
 
 	if (!config.useMaximize) {
 		unMaximizeIfMaximized(app);
-		app.move_resize_frame(true, x, y, w, h);
+		moveAppCoordinates(app, x, y, w, h);
 	} else {
 		if (loc.height < 2 || loc.width < config.cols) {
 			unMaximizeIfMaximized(app);
 		}
-		app.move_resize_frame(true, x, y, w, h);
+		moveAppCoordinates(app, x, y, w, h);
 		if (loc.height == 2 && loc.width == config.cols) {
 			// Maximize
 			_log('maximize')
@@ -184,7 +196,7 @@ function restoreApp(app, move=true) {
 		if (app.wintile.origFrame.y+app.wintile.origFrame.height > space.y+space.height) {
 			app.wintile.origFrame.y = space.y + space.height - app.wintile.origFrame.height - 100;
 		}
-		app.move_resize_frame(true, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
+		moveAppCoordinates(app, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
 	} else {
 		// BUG: when clicking the maximize button, then dragging the window off, it moves to below the mouse cursor
 		let [x, y, mask] = global.get_pointer();
@@ -195,7 +207,7 @@ function restoreApp(app, move=true) {
 			window = app.wintile.origFrame;
 			_log(`A) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
 		}
-		app.move_resize_frame(true, Math.floor(x-app.wintile.origFrame.width/2), y-10, app.wintile.origFrame.width, app.wintile.origFrame.height);
+		moveAppCoordinates(app, Math.floor(x-app.wintile.origFrame.width/2), y-10, app.wintile.origFrame.width, app.wintile.origFrame.height);
 		if (config.debug) {
 			let window = app.get_frame_rect()
 			_log(`B) mouse - x:${x} y:${y}`);
