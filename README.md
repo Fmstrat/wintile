@@ -12,3 +12,8 @@ WinTile can be found on the GNOME Extension site:
 https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/
 
 <img src='demo.gif'>
+
+# Configuration
+1. Visit https://extensions.gnome.org/local/
+1. Click on the "Configure this extension" button.
+1. Alternatively, open the `Extension` settings in [Gnome Tweaks](https://gitlab.gnome.org/GNOME/gnome-tweaks), locate `Wintile` and click on the cogwheel button to bring up the configuration dialog.

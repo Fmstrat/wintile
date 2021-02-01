@@ -167,7 +167,7 @@ function buildPrefsWidget() {
 
     // Delay
     let previewDelayLabel = new Gtk.Label({
-        label: _("     Delay in ms before preview dislpays"),
+        label: _("     Delay in ms before preview displays"),
         visible: true,
         hexpand: true,
         halign: Gtk.Align.START
