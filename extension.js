@@ -26,6 +26,7 @@ var _log = function(str) {
 let config = {
 	cols: 2,
 	useMaximize: true,
+	useMinimize: true,
 	debug: true,
 	preview: {
 		enabled: true,
@@ -51,6 +52,7 @@ function updateSettings() {
 	config.cols = (settings.get_value('cols').deep_unpack())+2;
 	config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
+	config.useMinimize = settings.get_value('use-minimize').deep_unpack();
 	config.preview.enabled = settings.get_value('preview').deep_unpack();
 	config.preview.distance = settings.get_value('distance').deep_unpack();
 	config.preview.delay = settings.get_value('delay').deep_unpack();
@@ -78,6 +80,16 @@ var oldbindings = {
 	toggle_tiled_left: [],
 	toggle_tiled_right: []
 }
+
+// Minimize app if config allows
+function requestMinimize(app) {
+	_log("useMinimize: "+config.useMinimize);
+	if (config.useMinimize) {
+		_log("Minimize");
+		app.minimize();
+	} else {
+		_log("Not minimizing due to config");
+	}
 
 // Move window to specified location and size.
 // On paper, the move_resize_frame should not need the preceding move_frame, 
@@ -264,7 +276,7 @@ function sendMove(direction) {
 					break;
 				case "down":
 					// Minimize
-					app.minimize();
+					requestMinimize(app);
 					break;
 			}	
 		} else if (config.cols == 3) {
@@ -287,7 +299,7 @@ function sendMove(direction) {
 						break;
 					case "down":
 						// Minimize
-						app.minimize();
+						requestMinimize(app);
 						break;
 				}
 		} else {
@@ -310,7 +322,7 @@ function sendMove(direction) {
 					break;
 				case "down":
 					// Minimize
-					app.minimize();
+					requestMinimize(app);
 					break;
 			}	
 		}
@@ -414,7 +426,7 @@ function sendMove(direction) {
 					} else {
 						// We are bottom half, minimize
 						_log('down - 6')
-						app.minimize();
+						requestMinimize(app);
 					}
 					break;
 			}	
@@ -506,7 +518,7 @@ function sendMove(direction) {
 					} else {
 						// We are bottom half, minimize
 						_log('down - 6')
-						app.minimize();
+						requestMinimize(app);
 					}
 					break;
 			}	
@@ -606,7 +618,7 @@ function sendMove(direction) {
 					} else {
 						// We are bottom half, minimize
 						_log('down - 7')
-						app.minimize();
+						requestMinimize(app);
 					}
 					break;
 			}	
