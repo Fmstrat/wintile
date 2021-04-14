@@ -13,6 +13,9 @@ const PopupMenu = imports.ui.popupMenu;
 const St = imports.gi.St;
 const Tweener = imports.tweener && imports.tweener.tweener || imports.ui.tweener;
 
+const Config = imports.misc.config;
+const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
+
 let onWindowGrabBegin, onWindowGrabEnd;
 let windowMoving = false;
 
@@ -63,7 +66,6 @@ updateSettings();
 // Watch the settings for changes
 let settingsChangedId = settings.connect('changed', updateSettings.bind());
 
-const Config = imports.misc.config;
 window.wintile = {
 	extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
 	shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10)
@@ -623,7 +625,7 @@ function checkForMove(x, y, app) {
 	}
 }
 
-function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
+function windowGrabBegin(meta_window, meta_grab_op) {
 	_log('windowGrabBegin')
 	if (meta_window) {
 		windowMoving = true;
@@ -641,7 +643,7 @@ function windowGrabBegin(meta_display, meta_screen, meta_window, meta_grab_op, g
 	}
 }
 
-function windowGrabEnd(meta_display, meta_screen, meta_window, meta_grab_op, gpointer) {
+function windowGrabEnd(meta_window, meta_grab_op) {
 	_log('windowGrabEnd')
 	if (meta_window) {
 		windowMoving = false;
@@ -855,8 +857,23 @@ var enable = function() {
 			keyManager.add("<Super>up", function() { requestMove("up") })
 			keyManager.add("<Super>down", function() { requestMove("down") })
 		});
-		onWindowGrabBegin = global.display.connect('grab-op-begin', windowGrabBegin);
-		onWindowGrabEnd = global.display.connect('grab-op-end', windowGrabEnd);
+
+		// Since GNOME 40 the meta_display argument isn't passed anymore to these callbacks.
+		// We "translate" the parameters here so that things work on both GNOME 3 and 40.
+		onWindowGrabBegin = global.display.connect('grab-op-begin', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
+			if (SHELL_VERSION_MAJOR >= 40) { 
+				windowGrabBegin(meta_screen, meta_window);
+			} else {
+				windowGrabBegin(meta_window, meta_grab_op);
+			}
+		});
+		onWindowGrabEnd = global.display.connect('grab-op-end', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
+			if (SHELL_VERSION_MAJOR >= 40) { 
+				windowGrabEnd(meta_screen, meta_window);
+			} else {
+				windowGrabEnd(meta_window, meta_grab_op);
+			}
+		});
 	}
 }
 
