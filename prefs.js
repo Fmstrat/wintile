@@ -10,6 +10,9 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Gettext = imports.gettext;
 const _ = Gettext.domain('wintile').gettext;
 
+const Config = imports.misc.config;
+const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
+
 let gschema = Gio.SettingsSchemaSource.new_from_directory(
     Me.dir.get_child('schemas').get_path(),
     Gio.SettingsSchemaSource.get_default(),
@@ -45,7 +48,10 @@ function buildPrefsWidget() {
 
     // Create a parent widget that we'll return from this function
     let layout = new Gtk.Grid({
-        margin: 18,
+        margin_bottom: 18,
+        margin_end: 18,
+        margin_start: 18,
+        margin_top: 18,
         column_spacing: 12,
         row_spacing: 12,
         visible: true
@@ -161,7 +167,11 @@ function buildPrefsWidget() {
         visible: true
     });    
     previewDistanceSettingInt.set_value(gsettings.get_int('distance'));
-    previewDistanceInput.add(previewDistanceSettingInt);
+    if (SHELL_VERSION_MAJOR >= 40) {
+        previewDistanceInput.append(previewDistanceSettingInt);
+    } else {
+        previewDistanceInput.add(previewDistanceSettingInt);
+    }
     layout.attach(previewDistanceLabel, 0, row, 1, 1);
     layout.attach(previewDistanceInput, 1, row++, 1, 1);
 
@@ -187,7 +197,11 @@ function buildPrefsWidget() {
         visible: true
     });    
     previewDelaySettingInt.set_value(gsettings.get_int('delay'));
-    previewDelayInput.add(previewDelaySettingInt);
+    if (SHELL_VERSION_MAJOR >= 40) {
+        previewDelayInput.append(previewDelaySettingInt);
+    } else {
+        previewDelayInput.add(previewDelaySettingInt);
+    }
     layout.attach(previewDelayLabel, 0, row, 1, 1);
     layout.attach(previewDelayInput, 1, row++, 1, 1);
 
