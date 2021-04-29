@@ -92,6 +92,7 @@ function requestMinimize(app) {
 	} else {
 		_log("Not minimizing due to config");
 	}
+}
 
 // Move window to specified location and size.
 // On paper, the move_resize_frame should not need the preceding move_frame, 
