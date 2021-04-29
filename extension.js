@@ -719,6 +719,11 @@ var preview = new St.BoxLayout({
 Main.uiGroup.add_actor(preview);
 
 function showPreview(loc, _x, _y, _w, _h) {
+	if (Tweener.getTweenCount(preview) == 0) {
+		let [x, y, _] = global.get_pointer();
+		preview.x = x;
+		preview.y = y;
+	}
 	Tweener.removeTweens(preview);
 	preview.visible = true;
 	preview.loc = loc;
