@@ -652,7 +652,7 @@ function checkForMove(x, y, app) {
 
 function windowGrabBegin(meta_window, meta_grab_op) {
 	_log('windowGrabBegin')
-	if (meta_window) {
+	if (meta_window && meta_grab_op !== Meta.GrabOp.WAYLAND_POPUP) {
 		windowMoving = true;
 		var app = global.display.focus_window;
 		if (app.wintile) {
@@ -670,7 +670,7 @@ function windowGrabBegin(meta_window, meta_grab_op) {
 
 function windowGrabEnd(meta_window, meta_grab_op) {
 	_log('windowGrabEnd')
-	if (meta_window) {
+	if (meta_window && meta_grab_op !== Meta.GrabOp.WAYLAND_POPUP) {
 		windowMoving = false;
 		if (meta_window.resizeable && config.preview.enabled) {
 			if (preview.visible == true) {
