@@ -744,6 +744,10 @@ function hidePreview() {
 	Tweener.removeTweens(preview);
 	preview.visible = false;
 	preview.loc = null;
+	preview.width = -1;
+	preview.height = -1;
+	preview.x = -1;
+	preview.y = -1;
 }
 
 function checkIfNearGrid(app) {
