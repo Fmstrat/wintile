@@ -243,11 +243,21 @@ function sendMove(direction) {
 	let monitorToLeft = -1;
 	let monitorToRight = -1;
 	// If a monitor's Y is within 100px, it's beside it.
+	// Calculate monitors height difference, to account for monitors different resolution 
+	// If a monitor's Y is within 100px + height difference, it's beside it.
 	for (var i = 0; i < Main.layoutManager.monitors.length; i++) {
-		if (Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[curMonitor].x && Math.abs(Main.layoutManager.monitors[i].y - Main.layoutManager.monitors[curMonitor].y) < 100 && (monitorToLeft == -1 || (monitorToLeft >= 0 && Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[monitorToLeft].x)))
+		let monitorHeightDiff = Math.abs(Main.layoutManager.monitors[i].height - Main.layoutManager.monitors[curMonitor].height);
+		_log("monitor " + i + " height : " + Main.layoutManager.monitors[i].height )
+		_log("monitorsHeightDiff :" + monitorHeightDiff);
+
+		if (Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[curMonitor].x &&  
+			Math.abs(Main.layoutManager.monitors[i].y - Main.layoutManager.monitors[curMonitor].y) < (100 + monitorHeightDiff) &&
+			 (monitorToLeft == -1 || (monitorToLeft >= 0 && Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[monitorToLeft].x)))
 			monitorToLeft = i;
-		if (Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[curMonitor].x && Math.abs(Main.layoutManager.monitors[i].y - Main.layoutManager.monitors[curMonitor].y) < 100 && (monitorToRight == -1 || (monitorToRight >= 0 && Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[monitorToRight].x)))
-			monitorToRight = i;
+		if (Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[curMonitor].x && 
+			Math.abs(Main.layoutManager.monitors[i].y - Main.layoutManager.monitors[curMonitor].y) < (100 + monitorHeightDiff) &&
+             (monitorToRight == -1 || (monitorToRight >= 0 && Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[monitorToRight].x)))
+			monitorToRight = i;			
 	}
 	_log("monitorToLeft: " + monitorToLeft);
 	_log("monitorToRight: " + monitorToRight);
