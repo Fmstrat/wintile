@@ -720,7 +720,7 @@ var preview = new St.BoxLayout({
 Main.uiGroup.add_actor(preview);
 
 function showPreview(loc, _x, _y, _w, _h) {
-	if (Tweener.getTweenCount(preview) == 0) {
+	if (Tweener.getTweenCount(preview) == 0 && preview.x !== _x && preview.y !== _y) {
 		let [x, y, _] = global.get_pointer();
 		preview.x = x;
 		preview.y = y;
@@ -744,6 +744,10 @@ function hidePreview() {
 	Tweener.removeTweens(preview);
 	preview.visible = false;
 	preview.loc = null;
+	preview.width = -1;
+	preview.height = -1;
+	preview.x = -1;
+	preview.y = -1;
 }
 
 function checkIfNearGrid(app) {
