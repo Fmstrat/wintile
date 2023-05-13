@@ -943,7 +943,6 @@ var disable = function() {
 		let mutterSettings = new Gio.Settings({
 			schema_id: 'org.gnome.mutter'
 		});
-
 		desktopSettings.reset('unmaximize');
 		desktopSettings.reset('maximize');
 		mutterKeybindingSettings.reset('toggle-tiled-left');
