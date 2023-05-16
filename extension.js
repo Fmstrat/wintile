@@ -151,9 +151,8 @@ function moveApp(app, loc) {
 	app.wintile.row = loc.row;
 	app.wintile.width = loc.width;
 	app.wintile.height = loc.height;
-
 	let window = app.get_frame_rect()
-	_log("window.x: "+window.x+" window.y: "+window.y+" window.width: "+window.width+" window.height: "+window.height)
+	_log("moveApp) window.x: " + window.x + " window.y: " + window.y + " window.width: " + window.width + " window.height: " + window.height)
 }
 
 function unMaximizeIfMaximized(app) {
@@ -215,21 +214,17 @@ function restoreApp(app, move=true) {
 	} else {
 		// BUG: when clicking the maximize button, then dragging the window off, it moves to below the mouse cursor
 		let [x, y, mask] = global.get_pointer();
-		if (config.debug) {
-			let window = app.get_frame_rect()
-			_log(`A) mouse - x:${x} y:${y}`);
-			_log(`A) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-			window = app.wintile.origFrame;
-			_log(`A) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-		}
-		moveAppCoordinates(app, Math.floor(x-app.wintile.origFrame.width/2), y-10, app.wintile.origFrame.width, app.wintile.origFrame.height);
-		if (config.debug) {
-			let window = app.get_frame_rect()
-			_log(`B) mouse - x:${x} y:${y}`);
-			_log(`B) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-			window = app.wintile.origFrame;
-			_log(`B) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-		}
+		let window = app.get_frame_rect()
+		_log(`A) mouse - x:${x} y:${y}`);
+		_log(`A) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+		window = app.wintile.origFrame;
+		_log(`A) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+		moveAppCoordinates(app, Math.floor(x - app.wintile.origFrame.width / 2), y - 10, app.wintile.origFrame.width, app.wintile.origFrame.height);
+		window = app.get_frame_rect()
+		_log(`B) mouse - x:${x} y:${y}`);
+		_log(`B) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+		window = app.wintile.origFrame;
+		_log(`B) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
 	}
 	app.wintile = null;
 }
@@ -662,11 +657,37 @@ function checkForMove(x, y, app) {
 
 function windowGrabBegin(meta_window, meta_grab_op) {
 	_log('windowGrabBegin')
+	let [x, y, mask] = global.get_pointer();
+	var app = global.display.focus_window;
+	let window = app.get_frame_rect()
+	var leeway = 10;
+	_log(`grabBegin) mouse - x:${x} y:${y}`);
+	_log(`grabBegin) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
+	var output = '';
+	if (x > window.x - leeway && x < window.x + leeway) {
+		output += 'left ';
+	}
+	if (x > window.x + window.width - leeway && x < window.x + window.width + leeway) {
+		output += 'right ';
+	}
+	if (y > window.y - leeway && y < window.y + leeway) {
+		output += 'top ';
+	}
+	if (y > window.y + window.height - leeway && y < window.y + window.height + leeway) {
+		output += 'bottom ';
+	}
+	if (output) {
+		_log(`grabBegin) Mouse is on the ${output}side. Ignoring`);
+		return;
+	}
 	if (meta_window && meta_grab_op !== Meta.GrabOp.WAYLAND_POPUP) {
 		windowMoving = true;
-		var app = global.display.focus_window;
+
+
 		if (app.wintile) {
 			let [x, y, mask] = global.get_pointer();
+			let window = app.wintile.origFrame;
+			_log(`grabBegin) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
 			checkForMove(x, y, app);
 		}
 		if (meta_window.resizeable && config.preview.enabled) {
@@ -774,13 +795,11 @@ function checkIfNearGrid(app) {
 		if (x >= monitor.x && x < monitor.x+monitor.width && y >= monitor.y && y < monitor.y+monitor.width) {
 			inMonitorBounds = true;
 		}
-		if (config.debug) {
-			let window = app.get_frame_rect()
-			_log(`mouse - x:${x} y:${y}`);
-			_log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
-			_log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
-			_log(`window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-		}
+		let window = app.get_frame_rect()
+		_log(`mouse - x:${x} y:${y}`);
+		_log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
+		_log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
+		_log(`window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
 		for (var i = 0; i < config.cols; i++) {
 			var grid_x = i * colWidth + space.x;
 			if (inMonitorBounds && (isClose(y, space.y) || y < space.y) && x > Math.floor(space.width/2+space.x-colWidth/2) && x < Math.floor(space.width/2+space.x+colWidth/2)) {
