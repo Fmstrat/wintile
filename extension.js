@@ -664,17 +664,17 @@ function windowGrabBegin(meta_window, meta_grab_op) {
 	_log(`grabBegin) mouse - x:${x} y:${y}`);
 	_log(`grabBegin) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
 	var output = '';
-	if (x > window.x - leeway && x < window.x + leeway) {
-		output += 'left ';
-	}
-	if (x > window.x + window.width - leeway && x < window.x + window.width + leeway) {
-		output += 'right ';
-	}
 	if (y > window.y - leeway && y < window.y + leeway) {
 		output += 'top ';
 	}
 	if (y > window.y + window.height - leeway && y < window.y + window.height + leeway) {
 		output += 'bottom ';
+	}
+	if (x > window.x - leeway && x < window.x + leeway) {
+		output += 'left ';
+	}
+	if (x > window.x + window.width - leeway && x < window.x + window.width + leeway) {
+		output += 'right ';
 	}
 	if (output) {
 		_log(`grabBegin) Mouse is on the ${output}side. Ignoring`);
