@@ -882,9 +882,14 @@ function enable() {
 		_log('Keymanager is being defined')
 		keyManager = new KeyBindings.Manager();
 		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-		let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
 		let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
 		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+		try {
+			let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+			shellSettings.set_boolean("edge-tiling", false);
+		} catch (error) {
+			_log("org.gnome.shell.overrides does not exist");
+		}
 		oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
 		oldbindings['maximize'] = desktopSettings.get_strv('maximize');
 		oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
@@ -893,7 +898,6 @@ function enable() {
 		changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
 		changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
 		changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
-		shellSettings.set_boolean("edge-tiling", false);
 		mutterSettings.set_boolean("edge-tiling", false);
 		Mainloop.timeout_add(3000, function() {
 			keyManager.add("<Super>left", function() { requestMove("left") })
