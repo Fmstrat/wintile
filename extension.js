@@ -10,8 +10,7 @@ const ModalDialog = imports.ui.modalDialog;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
-const St = imports.gi.St;
-const Tweener = imports.tweener && imports.tweener.tweener || imports.ui.tweener;
+const {Clutter, St} = imports.gi;
 
 const Config = imports.misc.config;
 const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
@@ -730,19 +729,18 @@ var preview = new St.BoxLayout({
 Main.uiGroup.add_actor(preview);
 
 function showPreview(loc, _x, _y, _w, _h) {
-	if (Tweener.getTweenCount(preview) == 0 && preview.x !== _x && preview.y !== _y) {
+	if (preview.x !== _x && preview.y !== _y) {
 		let [x, y, _] = global.get_pointer();
 		preview.x = x;
 		preview.y = y;
 	}
-	Tweener.removeTweens(preview);
 	preview.visible = true;
 	preview.loc = loc;
-	Tweener.addTween(preview, {
+	preview.ease({
 		time: 0.125,
 		opacity: 255,
 		visible: true,
-		transition: 'easeOutQuad',
+		transition: Clutter.AnimationMode.EASE_OUT_QUAD,
 		x: _x,
 		y: _y,
 		width: _w,
@@ -751,7 +749,6 @@ function showPreview(loc, _x, _y, _w, _h) {
 }
 
 function hidePreview() {
-	Tweener.removeTweens(preview);
 	preview.visible = false;
 	preview.loc = null;
 	preview.width = -1;
