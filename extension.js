@@ -52,7 +52,7 @@ let settings = new Gio.Settings({
 });
 
 function updateSettings() {
-	config.cols = (settings.get_value('cols').deep_unpack())+2;
+	config.cols = (settings.get_value('cols').deep_unpack());
 	config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
 	config.useMinimize = settings.get_value('use-minimize').deep_unpack();

@@ -2,10 +2,10 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.wintile" path="/org/gnome/shell/extensions/wintile/">
     <key name="cols" type="i">
-      <default>0</default>
+      <default>3</default>
       <summary>Number of columns</summary>
       <description></description>
-      <range min="0" max="2"/>
+      <range min="2" max="4"/>
     </key>
     <key name="use-maximize" type="b">
       <default>true</default>

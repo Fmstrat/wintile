@@ -27,19 +27,17 @@ const gsettings = new Gio.Settings({
 function init() {
 }
 
-function createColOptions(){
-    let options = [
-        { name: _("2") },
-        { name: _("3") },
-        { name: _("4"),}
-    ];
+function createColOptions() {
     let liststore = new Gtk.ListStore();
-    liststore.set_column_types([GObject.TYPE_STRING])
-    for (let i = 0; i < options.length; i++ ) {
-        let option = options[i];
+    liststore.set_column_types([GObject.TYPE_STRING]);
+   
+    let maxCols = 4; 
+    for (let i = 2; i <= maxCols; i++) {
+        let option = { name: _(i.toString()) };
         let iter = liststore.append();
-        liststore.set (iter, [0], [option.name]);
+        liststore.set(iter, [0], [option.name]);
     }
+
     return liststore;
 }
 
@@ -75,12 +73,26 @@ function buildPrefsWidget() {
         hexpand: true,
         halign: Gtk.Align.START
     });
-    let colsInput = new Gtk.ComboBox({
-        model: createColOptions(),
+    let colsInput = new Gtk.Box({
+        orientation: Gtk.Orientation.HORIZONTAL,
         visible: true
     });
-    colsInput.pack_start (rendererText, false);
-    colsInput.add_attribute (rendererText, "text", 0);
+    let colsAdjustment = new Gtk.Adjustment({
+        lower: 2,
+        upper: 4,
+        step_increment: 1
+    });
+    let colsSettingInt = new Gtk.SpinButton({
+        adjustment: colsAdjustment,
+        snap_to_ticks: true,
+        visible: true
+    });    
+    colsSettingInt.set_value(gsettings.get_int('cols'));
+    if (SHELL_VERSION_MAJOR >= 40) {
+        colsInput.append(colsSettingInt);
+    } else {
+        colsInput.add(colsSettingInt);
+    }
     layout.attach(colsLabel, 0, row, 1, 1);
     layout.attach(colsInput, 1, row++, 1, 1);
 
@@ -225,6 +237,9 @@ function buildPrefsWidget() {
     gsettings.bind('use-minimize', minimizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('preview', previewInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('double-width', doubleWidthInput, 'active', Gio.SettingsBindFlags.DEFAULT);
+    colsSettingInt.connect('value-changed', function(entry) {
+        gsettings.set_int('cols', entry.value);
+    });
     previewDistanceSettingInt.connect('value-changed', function(entry) {
         gsettings.set_int('distance', entry.value);
     });
