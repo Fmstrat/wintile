@@ -955,6 +955,7 @@ function checkIfNearGrid(app) {
 		}
 		if (!close) {
 			hidePreview();
+		}
 		checkIfNearGrid_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, config.preview.delay, function () {
 			checkIfNearGrid(app);
 		});
