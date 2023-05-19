@@ -978,7 +978,7 @@ function getCurrentMonitor() {
 	return monitorProvider.get_current_monitor();
 }
 
-var enable = function() {
+function enable() {
 	_log('Enable')
 	if (!keyManager) {
 		_log('Keymanager is being defined')
@@ -1035,31 +1035,24 @@ var enable = function() {
 	}
 }
 
-var disable = function() {
+function disable() {
 	_log('Disable')
-	if (keyManager) {
-		_log('Keymanager is being removed')
-		keyManager.removeAll();
-		keyManager.destroy();
-		keyManager = null;
-		let desktopSettings = new Gio.Settings({
-			schema_id: 'org.gnome.desktop.wm.keybindings'
-		});
-		let shellSettings = new Gio.Settings({
-			schema_id: 'org.gnome.shell.overrides'
-		});
-		let mutterKeybindingSettings = new Gio.Settings({
-			schema_id: 'org.gnome.mutter.keybindings'
-		});
-		let mutterSettings = new Gio.Settings({
-			schema_id: 'org.gnome.mutter'
-		});
-		desktopSettings.reset('unmaximize');
-		desktopSettings.reset('maximize');
-		mutterKeybindingSettings.reset('toggle-tiled-left');
-		mutterKeybindingSettings.reset('toggle-tiled-right');
-		mutterSettings.reset("edge-tiling")
-		global.display.disconnect(onWindowGrabBegin);
-		global.display.disconnect(onWindowGrabEnd);
-	}
+	_log('Keymanager is being removed')
+	keyManager.removeAll();
+	keyManager.destroy();
+	keyManager = null;
+	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+	let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+	let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+	desktopSettings.reset('unmaximize');
+	desktopSettings.reset('maximize');
+	mutterKeybindingSettings.reset('toggle-tiled-left');
+	mutterKeybindingSettings.reset('toggle-tiled-right');
+	shellSettings.reset("edge-tiling");
+	mutterSettings.reset("edge-tiling")
+	global.display.disconnect(onWindowGrabBegin);
+	global.display.disconnect(onWindowGrabEnd);
+	onWindowGrabBegin = null;
+	onWindowGrabEnd = null;
 }
