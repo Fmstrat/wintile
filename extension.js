@@ -28,6 +28,7 @@ var _log = function(str) {
 
 let config = {
 	cols: 2,
+	ultrawideOnly: false,
 	useMaximize: true,
 	useMinimize: true,
 	debug: true,
@@ -54,6 +55,7 @@ let settings = new Gio.Settings({
 function updateSettings() {
 	config.cols = (settings.get_value('cols').deep_unpack());
 	config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
+	config.ultrawideOnly = settings.get_value('ultrawide-only').deep_unpack();
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
 	config.useMinimize = settings.get_value('use-minimize').deep_unpack();
 	config.preview.enabled = settings.get_value('preview').deep_unpack();
@@ -116,7 +118,13 @@ function moveApp(app, loc) {
 	} else {
 		space = app.get_work_area_current_monitor()
 	}
-	var colWidth = Math.floor(space.width / config.cols);
+	var isNotUltrawide = (space.width / space.height) < 1.78;
+	if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
+		_log(`moveApp isNotUltrawide: ${isNotUltrawide}`);
+		var colWidth = Math.floor(space.width / 2);
+	} else {
+		var colWidth = Math.floor(space.width / config.cols);
+	}
 	var rowHeight = Math.floor(space.height / 2);
 
 	let x = loc.col * colWidth + space.x;
@@ -263,10 +271,12 @@ function sendMove(direction) {
 	if (!app.wintile && app.maximized_horizontally && app.maximizedVertically) {
 		initApp(app, true);
 	}
+	var isNotUltrawide = (space.width / space.height) < 1.78;
+	_log(`isNotUltrawide: ${isNotUltrawide}`);
 	if (!app.wintile) {
 		// We are not in a tile. Reset and find the most logical position
 		_log('Not in tile.')
-		if (config.cols == 2) {
+		if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 			// Normal 2x2 grid
 			switch (direction) {
 				case "left":
@@ -340,7 +350,7 @@ function sendMove(direction) {
 		// We are already in a tile.
 		_log('Already in a tile.')
 		_log(JSON.stringify(app.wintile));
-		if (config.cols == 2) {
+		if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 			// Normal 2x2 grid
 			switch (direction) {
 				case "left":

@@ -96,6 +96,21 @@ function buildPrefsWidget() {
     layout.attach(colsLabel, 0, row, 1, 1);
     layout.attach(colsInput, 1, row++, 1, 1);
 
+    // 16:9 and 16:10 always 2x2 setting
+    let ultrawideOnlyLabel = new Gtk.Label({
+        label: _("Treat 16:9 and 16:10 as 2x2"),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START
+    });
+    let ultrawideOnlyInput = new Gtk.Switch({
+        active: gsettings.get_boolean ('ultrawide-only'),
+        halign: Gtk.Align.END,
+        visible: true
+    });
+    layout.attach(ultrawideOnlyLabel, 0, row, 1, 1);
+    layout.attach(ultrawideOnlyInput, 1, row++, 1, 1);
+
     // Maximize setting
     let maximizeLabel = new Gtk.Label({
         label: _("Use true maximizing of windows"),
