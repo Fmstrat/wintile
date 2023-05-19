@@ -17,7 +17,11 @@ const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
 
 let onWindowGrabBegin, onWindowGrabEnd;
 let requestMove_timer, checkForMove_timer, windowGrabBegin_timer, windowGrabEnd_timer, checkIfNearGrid_timer, keyManager_timer;
+let preview;
 let windowMoving = false;
+let gschema;
+let settings;
+let settingsChangedId;
 
 // View logs with `journalctl -qf |grep WinTile`
 var _log = function(str) {
@@ -39,18 +43,6 @@ let config = {
 	}
 }
 
-// Get the GSchema for our settings
-let gschema = Gio.SettingsSchemaSource.new_from_directory(
-	Extension.dir.get_child('schemas').get_path(),
-	Gio.SettingsSchemaSource.get_default(),
-	false
-);
-
-// Create a new settings object
-let settings = new Gio.Settings({
-	settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true)
-});
-
 function updateSettings() {
 	config.cols = (settings.get_value('cols').deep_unpack()) + 2;
 	config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
@@ -62,11 +54,6 @@ function updateSettings() {
 	config.debug = settings.get_value('debug').deep_unpack();
 	_log(JSON.stringify(config));
 }
-
-updateSettings();
-
-// Watch the settings for changes
-let settingsChangedId = settings.connect('changed', updateSettings.bind());
 
 window.wintile = {
 	extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
@@ -751,12 +738,6 @@ function isClose(a, b) {
 	}
 }
 
-var preview = new St.BoxLayout({
-	style_class: 'tile-preview',
-	visible: false
-});
-Main.uiGroup.add_actor(preview);
-
 function showPreview(loc, _x, _y, _w, _h) {
 	if (preview.x !== _x && preview.y !== _y) {
 		let [x, y, _] = global.get_pointer();
@@ -1023,6 +1004,27 @@ function enable() {
 			}
 		});
 	}
+	// Get the GSchema for our settings
+	gschema = Gio.SettingsSchemaSource.new_from_directory(
+		Extension.dir.get_child('schemas').get_path(),
+		Gio.SettingsSchemaSource.get_default(),
+		false
+	);
+	// Create a new settings object
+	preview = new St.BoxLayout({
+		style_class: 'tile-preview',
+		visible: false
+	});
+	Main.uiGroup.add_actor(preview);
+
+	settings = new Gio.Settings({
+		settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true)
+	});
+	updateSettings();
+
+	// Watch the settings for changes
+	settingsChangedId = settings.connect('changed', updateSettings.bind());
+
 }
 
 function disable() {
@@ -1050,4 +1052,7 @@ function disable() {
 	GLib.source_remove(windowGrabEnd_timer);
 	GLib.source_remove(checkIfNearGrid_timer);
 	GLib.source_remove(keyManager_timer);
+	gschema = null;
+	settings = null;
+	preview = null;
 }
