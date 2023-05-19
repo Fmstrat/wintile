@@ -289,46 +289,23 @@ function sendMove(direction) {
 					requestMinimize(app);
 					break;
 			}
-		} else if (config.cols == 3) {
-			// Ultrawide 3x2 grid
-			switch (direction) {
-				case "left":
-					// Move to the left most column at full height
-					initApp(app);
-					moveApp(app, { "row": 0, "col": 0, "height": 2, "width": 1 });
-					break;
-				case "right":
-					// Move to the right most column at full height
-					initApp(app);
-					moveApp(app, { "row": 0, "col": 2, "height": 2, "width": 1 });
-					break;
-				case "up":
-					// 1st Maximize
-					initApp(app);
-					moveApp(app, { "row": 0, "col": 0, "height": 2, "width": 3 });
-					break;
-				case "down":
-					// Minimize
-					requestMinimize(app);
-					break;
-			}
 		} else {
-			// Ultrawide 4x2 grid
+			// Ultrawide 3x2 grid or 4x2 grid
 			switch (direction) {
 				case "left":
-					// Move to the left half at full height
+					// Move to the left at full height
 					initApp(app);
-					moveApp(app, { "row": 0, "col": 0, "height": 2, "width": 2 });
+					moveApp(app, { "row": 0, "col": 0, "height": 2, "width": Math.floor(config.cols / 2) });
 					break;
 				case "right":
-					// Move to the right half at full height
+					// Move to the right at full height
 					initApp(app);
-					moveApp(app, { "row": 0, "col": 2, "height": 2, "width": 2 });
+					moveApp(app, { "row": 0, "col": Math.floor(config.cols / 2), "height": 2, "width": Math.floor(config.cols / 2) });
 					break;
 				case "up":
 					// Maximize to center 4
 					initApp(app);
-					moveApp(app, { "row": 0, "col": 1, "height": 2, "width": 2 });
+					moveApp(app, { "row": 0, "col": 1, "height": 2, "width": Math.ceil(config.cols / 2) });
 					break;
 				case "down":
 					// Minimize
@@ -457,7 +434,7 @@ function sendMove(direction) {
 						// There is a monitor to the left, so let's go there
 						_log('left - 3')
 						app.move_to_monitor(monitorToLeft);
-						moveApp(app, { "row": app.wintile.row, "col": config.cols, "height": app.wintile.height, "width": 1 });
+						moveApp(app, { "row": app.wintile.row, "col": config.cols - 1, "height": app.wintile.height, "width": 1 });
 					} else {
 						// We are already on the left, and there is no other monitor to the left
 						// Move to the left most column at full height
