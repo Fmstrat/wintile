@@ -10,8 +10,7 @@ const ModalDialog = imports.ui.modalDialog;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
-const St = imports.gi.St;
-const Tweener = imports.tweener && imports.tweener.tweener || imports.ui.tweener;
+const {Clutter, St} = imports.gi;
 
 const Config = imports.misc.config;
 const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
@@ -759,19 +758,18 @@ var preview = new St.BoxLayout({
 Main.uiGroup.add_actor(preview);
 
 function showPreview(loc, _x, _y, _w, _h) {
-	if (Tweener.getTweenCount(preview) == 0) {
+	if (preview.x !== _x && preview.y !== _y) {
 		let [x, y, _] = global.get_pointer();
 		preview.x = x;
 		preview.y = y;
 	}
-	Tweener.removeTweens(preview);
 	preview.visible = true;
 	preview.loc = loc;
-	Tweener.addTween(preview, {
+	preview.ease({
 		time: 0.125,
 		opacity: 255,
 		visible: true,
-		transition: 'easeOutQuad',
+		transition: Clutter.AnimationMode.EASE_OUT_QUAD,
 		x: _x,
 		y: _y,
 		width: _w,
@@ -780,7 +778,6 @@ function showPreview(loc, _x, _y, _w, _h) {
 }
 
 function hidePreview() {
-	Tweener.removeTweens(preview);
 	preview.visible = false;
 	preview.loc = null;
 	preview.width = -1;
@@ -978,7 +975,7 @@ function getCurrentMonitor() {
 	return monitorProvider.get_current_monitor();
 }
 
-var enable = function() {
+function enable() {
 	_log('Enable')
 	if (!keyManager) {
 		_log('Keymanager is being defined')
@@ -1027,33 +1024,25 @@ var enable = function() {
 	}
 }
 
-var disable = function() {
+function disable() {
 	_log('Disable')
-	if (keyManager) {
-		_log('Keymanager is being removed')
-		keyManager.removeAll();
-		keyManager.destroy();
-		keyManager = null;
-		let desktopSettings = new Gio.Settings({
-			schema_id: 'org.gnome.desktop.wm.keybindings'
-		});
-		let shellSettings = new Gio.Settings({
-			schema_id: 'org.gnome.shell.overrides'
-		});
-		let mutterKeybindingSettings = new Gio.Settings({
-			schema_id: 'org.gnome.mutter.keybindings'
-		});
-		let mutterSettings = new Gio.Settings({
-			schema_id: 'org.gnome.mutter'
-		});
-		desktopSettings.reset('unmaximize');
-		desktopSettings.reset('maximize');
-		mutterKeybindingSettings.reset('toggle-tiled-left');
-		mutterKeybindingSettings.reset('toggle-tiled-right');
-		mutterSettings.reset("edge-tiling")
-		global.display.disconnect(onWindowGrabBegin);
-		global.display.disconnect(onWindowGrabEnd);
-	}
+  _log('Keymanager is being removed')
+  keyManager.removeAll();
+  keyManager.destroy();
+  keyManager = null;
+	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+	let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+	let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+  desktopSettings.reset('unmaximize');
+  desktopSettings.reset('maximize');
+  mutterKeybindingSettings.reset('toggle-tiled-left');
+  mutterKeybindingSettings.reset('toggle-tiled-right');
+  mutterSettings.reset("edge-tiling")
+  global.display.disconnect(onWindowGrabBegin);
+  global.display.disconnect(onWindowGrabEnd);
+  onWindowGrabBegin = null;
+	onWindowGrabEnd = null;
 	GLib.source_remove(timerrequestMove_timer);
 	GLib.source_remove(checkForMove_timer);
 	GLib.source_remove(windowGrabBegin_timer);
