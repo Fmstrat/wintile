@@ -1,7 +1,7 @@
-const Meta = imports.gi.Meta
-const Main = imports.ui.main
-const Mainloop = imports.mainloop;
+const Meta = imports.gi.Meta;
+const Main = imports.ui.main;
 const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
@@ -16,6 +16,7 @@ const Config = imports.misc.config;
 const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
 
 let onWindowGrabBegin, onWindowGrabEnd;
+let requestMove_timer, checkForMove_timer, windowGrabBegin_timer, windowGrabEnd_timer, checkIfNearGrid_timer, keyManager_timer;
 let windowMoving = false;
 
 // View logs with `journalctl -qf |grep WinTile`
@@ -636,7 +637,7 @@ function sendMove(direction) {
 }
 
 function requestMove(direction) {
-	Mainloop.timeout_add(10, function() {
+	requestMove_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 10, function () {
 		sendMove(direction);
 	});
 }
@@ -644,7 +645,7 @@ function requestMove(direction) {
 function checkForMove(x, y, app) {
 	_log('checkForMove')
 	if (windowMoving) {
-		Mainloop.timeout_add(10, function () {
+		checkForMove_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 10, function () {
 			var curFrameAfter = app.get_frame_rect();
 			let [xAfter, yAfter, mask] = global.get_pointer();
 			if (x != xAfter || y != yAfter) {
@@ -693,7 +694,7 @@ function windowGrabBegin(meta_window, meta_grab_op) {
 		}
 		if (meta_window.resizeable && config.preview.enabled) {
 			app.origFrameRect = app.get_frame_rect();
-			Mainloop.timeout_add(config.preview.delay, function () {
+			windowGrabBegin_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, config.preview.delay, function () {
 				checkIfNearGrid(app);
 			});
 		}
@@ -714,7 +715,7 @@ function windowGrabEnd(meta_window, meta_grab_op) {
 				hidePreview();
 			} else {
 				// If maximize button was pressed or double clicked on title bar, make the wintile var
-				Mainloop.timeout_add(500, function () {
+				windowGrabEnd_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, function () {
 					var app = global.display.focus_window;
 					if (app.maximized_horizontally && app.maximized_vertically) {
 						initApp(app, true)
@@ -954,8 +955,7 @@ function checkIfNearGrid(app) {
 		}
 		if (!close) {
 			hidePreview();
-		}
-		Mainloop.timeout_add(config.preview.delay, function() {
+		checkIfNearGrid_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, config.preview.delay, function () {
 			checkIfNearGrid(app);
 		});
 	}
@@ -998,19 +998,11 @@ function enable() {
 		changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
 		changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
 		mutterSettings.set_boolean("edge-tiling", false);
-		Mainloop.timeout_add(3000, function() {
-			keyManager.add("<Super>left", function() {
-				requestMove("left")
-			})
-			keyManager.add("<Super>right", function() {
-				requestMove("right")
-			})
-			keyManager.add("<Super>up", function() {
-				requestMove("up")
-			})
-			keyManager.add("<Super>down", function() {
-				requestMove("down")
-			})
+		keyManager_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, function() {
+			keyManager.add("<Super>left", function() { requestMove("left") })
+			keyManager.add("<Super>right", function() { requestMove("right") })
+			keyManager.add("<Super>up", function() { requestMove("up") })
+			keyManager.add("<Super>down", function() { requestMove("down") })
 		});
 
 		// Since GNOME 40 the meta_display argument isn't passed anymore to these callbacks.
@@ -1046,10 +1038,15 @@ function disable() {
 	desktopSettings.reset('maximize');
 	mutterKeybindingSettings.reset('toggle-tiled-left');
 	mutterKeybindingSettings.reset('toggle-tiled-right');
-	shellSettings.reset("edge-tiling");
 	mutterSettings.reset("edge-tiling")
 	global.display.disconnect(onWindowGrabBegin);
 	global.display.disconnect(onWindowGrabEnd);
 	onWindowGrabBegin = null;
 	onWindowGrabEnd = null;
+	GLib.source_remove(timerrequestMove_timer);
+	GLib.source_remove(checkForMove_timer);
+	GLib.source_remove(windowGrabBegin_timer);
+	GLib.source_remove(windowGrabEnd_timer);
+	GLib.source_remove(checkIfNearGrid_timer);
+	GLib.source_remove(keyManager_timer);
 }
