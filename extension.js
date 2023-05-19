@@ -1026,22 +1026,22 @@ function enable() {
 
 function disable() {
 	_log('Disable')
-  _log('Keymanager is being removed')
-  keyManager.removeAll();
-  keyManager.destroy();
-  keyManager = null;
+	_log('Keymanager is being removed')
+	keyManager.removeAll();
+	keyManager.destroy();
+	keyManager = null;
 	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
 	let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
 	let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
 	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
-  desktopSettings.reset('unmaximize');
-  desktopSettings.reset('maximize');
-  mutterKeybindingSettings.reset('toggle-tiled-left');
-  mutterKeybindingSettings.reset('toggle-tiled-right');
-  mutterSettings.reset("edge-tiling")
-  global.display.disconnect(onWindowGrabBegin);
-  global.display.disconnect(onWindowGrabEnd);
-  onWindowGrabBegin = null;
+	desktopSettings.reset('unmaximize');
+	desktopSettings.reset('maximize');
+	mutterKeybindingSettings.reset('toggle-tiled-left');
+	mutterKeybindingSettings.reset('toggle-tiled-right');
+	mutterSettings.reset("edge-tiling")
+	global.display.disconnect(onWindowGrabBegin);
+	global.display.disconnect(onWindowGrabEnd);
+	onWindowGrabBegin = null;
 	onWindowGrabEnd = null;
 	GLib.source_remove(timerrequestMove_timer);
 	GLib.source_remove(checkForMove_timer);
