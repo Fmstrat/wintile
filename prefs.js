@@ -13,18 +13,24 @@ const _ = Gettext.domain('wintile').gettext;
 const Config = imports.misc.config;
 const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
 
-let gschema = Gio.SettingsSchemaSource.new_from_directory(
-    Me.dir.get_child('schemas').get_path(),
-    Gio.SettingsSchemaSource.get_default(),
-    false
-);
-
-const gsettings = new Gio.Settings({
-    settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true)
-});
-
+let gschema;
+let gsettings;
 
 function init() {
+    gschema = Gio.SettingsSchemaSource.new_from_directory(
+        Me.dir.get_child('schemas').get_path(),
+        Gio.SettingsSchemaSource.get_default(),
+        false
+    );
+
+    gsettings = new Gio.Settings({
+        settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true)
+    });
+}
+
+function disable() {
+    gschema = null;
+    gsettings = null;
 }
 
 function createColOptions(){
