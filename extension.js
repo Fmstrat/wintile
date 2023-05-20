@@ -988,51 +988,49 @@ function getCurrentMonitor() {
 
 function enable() {
 	_log('Enable')
-	if (!keyManager) {
-		_log('Keymanager is being defined')
-		keyManager = new KeyBindings.Manager();
-		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-		let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
-		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
-		try {
-			let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
-			shellSettings.set_boolean("edge-tiling", false);
-		} catch (error) {
-			_log("org.gnome.shell.overrides does not exist");
-		}
-		oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
-		oldbindings['maximize'] = desktopSettings.get_strv('maximize');
-		oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
-		oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
-		changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
-		changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
-		changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
-		changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
-		mutterSettings.set_boolean("edge-tiling", false);
-		keyManager_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, function() {
-			keyManager.add("<Super>left", function() { requestMove("left") })
-			keyManager.add("<Super>right", function() { requestMove("right") })
-			keyManager.add("<Super>up", function() { requestMove("up") })
-			keyManager.add("<Super>down", function() { requestMove("down") })
-		});
-
-		// Since GNOME 40 the meta_display argument isn't passed anymore to these callbacks.
-		// We "translate" the parameters here so that things work on both GNOME 3 and 40.
-		onWindowGrabBegin = global.display.connect('grab-op-begin', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
-			if (SHELL_VERSION_MAJOR >= 40) {
-				windowGrabBegin(meta_screen, meta_window);
-			} else {
-				windowGrabBegin(meta_window, meta_grab_op);
-			}
-		});
-		onWindowGrabEnd = global.display.connect('grab-op-end', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
-			if (SHELL_VERSION_MAJOR >= 40) {
-				windowGrabEnd(meta_screen, meta_window);
-			} else {
-				windowGrabEnd(meta_window, meta_grab_op);
-			}
-		});
+	_log('Keymanager is being defined')
+	keyManager = new KeyBindings.Manager();
+	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+	let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+	try {
+		let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+		shellSettings.set_boolean("edge-tiling", false);
+	} catch (error) {
+		_log("org.gnome.shell.overrides does not exist");
 	}
+	oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
+	oldbindings['maximize'] = desktopSettings.get_strv('maximize');
+	oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
+	oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
+	changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
+	changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
+	changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
+	changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+	mutterSettings.set_boolean("edge-tiling", false);
+	keyManager_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, function() {
+		keyManager.add("<Super>left", function() { requestMove("left") })
+		keyManager.add("<Super>right", function() { requestMove("right") })
+		keyManager.add("<Super>up", function() { requestMove("up") })
+		keyManager.add("<Super>down", function() { requestMove("down") })
+	});
+
+	// Since GNOME 40 the meta_display argument isn't passed anymore to these callbacks.
+	// We "translate" the parameters here so that things work on both GNOME 3 and 40.
+	onWindowGrabBegin = global.display.connect('grab-op-begin', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
+		if (SHELL_VERSION_MAJOR >= 40) {
+			windowGrabBegin(meta_screen, meta_window);
+		} else {
+			windowGrabBegin(meta_window, meta_grab_op);
+		}
+	});
+	onWindowGrabEnd = global.display.connect('grab-op-end', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
+		if (SHELL_VERSION_MAJOR >= 40) {
+			windowGrabEnd(meta_screen, meta_window);
+		} else {
+			windowGrabEnd(meta_window, meta_grab_op);
+		}
+	});
 }
 
 function disable() {
