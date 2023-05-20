@@ -98,7 +98,7 @@ function buildPrefsWidget() {
 
     // 16:9 and 16:10 always 2x2 setting
     let ultrawideOnlyLabel = new Gtk.Label({
-        label: _("Treat 16:9 and 16:10 as 2x2"),
+        label: _("Treat monitors <= 16:9 as 2x2"),
         visible: true,
         hexpand: true,
         halign: Gtk.Align.START
@@ -248,6 +248,7 @@ function buildPrefsWidget() {
     layout.attach(debugInput, 1, row++, 1, 1);
 
     gsettings.bind('cols', colsInput, 'active', Gio.SettingsBindFlags.DEFAULT);
+    gsettings.bind('ultrawide-only', ultrawideOnlyInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('use-maximize', maximizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('use-minimize', minimizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
     gsettings.bind('preview', previewInput, 'active', Gio.SettingsBindFlags.DEFAULT);
