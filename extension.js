@@ -32,6 +32,7 @@ var _log = function(str) {
 
 let config = {
 	cols: 2,
+	ultrawideOnly: false,
 	useMaximize: true,
 	useMinimize: true,
 	debug: true,
@@ -44,8 +45,9 @@ let config = {
 }
 
 function updateSettings() {
-	config.cols = (settings.get_value('cols').deep_unpack()) + 2;
+	config.cols = (settings.get_value('cols').deep_unpack());
 	config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
+	config.ultrawideOnly = settings.get_value('ultrawide-only').deep_unpack();
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
 	config.useMinimize = settings.get_value('use-minimize').deep_unpack();
 	config.preview.enabled = settings.get_value('preview').deep_unpack();
@@ -103,7 +105,18 @@ function moveApp(app, loc) {
 	} else {
 		space = app.get_work_area_current_monitor()
 	}
-	var colWidth = Math.floor(space.width / config.cols);
+	var isNotUltrawide = (space.width / space.height) < 1.78;
+	if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
+		_log(`moveApp) isNotUltrawide: ${isNotUltrawide}`);
+		var colCount = 2;
+		if (loc.col >= colCount){
+			loc.col = 1;
+		}
+	} else {
+		var colCount = config.cols;
+	}
+	loc.col %= colCount;
+	var colWidth = Math.floor(space.width / colCount);
 	var rowHeight = Math.floor(space.height / 2);
 
 	let x = loc.col * colWidth + space.x;
@@ -250,10 +263,12 @@ function sendMove(direction) {
 	if (!app.wintile && app.maximized_horizontally && app.maximizedVertically) {
 		initApp(app, true);
 	}
+	var isNotUltrawide = (space.width / space.height) < 1.78;
+	_log(`isNotUltrawide: ${isNotUltrawide}`);
 	if (!app.wintile) {
 		// We are not in a tile. Reset and find the most logical position
 		_log('Not in tile.')
-		if (config.cols == 2) {
+		if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 			// Normal 2x2 grid
 			switch (direction) {
 				case "left":
@@ -327,7 +342,7 @@ function sendMove(direction) {
 		// We are already in a tile.
 		_log('Already in a tile.')
 		_log(JSON.stringify(app.wintile));
-		if (config.cols == 2) {
+		if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 			// Normal 2x2 grid
 			switch (direction) {
 				case "left":
@@ -349,7 +364,7 @@ function sendMove(direction) {
 						// There is a monitor to the left, so let's go there
 						app.move_to_monitor(monitorToLeft);
 						_log('left - 4')
-						moveApp(app, { "row": app.wintile.row, "col": 1, "height": app.wintile.height, "width": app.wintile.width });
+						moveApp(app, { "row": app.wintile.row, "col": config.cols - 1, "height": app.wintile.height, "width": app.wintile.width });
 					}
 					break;
 				case "right":
@@ -775,7 +790,14 @@ function checkIfNearGrid(app) {
 		var curMonitor = getCurrentMonitor();
 		var monitor = Main.layoutManager.monitors[curMonitor];
 		var space = getActiveWorkspace().get_work_area_for_monitor(curMonitor);
-		var colWidth = Math.floor(space.width / config.cols);
+		var isNotUltrawide = (space.width / space.height) < 1.78;
+		if (config.ultrawideOnly && isNotUltrawide) {
+			_log(`checkIfNearGrid) isNotUltrawide: ${isNotUltrawide}`);
+			var colCount = 2;
+		} else {
+			var colCount = config.cols;
+		}
+		var colWidth = Math.floor(space.width / colCount);
 		var rowHeight = Math.floor(space.height / 2);
 		var inMonitorBounds = false;
 		if (x >= monitor.x && x < monitor.x + monitor.width && y >= monitor.y && y < monitor.y + monitor.width) {
@@ -786,21 +808,21 @@ function checkIfNearGrid(app) {
 		_log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
 		_log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
 		_log(`window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-		for (var i = 0; i < config.cols; i++) {
+		for (var i = 0; i < colCount; i++) {
 			var grid_x = i * colWidth + space.x;
 			if (inMonitorBounds && (isClose(y, space.y) || y < space.y) && x > Math.floor(space.width / 2 + space.x - colWidth / 2) && x < Math.floor(space.width / 2 + space.x + colWidth / 2)) {
 				// If we are in the center top, show a preview for maximize
 				showPreview({
 					col: 0,
 					row: 0,
-					width: config.cols,
+					width: colCount,
 					height: 2
 				}, space.x, space.y, space.width, space.height)
 				close = true;
 				break;
 			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > Math.floor(space.height / 2 + space.y - rowHeight / 2) && y < Math.floor(space.height / 2 + space.y + rowHeight / 2)) {
 				// If we are in the center left, show a preview for left maximize
-				if (config.cols == 4 && config.preview.doubleWidth) {
+				if (colCount == 4 && config.preview.doubleWidth) {
 					showPreview({
 						col: 0,
 						row: 0,
@@ -819,16 +841,16 @@ function checkIfNearGrid(app) {
 				break;
 			} else if (inMonitorBounds && (isClose(x, space.x + space.width) || x > space.x + space.width) && y > Math.floor(space.height / 2 + space.y - rowHeight / 2) && y < Math.floor(space.height / 2 + space.y + rowHeight / 2)) {
 				// If we are in the center right, show a preview for right maximize
-				if (config.cols == 4 && config.preview.doubleWidth) {
+				if (colCount == 4 && config.preview.doubleWidth) {
 					showPreview({
-						col: config.cols - 2,
+						col: colCount - 2,
 						row: 0,
 						width: 2,
 						height: 2
 					}, space.x + space.width - colWidth * 2, space.y, colWidth * 2, space.height)
 				} else {
 					showPreview({
-						col: config.cols - 1,
+						col: colCount - 1,
 						row: 0,
 						width: 1,
 						height: 2
@@ -838,7 +860,7 @@ function checkIfNearGrid(app) {
 				break;
 			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > space.y && y < space.y + rowHeight) {
 				// If we are close to the top left, show the top left grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
+				if (colCount == 4 && config.preview.doubleWidth) {
 					showPreview({
 						col: 0,
 						row: 0,
@@ -857,7 +879,7 @@ function checkIfNearGrid(app) {
 				break;
 			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > space.y + rowHeight) {
 				// If we are close to the bottom left, show the bottom left grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
+				if (colCount == 4 && config.preview.doubleWidth) {
 					showPreview({
 						col: 0,
 						row: 1,
@@ -876,16 +898,16 @@ function checkIfNearGrid(app) {
 				break;
 			} else if (inMonitorBounds && (isClose(x, space.x + space.width) || x > space.x + space.width) && y > space.y && y < space.y + rowHeight) {
 				// If we are close to the top right, show the top right grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
+				if (colCount == 4 && config.preview.doubleWidth) {
 					showPreview({
-						col: config.cols - 2,
+						col: colCount - 2,
 						row: 0,
 						width: 2,
 						height: 1
 					}, space.x + space.width - colWidth * 2, space.y, colWidth * 2, rowHeight)
 				} else {
 					showPreview({
-						col: config.cols - 1,
+						col: colCount - 1,
 						row: 0,
 						width: 1,
 						height: 1
@@ -895,16 +917,16 @@ function checkIfNearGrid(app) {
 				break;
 			} else if (inMonitorBounds && (isClose(x, space.x + space.width) || x > space.x + space.width) && y > space.y + rowHeight) {
 				// If we are close to the bottom right, show the bottom right grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
+				if (colCount == 4 && config.preview.doubleWidth) {
 					showPreview({
-						col: config.cols - 2,
+						col: colCount - 2,
 						row: 1,
 						width: 2,
 						height: 1
 					}, space.x + space.width - colWidth * 2, space.y + rowHeight, colWidth * 2, rowHeight)
 				} else {
 					showPreview({
-						col: config.cols - 1,
+						col: colCount - 1,
 						row: 1,
 						width: 1,
 						height: 1
