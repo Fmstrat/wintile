@@ -122,6 +122,9 @@ function moveApp(app, loc) {
 	if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 		_log(`moveApp) isNotUltrawide: ${isNotUltrawide}`);
 		var colCount = 2;
+		if (loc.col >= colCount){
+			loc.col = 1;
+		}
 	} else {
 		var colCount = config.cols;
 	}
