@@ -1044,7 +1044,7 @@ function disable() {
 	global.display.disconnect(onWindowGrabEnd);
 	onWindowGrabBegin = null;
 	onWindowGrabEnd = null;
-	GLib.source_remove(timerrequestMove_timer);
+	GLib.source_remove(requestMove_timer);
 	GLib.source_remove(checkForMove_timer);
 	GLib.source_remove(windowGrabBegin_timer);
 	GLib.source_remove(windowGrabEnd_timer);
