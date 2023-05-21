@@ -17,7 +17,11 @@ const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
 
 let onWindowGrabBegin, onWindowGrabEnd;
 let requestMove_timer, checkForMove_timer, windowGrabBegin_timer, windowGrabEnd_timer, checkIfNearGrid_timer, keyManager_timer;
+let preview;
 let windowMoving = false;
+let gschema;
+let settings;
+let settingsChangedId;
 
 // View logs with `journalctl -qf |grep WinTile`
 var _log = function(str) {
@@ -28,6 +32,7 @@ var _log = function(str) {
 
 let config = {
 	cols: 2,
+	ultrawideOnly: false,
 	useMaximize: true,
 	useMinimize: true,
 	debug: true,
@@ -39,21 +44,10 @@ let config = {
 	}
 }
 
-// Get the GSchema for our settings
-let gschema = Gio.SettingsSchemaSource.new_from_directory(
-	Extension.dir.get_child('schemas').get_path(),
-	Gio.SettingsSchemaSource.get_default(),
-	false
-);
-
-// Create a new settings object
-let settings = new Gio.Settings({
-	settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true)
-});
-
 function updateSettings() {
-	config.cols = (settings.get_value('cols').deep_unpack()) + 2;
+	config.cols = (settings.get_value('cols').deep_unpack());
 	config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
+	config.ultrawideOnly = settings.get_value('ultrawide-only').deep_unpack();
 	config.useMaximize = settings.get_value('use-maximize').deep_unpack();
 	config.useMinimize = settings.get_value('use-minimize').deep_unpack();
 	config.preview.enabled = settings.get_value('preview').deep_unpack();
@@ -62,11 +56,6 @@ function updateSettings() {
 	config.debug = settings.get_value('debug').deep_unpack();
 	_log(JSON.stringify(config));
 }
-
-updateSettings();
-
-// Watch the settings for changes
-let settingsChangedId = settings.connect('changed', updateSettings.bind());
 
 window.wintile = {
 	extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
@@ -116,7 +105,18 @@ function moveApp(app, loc) {
 	} else {
 		space = app.get_work_area_current_monitor()
 	}
-	var colWidth = Math.floor(space.width / config.cols);
+	var isNotUltrawide = (space.width / space.height) < 1.9;
+	if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
+		_log(`moveApp) isNotUltrawide: ${isNotUltrawide}`);
+		var colCount = 2;
+		if (loc.col >= colCount){
+			loc.col = 1;
+		}
+	} else {
+		var colCount = config.cols;
+	}
+	loc.col %= colCount;
+	var colWidth = Math.floor(space.width / colCount);
 	var rowHeight = Math.floor(space.height / 2);
 
 	let x = loc.col * colWidth + space.x;
@@ -263,10 +263,12 @@ function sendMove(direction) {
 	if (!app.wintile && app.maximized_horizontally && app.maximizedVertically) {
 		initApp(app, true);
 	}
+	var isNotUltrawide = (space.width / space.height) < 1.9;
+	_log(`isNotUltrawide: ${isNotUltrawide}`);
 	if (!app.wintile) {
 		// We are not in a tile. Reset and find the most logical position
 		_log('Not in tile.')
-		if (config.cols == 2) {
+		if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 			// Normal 2x2 grid
 			switch (direction) {
 				case "left":
@@ -317,7 +319,7 @@ function sendMove(direction) {
 		// We are already in a tile.
 		_log('Already in a tile.')
 		_log(JSON.stringify(app.wintile));
-		if (config.cols == 2) {
+		if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 			// Normal 2x2 grid
 			switch (direction) {
 				case "left":
@@ -339,7 +341,7 @@ function sendMove(direction) {
 						// There is a monitor to the left, so let's go there
 						app.move_to_monitor(monitorToLeft);
 						_log('left - 4')
-						moveApp(app, { "row": app.wintile.row, "col": 1, "height": app.wintile.height, "width": app.wintile.width });
+						moveApp(app, { "row": app.wintile.row, "col": config.cols - 1, "height": app.wintile.height, "width": app.wintile.width });
 					}
 					break;
 				case "right":
@@ -636,12 +638,6 @@ function isClose(a, b) {
 	}
 }
 
-var preview = new St.BoxLayout({
-	style_class: 'tile-preview',
-	visible: false
-});
-Main.uiGroup.add_actor(preview);
-
 function showPreview(loc, _x, _y, _w, _h) {
 	if (preview.x !== _x && preview.y !== _y) {
 		let [x, y, _] = global.get_pointer();
@@ -679,7 +675,14 @@ function checkIfNearGrid(app) {
 		var curMonitor = getCurrentMonitor();
 		var monitor = Main.layoutManager.monitors[curMonitor];
 		var space = getActiveWorkspace().get_work_area_for_monitor(curMonitor);
-		var colWidth = Math.floor(space.width / config.cols);
+		var isNotUltrawide = (space.width / space.height) < 1.9;
+		if (config.ultrawideOnly && isNotUltrawide) {
+			_log(`checkIfNearGrid) isNotUltrawide: ${isNotUltrawide}`);
+			var colCount = 2;
+		} else {
+			var colCount = config.cols;
+		}
+		var colWidth = Math.floor(space.width / colCount);
 		var rowHeight = Math.floor(space.height / 2);
 		var inMonitorBounds = false;
 		if (x >= monitor.x && x < monitor.x + monitor.width && y >= monitor.y && y < monitor.y + monitor.width) {
@@ -690,152 +693,181 @@ function checkIfNearGrid(app) {
 		_log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
 		_log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
 		_log(`window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-		for (var i = 0; i < config.cols; i++) {
-			var grid_x = i * colWidth + space.x;
-			if (inMonitorBounds && (isClose(y, space.y) || y < space.y) && x > Math.floor(space.width/2+space.x-colWidth/2) && x < Math.floor(space.width/2+space.x+colWidth/2)) {
-				// If we are in the center top, show a preview for maximize
-				showPreview({
-					col: 0,
-					row: 0,
-					width: config.cols,
-					height: 2
-				}, space.x, space.y, space.width, space.height)
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > Math.floor(space.height / 2 + space.y - rowHeight / 2) && y < Math.floor(space.height / 2 + space.y + rowHeight / 2)) {
-				// If we are in the center left, show a preview for left maximize
-				if (config.cols == 4 && config.preview.doubleWidth) {
+		if (inMonitorBounds) {
+			for (var i = 0; i < colCount; i++) {
+				var grid_x = i * colWidth + space.x;
+				var inGrid = x > grid_x && x < grid_x + colWidth;
+				var centerOfGrid = x > Math.floor(grid_x + colWidth / 3) && x < Math.floor(grid_x + colWidth - (colWidth  / 3));
+				var topRow = space.y < y && y < space.y + rowHeight;
+				var bottomRow = y > space.y + rowHeight;
+				var nearTop = (isClose(y, space.y) || y < space.y);
+				var nearBottom = (isClose(y, space.y + space.height) || y > space.y + space.height)
+				var nearLeft = (isClose(x, space.x) || x < space.x);
+				var nearRight = (isClose(x, space.x + space.width) || x > space.x + space.width);
+
+				var centerHorizontalLeft  = Math.floor(space.x + (space.width / 2) - (colWidth / 5));
+				var centerHorizontalRight = Math.floor(space.x + (space.width / 2) + (colWidth / 5));
+				var nearCenterH = centerHorizontalLeft < x && x < centerHorizontalRight;
+
+				var centerVerticalTop = Math.floor(space.height / 2 + space.y - rowHeight / 2) ;
+				var centerVerticalBottom = Math.floor(space.height / 2 + space.y + rowHeight / 2);
+				var nearCenterV = centerVerticalTop < y && y < centerVerticalBottom;
+
+				if (nearTop && nearCenterH) {
+					// If we are in the center top, show a preview for maximize
 					showPreview({
 						col: 0,
 						row: 0,
-						width: 2,
+						width: colCount,
 						height: 2
-					}, space.x, space.y, colWidth * 2, space.height)
-				} else {
+					}, space.x, space.y, space.width, space.height)
+					close = true;
+					break;
+				} else if (nearLeft && nearCenterV) {
+					// If we are in the center left, show a preview for left maximize
+					if (colCount == 4 && config.preview.doubleWidth) {
+						showPreview({
+							col: 0,
+							row: 0,
+							width: 2,
+							height: 2
+						}, space.x, space.y, colWidth * 2, space.height)
+					} else {
+						showPreview({
+							col: 0,
+							row: 0,
+							width: 1,
+							height: 2
+						}, space.x, space.y, colWidth, space.height)
+					}
+					close = true;
+					break;
+				} else if (nearRight && nearCenterV) {
+					// If we are in the center right, show a preview for right maximize
+					if (colCount == 4 && config.preview.doubleWidth) {
+						showPreview({
+							col: colCount - 2,
+							row: 0,
+							width: 2,
+							height: 2
+						}, space.x + space.width - colWidth * 2, space.y, colWidth * 2, space.height)
+					} else {
+						showPreview({
+							col: colCount - 1,
+							row: 0,
+							width: 1,
+							height: 2
+						}, space.x + space.width - colWidth, space.y, colWidth, space.height)
+					}
+					close = true;
+					break;
+				} else if (nearLeft && topRow) {
+					// If we are close to the top left, show the top left grid item
+					if (colCount == 4 && config.preview.doubleWidth) {
+						showPreview({
+							col: 0,
+							row: 0,
+							width: 2,
+							height: 1
+						}, space.x, space.y, colWidth * 2, rowHeight)
+					} else {
+						showPreview({
+							col: 0,
+							row: 0,
+							width: 1,
+							height: 1
+						}, space.x, space.y, colWidth, rowHeight)
+					}
+					close = true;
+					break;
+				} else if (nearLeft && bottomRow) {
+					// If we are close to the bottom left, show the bottom left grid item
+					if (colCount == 4 && config.preview.doubleWidth) {
+						showPreview({
+							col: 0,
+							row: 1,
+							width: 2,
+							height: 1
+						}, space.x, space.y + rowHeight, colWidth * 2, rowHeight)
+					} else {
+						showPreview({
+							col: 0,
+							row: 1,
+							width: 1,
+							height: 1
+						}, space.x, space.y + rowHeight, colWidth, rowHeight)
+					}
+					close = true;
+					break;
+				} else if (nearRight && topRow) {
+					// If we are close to the top right, show the top right grid item
+					if (colCount == 4 && config.preview.doubleWidth) {
+						showPreview({
+							col: colCount - 2,
+							row: 0,
+							width: 2,
+							height: 1
+						}, space.x + space.width - colWidth * 2, space.y, colWidth * 2, rowHeight)
+					} else {
+						showPreview({
+							col: colCount - 1,
+							row: 0,
+							width: 1,
+							height: 1
+						}, space.x + space.width - colWidth, space.y, colWidth, rowHeight)
+					}
+					close = true;
+					break;
+				} else if (nearRight && bottomRow) {
+					// If we are close to the bottom right, show the bottom right grid item
+					if (colCount == 4 && config.preview.doubleWidth) {
+						showPreview({
+							col: colCount - 2,
+							row: 1,
+							width: 2,
+							height: 1
+						}, space.x + space.width - colWidth * 2, space.y + rowHeight, colWidth * 2, rowHeight)
+					} else {
+						showPreview({
+							col: colCount - 1,
+							row: 1,
+							width: 1,
+							height: 1
+						}, space.x + space.width - colWidth, space.y + rowHeight, colWidth, rowHeight)
+					}
+					close = true;
+					break;
+				} else if (nearTop && inGrid) {
+					// If we are close to the top, show a preview for the top grid item
 					showPreview({
-						col: 0,
+						col: i,
+						row: 0,
+						width: 1,
+						height: 1
+					}, grid_x, space.y, colWidth, rowHeight)
+					close = true;
+					break;
+				} else if (nearBottom && centerOfGrid) {
+					// If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
+					showPreview({
+						col: i,
 						row: 0,
 						width: 1,
 						height: 2
-					}, space.x, space.y, colWidth, space.height)
-				}
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(x, space.x + space.width) || x > space.x + space.width) && y > Math.floor(space.height / 2 + space.y - rowHeight / 2) && y < Math.floor(space.height / 2 + space.y + rowHeight / 2)) {
-				// If we are in the center right, show a preview for right maximize
-				if (config.cols == 4 && config.preview.doubleWidth) {
+					}, grid_x, space.y, colWidth, space.height)
+					close = true;
+					break;
+				} else if (nearBottom && inGrid) {
+					// If we are close to the bottom, show a preview for the bottom grid item
 					showPreview({
-						col: config.cols - 2,
-						row: 0,
-						width: 2,
-						height: 2
-					}, space.x + space.width - colWidth * 2, space.y, colWidth * 2, space.height)
-				} else {
-					showPreview({
-						col: config.cols - 1,
-						row: 0,
-						width: 1,
-						height: 2
-					}, space.x + space.width - colWidth, space.y, colWidth, space.height)
-				}
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > space.y && y < space.y + rowHeight) {
-				// If we are close to the top left, show the top left grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
-					showPreview({
-						col: 0,
-						row: 0,
-						width: 2,
-						height: 1
-					}, space.x, space.y, colWidth * 2, rowHeight)
-				} else {
-					showPreview({
-						col: 0,
-						row: 0,
-						width: 1,
-						height: 1
-					}, space.x, space.y, colWidth, rowHeight)
-				}
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(x, space.x) || x < space.x) && y > space.y + rowHeight) {
-				// If we are close to the bottom left, show the bottom left grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
-					showPreview({
-						col: 0,
-						row: 1,
-						width: 2,
-						height: 1
-					}, space.x, space.y + rowHeight, colWidth * 2, rowHeight)
-				} else {
-					showPreview({
-						col: 0,
+						col: i,
 						row: 1,
 						width: 1,
 						height: 1
-					}, space.x, space.y + rowHeight, colWidth, rowHeight)
+					}, grid_x, space.y + rowHeight, colWidth, rowHeight)
+					close = true;
+					break;
 				}
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(x, space.x + space.width) || x > space.x + space.width) && y > space.y && y < space.y + rowHeight) {
-				// If we are close to the top right, show the top right grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
-					showPreview({
-						col: config.cols - 2,
-						row: 0,
-						width: 2,
-						height: 1
-					}, space.x + space.width - colWidth * 2, space.y, colWidth * 2, rowHeight)
-				} else {
-					showPreview({
-						col: config.cols - 1,
-						row: 0,
-						width: 1,
-						height: 1
-					}, space.x + space.width - colWidth, space.y, colWidth, rowHeight)
-				}
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(x, space.x + space.width) || x > space.x + space.width) && y > space.y + rowHeight) {
-				// If we are close to the bottom right, show the bottom right grid item
-				if (config.cols == 4 && config.preview.doubleWidth) {
-					showPreview({
-						col: config.cols - 2,
-						row: 1,
-						width: 2,
-						height: 1
-					}, space.x + space.width - colWidth * 2, space.y + rowHeight, colWidth * 2, rowHeight)
-				} else {
-					showPreview({
-						col: config.cols - 1,
-						row: 1,
-						width: 1,
-						height: 1
-					}, space.x + space.width - colWidth, space.y + rowHeight, colWidth, rowHeight)
-				}
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(y, space.y) || y < space.y) && x > grid_x && x < grid_x + colWidth) {
-				// If we are close to the top, show a preview for the top grid item
-				showPreview({
-					col: i,
-					row: 0,
-					width: 1,
-					height: 1
-				}, grid_x, space.y, colWidth, rowHeight)
-				close = true;
-				break;
-			} else if (inMonitorBounds && (isClose(y, space.y + space.height) || y > space.y + space.height) && x > grid_x && x < grid_x + colWidth) {
-				// If we are close to the bottom, show a preview for the bottom grid item
-				showPreview({
-					col: i,
-					row: 1,
-					width: 1,
-					height: 1
-				}, grid_x, space.y + rowHeight, colWidth, rowHeight)
-				close = true;
-				break;
 			}
 		}
 		if (!close) {
@@ -863,51 +895,69 @@ function getCurrentMonitor() {
 
 function enable() {
 	_log('Enable')
-	if (!keyManager) {
-		_log('Keymanager is being defined')
-		keyManager = new KeyBindings.Manager();
-		let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-		let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
-		let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
-		try {
-			let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
-			shellSettings.set_boolean("edge-tiling", false);
-		} catch (error) {
-			_log("org.gnome.shell.overrides does not exist");
-		}
-		oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
-		oldbindings['maximize'] = desktopSettings.get_strv('maximize');
-		oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
-		oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
-		changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
-		changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
-		changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
-		changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
-		mutterSettings.set_boolean("edge-tiling", false);
-		keyManager_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, function() {
-			keyManager.add("<Super>left", function() { requestMove("left") })
-			keyManager.add("<Super>right", function() { requestMove("right") })
-			keyManager.add("<Super>up", function() { requestMove("up") })
-			keyManager.add("<Super>down", function() { requestMove("down") })
-		});
-
-		// Since GNOME 40 the meta_display argument isn't passed anymore to these callbacks.
-		// We "translate" the parameters here so that things work on both GNOME 3 and 40.
-		onWindowGrabBegin = global.display.connect('grab-op-begin', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
-			if (SHELL_VERSION_MAJOR >= 40) {
-				windowGrabBegin(meta_screen, meta_window);
-			} else {
-				windowGrabBegin(meta_window, meta_grab_op);
-			}
-		});
-		onWindowGrabEnd = global.display.connect('grab-op-end', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
-			if (SHELL_VERSION_MAJOR >= 40) {
-				windowGrabEnd(meta_screen, meta_window);
-			} else {
-				windowGrabEnd(meta_window, meta_grab_op);
-			}
-		});
+	_log('Keymanager is being defined')
+	keyManager = new KeyBindings.Manager();
+	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
+	let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
+	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+	try {
+		let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+		shellSettings.set_boolean("edge-tiling", false);
+	} catch (error) {
+		_log("org.gnome.shell.overrides does not exist");
 	}
+	oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
+	oldbindings['maximize'] = desktopSettings.get_strv('maximize');
+	oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
+	oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
+	changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
+	changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
+	changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
+	changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+	mutterSettings.set_boolean("edge-tiling", false);
+	keyManager_timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, function() {
+		keyManager.add("<Super>left", function() { requestMove("left") })
+		keyManager.add("<Super>right", function() { requestMove("right") })
+		keyManager.add("<Super>up", function() { requestMove("up") })
+		keyManager.add("<Super>down", function() { requestMove("down") })
+	});
+
+	// Since GNOME 40 the meta_display argument isn't passed anymore to these callbacks.
+	// We "translate" the parameters here so that things work on both GNOME 3 and 40.
+	onWindowGrabBegin = global.display.connect('grab-op-begin', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
+		if (SHELL_VERSION_MAJOR >= 40) {
+			windowGrabBegin(meta_screen, meta_window);
+		} else {
+			windowGrabBegin(meta_window, meta_grab_op);
+		}
+	});
+	onWindowGrabEnd = global.display.connect('grab-op-end', (meta_display, meta_screen, meta_window, meta_grab_op, gpointer) => {
+		if (SHELL_VERSION_MAJOR >= 40) {
+			windowGrabEnd(meta_screen, meta_window);
+		} else {
+			windowGrabEnd(meta_window, meta_grab_op);
+		}
+	});
+	// Get the GSchema for our settings
+	gschema = Gio.SettingsSchemaSource.new_from_directory(
+		Extension.dir.get_child('schemas').get_path(),
+		Gio.SettingsSchemaSource.get_default(),
+		false
+	);
+	// Create a new settings object
+	preview = new St.BoxLayout({
+		style_class: 'tile-preview',
+		visible: false
+	});
+	Main.uiGroup.add_actor(preview);
+
+	settings = new Gio.Settings({
+		settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true)
+	});
+	updateSettings();
+
+	// Watch the settings for changes
+	settingsChangedId = settings.connect('changed', updateSettings.bind());
 }
 
 function disable() {
@@ -929,10 +979,13 @@ function disable() {
 	global.display.disconnect(onWindowGrabEnd);
 	onWindowGrabBegin = null;
 	onWindowGrabEnd = null;
-	GLib.source_remove(timerrequestMove_timer);
+	GLib.source_remove(requestMove_timer);
 	GLib.source_remove(checkForMove_timer);
 	GLib.source_remove(windowGrabBegin_timer);
 	GLib.source_remove(windowGrabEnd_timer);
 	GLib.source_remove(checkIfNearGrid_timer);
 	GLib.source_remove(keyManager_timer);
+	gschema = null;
+	settings = null;
+	preview = null;
 }
