@@ -151,8 +151,23 @@ function moveApp(app, loc) {
 	app.wintile.row = loc.row;
 	app.wintile.width = loc.width;
 	app.wintile.height = loc.height;
-	let window = app.get_frame_rect()
-	_log("moveApp) window.x: " + window.x + " window.y: " + window.y + " window.width: " + window.width + " window.height: " + window.height)
+	let window = app.get_frame_rect();
+	let leftShift = window.width - w;
+	let downShift = h - window.height;
+	if (leftShift && loc.col == colCount - 1){
+		_log(`moveApp) window wider than anticipated. Shift left by ${leftShift} px`);
+		x -= leftShift;
+		w = window.width;
+	}
+	if (downShift && loc.row == 1) {
+		_log(`moveApp) window higher than anticipated. Shift down by ${downShift} px`);
+		y -= downShift;	
+		h = window.height;
+	}
+	if (downShift || leftShift) {
+		moveAppCoordinates(app, x, y, w, h);
+	}
+	_log("moveApp) window.x: " + window.x + " window.y: " + window.y + " window.width: " + window.width + " window.height: " + window.height);
 }
 
 function unMaximizeIfMaximized(app) {
