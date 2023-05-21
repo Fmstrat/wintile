@@ -105,7 +105,7 @@ function moveApp(app, loc) {
 	} else {
 		space = app.get_work_area_current_monitor()
 	}
-	var isNotUltrawide = (space.width / space.height) < 1.78;
+	var isNotUltrawide = (space.width / space.height) < 1.9;
 	if (config.cols == 2 || (config.ultrawideOnly && isNotUltrawide)) {
 		_log(`moveApp) isNotUltrawide: ${isNotUltrawide}`);
 		var colCount = 2;
@@ -263,7 +263,7 @@ function sendMove(direction) {
 	if (!app.wintile && app.maximized_horizontally && app.maximizedVertically) {
 		initApp(app, true);
 	}
-	var isNotUltrawide = (space.width / space.height) < 1.78;
+	var isNotUltrawide = (space.width / space.height) < 1.9;
 	_log(`isNotUltrawide: ${isNotUltrawide}`);
 	if (!app.wintile) {
 		// We are not in a tile. Reset and find the most logical position
@@ -790,7 +790,7 @@ function checkIfNearGrid(app) {
 		var curMonitor = getCurrentMonitor();
 		var monitor = Main.layoutManager.monitors[curMonitor];
 		var space = getActiveWorkspace().get_work_area_for_monitor(curMonitor);
-		var isNotUltrawide = (space.width / space.height) < 1.78;
+		var isNotUltrawide = (space.width / space.height) < 1.9;
 		if (config.ultrawideOnly && isNotUltrawide) {
 			_log(`checkIfNearGrid) isNotUltrawide: ${isNotUltrawide}`);
 			var colCount = 2;
