@@ -1,4 +1,5 @@
 'use strict';
+/* global global */
 
 const Config = imports.misc.config;
 const Main = imports.ui.main;
@@ -25,7 +26,6 @@ const SHELL_VERSION_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
  *     https://gitlab.gnome.org/GNOME/gnome-shell/blob/master/js/ui/windowManager.js#L1093-1112
  */
 var Manager = class Manager {
-
     constructor() {
         this._keybindings = new Map();
 
@@ -35,13 +35,12 @@ var Manager = class Manager {
         );
     }
 
-    _onAcceleratorActivated(display, action, deviceId, timestamp) {
+    _onAcceleratorActivated(display, action, unused, _timestamp) {
         try {
             let binding = this._keybindings.get(action);
 
-            if (binding !== undefined) {
+            if (binding !== undefined)
                 binding.callback();
-            }
         } catch (e) {
             logError(e);
         }
@@ -50,24 +49,24 @@ var Manager = class Manager {
     /**
      * Add a keybinding with callback
      *
-     * @param {String} accelerator - An accelerator in the form '<Control>q'
+     * @param {string} accelerator - An accelerator in the form '<Control>q'
      * @param {Function} callback - A callback for the accelerator
-     * @return {Number} - A non-zero action id on success, or 0 on failure
+     * @returns {number} - A non-zero action id on success, or 0 on failure
      */
     add(accelerator, callback) {
         let action = Meta.KeyBindingAction.NONE;
 
         // A flags argument was added somewhere between 3.30-3.32
-        if (SHELL_VERSION_MAJOR == 3 && SHELL_VERSION_MINOR < 30) {
+        if (SHELL_VERSION_MAJOR === 3 && SHELL_VERSION_MINOR < 30)
             action = global.display.grab_accelerator(accelerator);
-        } else {
+        else
             action = global.display.grab_accelerator(accelerator, 0);
-        }
+
 
         if (action !== Meta.KeyBindingAction.NONE) {
             let name = Meta.external_binding_name_for_action(action);
             Main.wm.allowKeybinding(name, Shell.ActionMode.ALL);
-            this._keybindings.set(action, {name: name, callback: callback});
+            this._keybindings.set(action, {name, callback});
         } else {
             logError(new Error(`Failed to add keybinding: '${accelerator}'`));
         }
@@ -78,7 +77,7 @@ var Manager = class Manager {
     /**
      * Remove a keybinding
      *
-     * @param {Number} accelerator - A non-zero action id returned by add()
+     * @param {object} action - the keyboard shortcut to unbind
      */
     remove(action) {
         try {
@@ -95,9 +94,8 @@ var Manager = class Manager {
      * Remove all keybindings
      */
     removeAll() {
-        for (let action of this._keybindings.keys()) {
+        for (let action of this._keybindings.keys())
             this.remove(action);
-        }
     }
 
     /**
