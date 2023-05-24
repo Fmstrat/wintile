@@ -1144,13 +1144,13 @@ function enable() {
 
     // Since GNOME 40 the metaDisplay argument isn't passed anymore to these callbacks.
     // We "translate" the parameters here so that things work on both GNOME 3 and 40.
-    onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, metaGrabOp) => {
+    onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
         if (SHELL_VERSION_MAJOR >= 40)
             windowGrabBegin(metaScreen, metaWindow);
         else
             windowGrabBegin(metaWindow, metaGrabOp);
     });
-    onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, metaGrabOp) => {
+    onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
         if (SHELL_VERSION_MAJOR >= 40)
             windowGrabEnd(metaScreen, metaWindow);
         else
