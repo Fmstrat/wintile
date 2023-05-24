@@ -1097,9 +1097,14 @@ function disable() {
 	keyManager.destroy();
 	keyManager = null;
 	let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-	let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
 	let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
 	let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+	try {
+		let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
+		shellSettings.reset("edge-tiling");
+	} catch (error) {
+		_log("org.gnome.shell.overrides does not exist");
+	}
 	desktopSettings.reset('unmaximize');
 	desktopSettings.reset('maximize');
 	mutterKeybindingSettings.reset('toggle-tiled-left');
