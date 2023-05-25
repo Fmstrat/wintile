@@ -1215,12 +1215,12 @@ function disable() {
     }
     desktopSettings.reset('unmaximize');
     desktopSettings.reset('maximize');
-    desktopSettings = none;
+    desktopSettings = null;
     mutterKeybindingSettings.reset('toggle-tiled-left');
     mutterKeybindingSettings.reset('toggle-tiled-right');
-    mutterKeybindingSettings = none;
+    mutterKeybindingSettings = null;
     mutterSettings.reset('edge-tiling');
-    mutterSettings = none;
+    mutterSettings = null;
     global.display.disconnect(onWindowGrabBegin);
     global.display.disconnect(onWindowGrabEnd);
     onWindowGrabBegin = null;
