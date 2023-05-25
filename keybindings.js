@@ -35,7 +35,7 @@ var Manager = class Manager {
         );
     }
 
-    _onAcceleratorActivated(display, action, _unused, _timestamp) {
+    _onAcceleratorActivated(display, action, _deviceId, _timestamp) {
         try {
             let binding = this._keybindings.get(action);
 
