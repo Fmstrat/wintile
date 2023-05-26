@@ -129,6 +129,7 @@ function moveApp(app, loc) {
     var colCount = config.cols === 2 || (config.ultrawideOnly && isNotUltrawide) ? 2 : config.cols;
     if (loc.col >= colCount)
         loc.col = 1;
+
     var colWidth = Math.floor(space.width / colCount);
     var rowHeight = Math.floor(space.height / 2);
 
@@ -136,6 +137,9 @@ function moveApp(app, loc) {
     let y = loc.row * rowHeight + space.y;
     let w = loc.width * colWidth;
     let h = loc.height * rowHeight;
+    
+    if (loc.col + loc.width === colCount)
+        w += space.width % colCount;
 
     if (!config.useMaximize) {
         unMaximizeIfMaximized(app);
