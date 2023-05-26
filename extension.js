@@ -107,9 +107,9 @@ function moveAppCoordinates(app, x, y, w, h) {
     _log(`Moving window to (${x},${y}), size (${w},${h})`);
     app.move_frame(true, x, y);
     app.move_resize_frame(true, x, y, w, h);
-	// as of stupid as it sounds this fixes an issue with mutter 41.3
-	// https://gitlab.gnome.org/GNOME/mutter/-/issues/2091
-	app.move_resize_frame(true, x, y, w, h);
+    // as of stupid as it sounds this fixes an issue with mutter 41.3
+    // https://gitlab.gnome.org/GNOME/mutter/-/issues/2091
+    app.move_resize_frame(true, x, y, w, h);
 }
 
 /**
