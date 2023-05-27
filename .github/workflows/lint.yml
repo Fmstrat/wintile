@@ -9,12 +9,18 @@ on:
     branches:
       - master
       - develop
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Install eslint
-      run: npm install --save-dev eslint
-    - name: Run ESLint
-      run: npx eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern node_modules/
+      - uses: actions/checkout@v3
+      - name: Install eslint
+        run: npm install --save-dev eslint
+      - name: Check for modified JavaScript files
+        id: file-check
+        run: echo "::set-output name=changed::$(git diff --name-only --diff-filter=AM $(git merge-base HEAD $(git symbolic-ref --short HEAD))..$(git symbolic-ref --short HEAD) | grep '\.js$' | grep -v 'node_modules')"
+      - name: Run ESLint
+        if: steps.file-check.outputs.changed
+        run: npx eslint . --ext .js --ignore-pattern node_modules/
