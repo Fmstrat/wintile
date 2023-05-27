@@ -13,4 +13,4 @@ jobs:
     - name: Install eslint
       run: npm install --save-dev eslint
     - name: Run ESLint
-      run: npx eslint . --fix --ext .js,.jsx,.ts,.tsx --ignore-pattern node_modules/
+      run: npx eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern node_modules/
