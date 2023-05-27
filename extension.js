@@ -263,15 +263,15 @@ function restoreApp(app, move = true) {
         moveAppCoordinates(app, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
     } else {
         // BUG: when clicking the maximize button, then dragging the window off, it moves to below the mouse cursor
-        let [x, y] = global.get_pointer();
+        let [mouseX, mouseY] = global.get_pointer();
         let window = app.get_frame_rect();
-        _log(`A) mouse - x:${x} y:${y}`);
+        _log(`A) mouse - mouseX:${mouseX} mouseY:${mouseY}`);
         _log(`A) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
         window = app.wintile.origFrame;
         _log(`A) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-        moveAppCoordinates(app, Math.floor(x - app.wintile.origFrame.width / 2), y - 10, app.wintile.origFrame.width, app.wintile.origFrame.height);
+        moveAppCoordinates(app, Math.floor(mouseX - app.wintile.origFrame.width / 2), mouseY - 10, app.wintile.origFrame.width, app.wintile.origFrame.height);
         window = app.get_frame_rect();
-        _log(`B) mouse - x:${x} y:${y}`);
+        _log(`B) mouse - mouseX:${mouseX} mouseY:${mouseY}`);
         _log(`B) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
         window = app.wintile.origFrame;
         _log(`B) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
@@ -726,23 +726,23 @@ function checkForMove(x, y, app) {
  */
 function windowGrabBegin(metaWindow, metaGrabOp) {
     _log('windowGrabBegin');
-    let [x, y] = global.get_pointer();
+    let [mouseX, mouseY] = global.get_pointer();
     var app = global.display.focus_window;
     let window = app.get_frame_rect();
     var leeway = 10;
-    _log(`grabBegin) mouse - x:${x} y:${y}`);
+    _log(`grabBegin) mouse - mouseX:${mouseX} mouseY:${mouseY}`);
     _log(`grabBegin) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
     var output = '';
-    if (y > window.y - leeway && y < window.y + leeway)
+    if (mouseY > window.y - leeway && mouseY < window.y + leeway)
         output += 'top ';
 
-    if (y > window.y + window.height - leeway && y < window.y + window.height + leeway)
+    if (mouseY > window.y + window.height - leeway && mouseY < window.y + window.height + leeway)
         output += 'bottom ';
 
-    if (x > window.x - leeway && x < window.x + leeway)
+    if (mouseX > window.x - leeway && mouseX < window.x + leeway)
         output += 'left ';
 
-    if (x > window.x + window.width - leeway && x < window.x + window.width + leeway)
+    if (mouseX > window.x + window.width - leeway && mouseX < window.x + window.width + leeway)
         output += 'right ';
 
     if (output) {
@@ -755,7 +755,7 @@ function windowGrabBegin(metaWindow, metaGrabOp) {
         if (app.wintile) {
             window = app.wintile.origFrame;
             _log(`grabBegin) origFrame - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-            checkForMove(x, y, app);
+            checkForMove(mouseX, mouseY, app);
         }
         if (metaWindow.resizeable && config.preview.enabled) {
             app.origFrameRect = app.get_frame_rect();
@@ -841,9 +841,9 @@ function isClose(a, b, distance = config.preview.distance) {
  */
 function showPreview(loc, _x, _y, _w, _h) {
     if (preview.x !== _x && preview.y !== _y) {
-        let [x, y, _] = global.get_pointer();
-        preview.x = x;
-        preview.y = y;
+        let [mouseX, mouseY] = global.get_pointer();
+        preview.x = mouseX;
+        preview.y = mouseY;
     }
     preview.visible = true;
     preview.loc = loc;
@@ -878,7 +878,7 @@ function hidePreview() {
 function checkIfNearGrid(app) {
     _log('checkIfNearGrid');
     if (windowMoving) {
-        let [x, y] = global.get_pointer();
+        let [mouseX, mouseY] = global.get_pointer();
         var close = false;
         var curMonitor = getCurrentMonitor();
         var monitor = Main.layoutManager.monitors[curMonitor];
@@ -891,33 +891,33 @@ function checkIfNearGrid(app) {
 
         var rowHeight = Math.floor(space.height / 2);
         var inMonitorBounds = false;
-        if (x >= monitor.x && x < monitor.x + monitor.width && y >= monitor.y && y < monitor.y + monitor.width)
+        if (mouseX >= monitor.x && mouseX < monitor.x + monitor.width && mouseY >= monitor.y && mouseY < monitor.y + monitor.width)
             inMonitorBounds = true;
 
         let window = app.get_frame_rect();
-        _log(`mouse - x:${x} y:${y}`);
+        _log(`mouse - mouseX:${mouseX} mouseY:${mouseY}`);
         _log(`monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
         _log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
         _log(`window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
         if (inMonitorBounds) {
             for (var i = 0; i < colCount; i++) {
                 var gridX = i * colWidth + space.x;
-                var inGrid = x > gridX && x < gridX + colWidth;
-                var centerOfGrid = x > Math.floor(gridX + colWidth / 3) && x < Math.floor(gridX + colWidth - (colWidth  / 3));
-                var topRow = space.y < y && y < space.y + rowHeight;
-                var bottomRow = y > space.y + rowHeight;
-                var nearTop = isClose(y, space.y) || y < space.y;
-                var nearBottom = isClose(y, space.y + space.height) || y > space.y + space.height;
-                var nearLeft = isClose(x, space.x) || x < space.x;
-                var nearRight = isClose(x, space.x + space.width) || x > space.x + space.width;
+                var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
+                var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + colWidth - (colWidth  / 3));
+                var topRow = space.y < mouseY && mouseY < space.y + rowHeight;
+                var bottomRow = mouseY > space.y + rowHeight;
+                var nearTop = isClose(mouseY, space.y) || mouseY < space.y;
+                var nearBottom = isClose(mouseY, space.y + space.height) || mouseY > space.y + space.height;
+                var nearLeft = isClose(mouseX, space.x) || mouseX < space.x;
+                var nearRight = isClose(mouseX, space.x + space.width) || mouseX > space.x + space.width;
 
                 var centerHorizontalLeft  = Math.floor(space.x + (space.width / 2) - (colWidth / 5));
                 var centerHorizontalRight = Math.floor(space.x + (space.width / 2) + (colWidth / 5));
-                var nearCenterH = centerHorizontalLeft < x && x < centerHorizontalRight;
+                var nearCenterH = centerHorizontalLeft < mouseX && mouseX < centerHorizontalRight;
 
                 var centerVerticalTop = Math.floor(space.height / 2 + space.y - rowHeight / 2);
                 var centerVerticalBottom = Math.floor(space.height / 2 + space.y + rowHeight / 2);
-                var nearCenterV = centerVerticalTop < y && y < centerVerticalBottom;
+                var nearCenterV = centerVerticalTop < mouseY && mouseY < centerVerticalBottom;
 
                 if (nearTop && nearCenterH) {
                     // If we are in the center top, show a preview for maximize
