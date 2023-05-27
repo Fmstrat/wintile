@@ -1,10 +1,6 @@
 name: lint
 
-on: 
-  merge:
-    branches:
-      master
-      develop
+on:
   push:
     branches:
       master
