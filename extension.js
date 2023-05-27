@@ -749,20 +749,6 @@ function windowGrabBegin(metaWindow, metaGrabOp) {
         _log(`grabBegin) Mouse is on the ${output}side. Ignoring`);
         return;
     }
-    // if it's anything other than a 1, then it's not a left-click move
-    // so it needs to be handled async
-    if (metaGrabOp & 1 === 0) {
-        _log("grabBegin) this isn't a left click");
-        Clutter.init(null);
-        let stage = new Clutter.Stage();
-        stage.connect('button-press-event', (actor, event) => {
-            windowGrabEnd(metaWindow, metaGrabOp);
-            stage.destroy();
-            Clutter.main_quit();
-        });
-        stage.show()
-        Clutter.main();
-    }
     if (metaWindow && metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP) {
         windowMoving = true;
 
