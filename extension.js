@@ -26,7 +26,7 @@ let settings;
  */
 function _log(message) {
     if (config.debug)
-        console.log('[WinTile]', message);
+        console.log("[WinTile]", message);
 }
 
 let config = {
