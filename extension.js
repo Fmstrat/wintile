@@ -943,6 +943,16 @@ function checkIfNearGrid(app) {
                     }, space.x, space.y, space.width, space.height);
                     close = true;
                     break;
+                } else if (nearBottom && nearCenterH) {
+                    // If we are in the center bottom, show a preview for bottom maximized horizontally
+                    showPreview({
+                        col: 0,
+                        row: 1,
+                        width: colCount,
+                        height: 1,
+                    }, space.x, space.y + rowHeight, space.width, rowHeight);
+                    close = true;
+                    break;
                 } else if (nearLeft && nearCenterV) {
                     // If we are in the center left, show a preview for left maximize
                     if (colCount === 4 && config.preview.doubleWidth) {
