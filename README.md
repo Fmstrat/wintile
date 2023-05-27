@@ -34,9 +34,11 @@ where that tile will snap.
 
 There are a few zones to be aware of
 - Top Center maximizes a window
+- Bottom Center maximizes horizontally in the bottom row
 - In the center of any column on the bottom row will maximize vertically in that column
 - Right or left center will maximize vertically in a column
--- If using 4 columns and double-width is enabled, it will maximize on that half of the screen
+    - If using 4 columns and double-width is enabled, it will maximize on that half of the screen
+
 - Any other zone along the edge will create a 1x1 tile
 
 
