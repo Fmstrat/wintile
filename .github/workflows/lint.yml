@@ -24,7 +24,7 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       - name: Install Dependencies
-        run: npm install
+        run: npm install eslint
 
       - name: Lint
-        run: npm run lint
+        run: eslint extension.js prefs.js keybinding.js
