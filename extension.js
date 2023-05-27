@@ -26,7 +26,7 @@ let settings;
  */
 function _log(message) {
     if (config.debug)
-        console.log('[WinTile]', message);
+        console.log("[WinTile]", message);
 }
 
 let config = {
@@ -137,7 +137,7 @@ function moveApp(app, loc) {
     let y = loc.row * rowHeight + space.y;
     let w = loc.width * colWidth;
     let h = loc.height * rowHeight;
-    
+
     if (loc.col + loc.width === colCount)
         w += space.width % colCount;
 
@@ -1170,9 +1170,6 @@ function enable() {
             windowGrabEnd(metaWindow, metaGrabOp);
     });
 
-    // create a Clutter object that will handle click events
-    const Clutter = imports.gi.Clutter;
-
     // Get the GSchema for our settings
     gschema = Gio.SettingsSchemaSource.new_from_directory(
         Extension.dir.get_child('schemas').get_path(),
@@ -1204,14 +1201,14 @@ function disable() {
     keyManager.removeAll();
     keyManager.destroy();
     keyManager = null;
-    let desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
-    let mutterKeybindingSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter.keybindings' });
-    let mutterSettings = new Gio.Settings({ schema_id: 'org.gnome.mutter' });
+    let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
+    let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
+    let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
     try {
-        let shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.overrides' });
-        shellSettings.reset("edge-tiling");
+        let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
+        shellSettings.reset('edge-tiling');
     } catch (error) {
-        _log("org.gnome.shell.overrides does not exist");
+        _log('org.gnome.shell.overrides does not exist');
     }
     desktopSettings.reset('unmaximize');
     desktopSettings.reset('maximize');
