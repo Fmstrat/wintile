@@ -3,12 +3,12 @@ name: lint
 on:
   pull_request:
     branches:
-      master
-      develop
+      - master
+      - develop
   push:
     branches:
-      master
-      develop
+      - master
+      - develop
 jobs:
   build:
     runs-on: ubuntu-latest
