@@ -203,10 +203,11 @@ function unMaximizeIfMaximized(app) {
  */
 function initApp(app, maximized = false) {
     _log('initApp');
+    const coords = app.get_frame_rect() || getDefaultFloatingRectangle(app);
     if (!maximized) {
         _log('init as normal');
         app.wintile = {
-            origFrame: app.get_frame_rect() || getDefaultFloatingRectangle(app),
+            origFrame: {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height},
             row: -1,
             col: -1,
             height: -1,
@@ -215,13 +216,14 @@ function initApp(app, maximized = false) {
     } else {
         _log('init as maximize');
         app.wintile = {
-            origFrame: app.origFrameRect || getDefaultFloatingRectangle(app),
+            origFrame: {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height},
             row: 0,
             col: 0,
             height: 2,
             width: config.cols,
         };
     }
+    _log(`initApp) app: ${JSON.stringify(app)}`);
 }
 
 /**
@@ -252,6 +254,7 @@ function restoreApp(app, move = true) {
     if (app.maximized_horizontally || app.maximized_vertically)
         app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 
+    const [mouseX, mouseY] = global.get_pointer();
     if (move) {
         var space = app.get_work_area_current_monitor();
         if (app.wintile.origFrame.x + app.wintile.origFrame.width > space.x + space.width)
@@ -263,7 +266,6 @@ function restoreApp(app, move = true) {
         moveAppCoordinates(app, app.wintile.origFrame.x, app.wintile.origFrame.y, app.wintile.origFrame.width, app.wintile.origFrame.height);
     } else {
         // BUG: when clicking the maximize button, then dragging the window off, it moves to below the mouse cursor
-        let [mouseX, mouseY] = global.get_pointer();
         let window = app.get_frame_rect();
         _log(`A) mouse - mouseX:${mouseX} mouseY:${mouseY}`);
         _log(`A) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
