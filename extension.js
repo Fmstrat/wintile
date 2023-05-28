@@ -249,7 +249,7 @@ function restoreApp(app, move = true) {
     _log('restoreApp');
     _log(move);
     _log(JSON.stringify(app.wintile));
-    if (app.maximized_horizontally || app.maximizedVertically)
+    if (app.maximized_horizontally || app.maximized_vertically)
         app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
 
     if (move) {
@@ -312,7 +312,7 @@ function sendMove(direction) {
     _log(`monitorToRight: ${monitorToRight}`);
 
     // First, check if maximized and apply a wintile state if so
-    if (!app.wintile && app.maximized_horizontally && app.maximizedVertically)
+    if (!app.wintile && app.maximized_horizontally && app.maximized_vertically)
         initApp(app, true);
 
     const isNotUltrawide = (space.width / space.height) < 1.9;
