@@ -251,8 +251,7 @@ function restoreApp(app, move = true) {
     _log('restoreApp');
     _log(move);
     _log(JSON.stringify(app.wintile));
-    if (app.maximized_horizontally || app.maximized_vertically)
-        app.unmaximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+    unMaximizeIfMaximized(app);
 
     const [mouseX, mouseY] = global.get_pointer();
     if (move) {
