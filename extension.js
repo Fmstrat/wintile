@@ -170,7 +170,7 @@ function moveApp(app, loc) {
     app.wintile.height = loc.height;
     let window = app.get_frame_rect();
     let leftShift = window.width - w;
-    let upShift = window height - h;
+    let upShift = window.height - h;
     if (leftShift && loc.col === colCount - 1) {
         _log(`moveApp) window wider than anticipated. Shift left by ${leftShift} px`);
         x -= leftShift;
