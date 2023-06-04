@@ -841,11 +841,12 @@ function isClose(a, b, distance = config.preview.distance) {
  * @param {number} _h - The height of the preview.
  */
 function showPreview(loc, _x, _y, _w, _h) {
-    if (preview.x !== _x && preview.y !== _y) {
-        let [mouseX, mouseY] = global.get_pointer();
-        preview.x = mouseX;
-        preview.y = mouseY;
-    }
+    if (preview.loc && preview.loc.col === loc.col && preview.loc.row === loc.row)
+        return;
+
+    let [mouseX, mouseY] = global.get_pointer();
+    preview.x = mouseX;
+    preview.y = mouseY;
     preview.visible = true;
     preview.loc = loc;
     preview.ease({
