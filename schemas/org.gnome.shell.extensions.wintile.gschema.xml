@@ -2,7 +2,7 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.wintile" path="/org/gnome/shell/extensions/wintile/">
     <key name="cols" type="i">
-      <default>3</default>
+      <default>2</default>
       <summary>Number of columns</summary>
       <description></description>
       <range min="2" max="4"/>
