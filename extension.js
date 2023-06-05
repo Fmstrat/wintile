@@ -20,7 +20,7 @@ let gschema;
 let settings;
 
 
-// View logs with `journalctl -qf |grep WinTile`
+// View logs with `journalctl -qf |grep -i -e Wintile -e 'js error' `
 /**
  * @param {string} message - the actual log to be logged
  */
