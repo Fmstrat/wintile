@@ -1,0 +1,23 @@
+{
+  "name": "wintile",
+  "version": "11.0.0",
+  "description": "WinTile: Windows 10 window tiling for GNOME =========================================== WinTile is a hotkey driven window tiling system for GNOME that imitates the standard `Win-Arrow` keys of Windows 10, allowing you to maximize, maximize to sides, or 1/4 sized to corner a window using just `<Super>`+`<Arrows>`.",
+  "main": "extension.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fmstrat/wintile.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fmstrat/wintile/issues"
+  },
+  "homepage": "https://github.com/Fmstrat/wintile#readme",
+  "devDependencies": {
+    "eslint": "^8.41.0",
+    "eslint-plugin-jsdoc": "^45.0.0"
+  }
+}
