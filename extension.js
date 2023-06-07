@@ -34,13 +34,14 @@ let config = {
     ultrawideOnly: false,
     useMaximize: true,
     useMinimize: true,
-    debug: true,
     preview: {
         enabled: true,
         doubleWidth: true,
         distance: 75,
         delay: 500,
     },
+    gap: 0,
+    debug: true,
 };
 
 /**
@@ -48,13 +49,14 @@ let config = {
  */
 function updateSettings() {
     config.cols = settings.get_value('cols').deep_unpack();
-    config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
     config.ultrawideOnly = settings.get_value('ultrawide-only').deep_unpack();
     config.useMaximize = settings.get_value('use-maximize').deep_unpack();
     config.useMinimize = settings.get_value('use-minimize').deep_unpack();
     config.preview.enabled = settings.get_value('preview').deep_unpack();
+    config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
     config.preview.distance = settings.get_value('distance').deep_unpack();
     config.preview.delay = settings.get_value('delay').deep_unpack();
+    config.gap = settings.get_value('gap').deep_unpack();
     config.debug = settings.get_value('debug').deep_unpack();
     _log(JSON.stringify(config));
 }
@@ -104,7 +106,14 @@ function requestMinimize(app) {
  * @param {number} h - desired height
  */
 function moveAppCoordinates(app, x, y, w, h) {
-    _log(`Moving window to (${x},${y}), size (${w},${h})`);
+    if (config.gap) {
+        const halfGap = Math.floor(config.gap / 2);
+        w -= config.gap;
+        h -= config.gap;
+        x += halfGap;
+        y += halfGap;
+    }
+    _log(`moveAppCoordinates) Moving window to (${x},${y}), size (${w},${h}) with ${config.gap}px gaps`);
     app.move_frame(true, x, y);
     app.move_resize_frame(true, x, y, w, h);
 }
@@ -153,11 +162,11 @@ function moveApp(app, loc) {
             // Maximize
             _log('maximize');
             app.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-        } else if (loc.height === 2) {
+        } else if (loc.height === 2 && !config.gap) {
             // Maximize vertically
             _log('maximize - v');
             app.maximize(Meta.MaximizeFlags.VERTICAL);
-        } else if (loc.width === config.cols) {
+        } else if (loc.width === config.cols && !config.gap) {
             // Maximize horizontally
             _log('maximize - h');
             app.maximize(Meta.MaximizeFlags.HORIZONTAL);
@@ -169,8 +178,8 @@ function moveApp(app, loc) {
     app.wintile.width = loc.width;
     app.wintile.height = loc.height;
     let window = app.get_frame_rect();
-    let leftShift = window.width - w;
-    let upShift = window.height - h;
+    let leftShift = window.width - w + config.gap;
+    let upShift = window.height - h + config.gap;
     if (leftShift && loc.col === colCount - 1) {
         _log(`moveApp) window wider than anticipated. Shift left by ${leftShift} px`);
         x -= leftShift;
@@ -844,6 +853,13 @@ function showPreview(loc, _x, _y, _w, _h) {
     if (preview.loc && JSON.stringify(preview.loc) === JSON.stringify(loc))
         return;
 
+    if (config.gap) {
+        const halfGap = Math.floor(config.gap / 2);
+        _w -= config.gap;
+        _h -= config.gap;
+        _x += halfGap;
+        _y += halfGap;
+    }
     let [mouseX, mouseY] = global.get_pointer();
     preview.x = mouseX;
     preview.y = mouseY;
