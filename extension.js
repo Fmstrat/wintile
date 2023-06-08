@@ -945,7 +945,7 @@ function checkIfNearGrid(app) {
                     // If we are in the center bottom, show a preview for bottom maximized horizontally
                     showPreview({
                         col: 0,
-                        row: 1,
+                        row: config.rows - 1,
                         width: colCount,
                         height: 1,
                     }, space.x, space.y, colWidth, rowHeight);
@@ -1013,14 +1013,14 @@ function checkIfNearGrid(app) {
                     if (colCount === 4 && config.preview.doubleWidth) {
                         showPreview({
                             col: 0,
-                            row: 1,
+                            row: config.rows - 1,
                             width: 2,
                             height: 1,
                         }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: 0,
-                            row: 1,
+                            row: config.rows - 1,
                             width: 1,
                             height: 1,
                         }, space.x, space.y, colWidth, rowHeight);
@@ -1051,14 +1051,14 @@ function checkIfNearGrid(app) {
                     if (colCount === 4 && config.preview.doubleWidth) {
                         showPreview({
                             col: colCount - 2,
-                            row: 1,
+                            row: config.rows - 1,
                             width: 2,
                             height: 1,
                         }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: colCount - 1,
-                            row: 1,
+                            row: config.rows - 1,
                             width: 1,
                             height: 1,
                         }, space.x, space.y, colWidth, rowHeight);
@@ -1089,7 +1089,7 @@ function checkIfNearGrid(app) {
                     // If we are close to the bottom, show a preview for the bottom grid item
                     showPreview({
                         col: i,
-                        row: 1,
+                        row: config.rows - 1,
                         width: 1,
                         height: 1,
                     }, space.x, space.y, colWidth, rowHeight);
