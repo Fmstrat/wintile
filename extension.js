@@ -854,13 +854,6 @@ function showPreview(loc, spaceX, spaceY, colWidth, rowHeight) {
     if (preview.loc && JSON.stringify(preview.loc) === JSON.stringify(loc))
         return;
 
-    if (config.gap) {
-        const halfGap = Math.floor(config.gap / 2);
-        _w -= config.gap;
-        _h -= config.gap;
-        _x += halfGap;
-        _y += halfGap;
-    }
     let [mouseX, mouseY] = global.get_pointer();
     preview.x = mouseX;
     preview.y = mouseY;
@@ -871,10 +864,10 @@ function showPreview(loc, spaceX, spaceY, colWidth, rowHeight) {
         opacity: 255,
         visible: true,
         transition: Clutter.AnimationMode.EASE_OUT_QUAD,
-        x: spaceX + (colWidth * loc.col),
-        y: spaceY + (rowHeight * loc.row),
-        width: colWidth * loc.width,
-        height: rowHeight * loc.height,
+        x: spaceX + (colWidth * loc.col) + Math.floor(config.gap / 2),
+        y: spaceY + (rowHeight * loc.row) + Math.floor(config.gap / 2),
+        width: colWidth * loc.width - config.gap,
+        height: rowHeight * loc.height - config.gap,
     });
 }
 
