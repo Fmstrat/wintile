@@ -8,6 +8,7 @@ WinTile also supports:
 - Mouse preview and snapping for placing tiles
 - "Maximize" mode, which adds/removes GNOME animations
 - Ultrawide-only mode limits 16:9 screens to a 2x2 grid
+- Adding gaps around tiles
 
 <img src='demo.gif'>
 
