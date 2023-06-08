@@ -836,12 +836,12 @@ function isClose(a, b, distance = config.preview.distance) {
 /**
  *
  * @param {object} loc = { col, row, width, height }
- * @param {number} _x - The x-coordinate of the preview.
- * @param {number} _y - The y-coordinate of the preview.
- * @param {number} _w - The width of the preview.
- * @param {number} _h - The height of the preview.
+ * @param {number} spaceX - starting x of the screen
+ * @param {number} spaceY - starting y of the screen
+ * @param {number} colWidth - single col width
+ * @param {number} rowHeight - single row height
  */
-function showPreview(loc, _x, _y, _w, _h) {
+function showPreview(loc, spaceX, spaceY, colWidth, rowHeight) {
     if (preview.loc && JSON.stringify(preview.loc) === JSON.stringify(loc))
         return;
 
@@ -855,10 +855,10 @@ function showPreview(loc, _x, _y, _w, _h) {
         opacity: 255,
         visible: true,
         transition: Clutter.AnimationMode.EASE_OUT_QUAD,
-        x: _x,
-        y: _y,
-        width: _w,
-        height: _h,
+        x: spaceX + (colWidth * loc.col),
+        y: spaceY + (rowHeight * loc.row),
+        width: colWidth * loc.width,
+        height: rowHeight * loc.height,
     });
 }
 
@@ -929,7 +929,7 @@ function checkIfNearGrid(app) {
                         row: 0,
                         width: colCount,
                         height: config.rows,
-                    }, space.x, space.y, space.width, space.height);
+                    }, space.x, space.y, colWidth, rowHeight);
                     close = true;
                     break;
                 } else if (nearBottom && nearCenterH) {
@@ -939,7 +939,7 @@ function checkIfNearGrid(app) {
                         row: 1,
                         width: colCount,
                         height: 1,
-                    }, space.x, space.y + rowHeight, space.width, rowHeight);
+                    }, space.x, space.y, colWidth, rowHeight);
                     close = true;
                     break;
                 } else if (nearLeft && nearCenterV) {
@@ -950,14 +950,14 @@ function checkIfNearGrid(app) {
                             row: 0,
                             width: 2,
                             height: config.rows,
-                        }, space.x, space.y, colWidth * 2, space.height);
+                        }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: 0,
                             row: 0,
                             width: 1,
                             height: config.rows,
-                        }, space.x, space.y, colWidth, space.height);
+                        }, space.x, space.y, colWidth, rowHeight);
                     }
                     close = true;
                     break;
@@ -969,14 +969,14 @@ function checkIfNearGrid(app) {
                             row: 0,
                             width: 2,
                             height: config.rows,
-                        }, space.x + space.width - colWidth * 2, space.y, colWidth * 2, space.height);
+                        }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: colCount - 1,
                             row: 0,
                             width: 1,
                             height: config.rows,
-                        }, space.x + space.width - colWidth, space.y, colWidth, space.height);
+                        }, space.x, space.y, colWidth, rowHeight);
                     }
                     close = true;
                     break;
@@ -988,7 +988,7 @@ function checkIfNearGrid(app) {
                             row: 0,
                             width: 2,
                             height: 1,
-                        }, space.x, space.y, colWidth * 2, rowHeight);
+                        }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: 0,
@@ -1007,14 +1007,14 @@ function checkIfNearGrid(app) {
                             row: 1,
                             width: 2,
                             height: 1,
-                        }, space.x, space.y + rowHeight, colWidth * 2, rowHeight);
+                        }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: 0,
                             row: 1,
                             width: 1,
                             height: 1,
-                        }, space.x, space.y + rowHeight, colWidth, rowHeight);
+                        }, space.x, space.y, colWidth, rowHeight);
                     }
                     close = true;
                     break;
@@ -1026,14 +1026,14 @@ function checkIfNearGrid(app) {
                             row: 0,
                             width: 2,
                             height: 1,
-                        }, space.x + space.width - colWidth * 2, space.y, colWidth * 2, rowHeight);
+                        }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: colCount - 1,
                             row: 0,
                             width: 1,
                             height: 1,
-                        }, space.x + space.width - colWidth, space.y, colWidth, rowHeight);
+                        }, space.x, space.y, colWidth, rowHeight);
                     }
                     close = true;
                     break;
@@ -1045,14 +1045,14 @@ function checkIfNearGrid(app) {
                             row: 1,
                             width: 2,
                             height: 1,
-                        }, space.x + space.width - colWidth * 2, space.y + rowHeight, colWidth * 2, rowHeight);
+                        }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: colCount - 1,
                             row: 1,
                             width: 1,
                             height: 1,
-                        }, space.x + space.width - colWidth, space.y + rowHeight, colWidth, rowHeight);
+                        }, space.x, space.y, colWidth, rowHeight);
                     }
                     close = true;
                     break;
@@ -1063,7 +1063,7 @@ function checkIfNearGrid(app) {
                         row: 0,
                         width: 1,
                         height: 1,
-                    }, gridX, space.y, colWidth, rowHeight);
+                    }, space.x, space.y, colWidth, rowHeight);
                     close = true;
                     break;
                 } else if (nearBottom && centerOfGrid) {
@@ -1073,7 +1073,7 @@ function checkIfNearGrid(app) {
                         row: 0,
                         width: 1,
                         height: config.rows,
-                    }, gridX, space.y, colWidth, space.height);
+                    }, space.x, space.y, colWidth, rowHeight);
                     close = true;
                     break;
                 } else if (nearBottom && inGrid) {
@@ -1083,7 +1083,7 @@ function checkIfNearGrid(app) {
                         row: 1,
                         width: 1,
                         height: 1,
-                    }, gridX, space.y + rowHeight, colWidth, rowHeight);
+                    }, space.x, space.y, colWidth, rowHeight);
                     close = true;
                     break;
                 }
