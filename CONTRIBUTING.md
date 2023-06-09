@@ -6,7 +6,7 @@ Here are a few important ones and their explanations.<br>
 1.  Lines must not have any extra space at the end (including blank lines)
 1.  Use 4 spaces instead of tabs
 3.  Switch statements and their cases must be at the same indent level
-    ```
+    ```javascript
     // good
     switch (direction) {
     case 'left':
@@ -22,7 +22,7 @@ Here are a few important ones and their explanations.<br>
     ```
 1.  If statements and their curly braces must have a space between them
 1.  If statements and their else block that only have a single command must not be surrounded with curly braces.
-    ```
+    ```javascript
     // good
     if ( user.age > 21 )
         user.canDrink = true;
@@ -33,7 +33,7 @@ Here are a few important ones and their explanations.<br>
     }
     ```
 1.  Multi-line objects must have a trailing comma as if there was another element
-    ```
+    ```javascript
     var goodObject = {
         firstElement: 1, // <--- trailing comma
     };
@@ -43,22 +43,22 @@ Here are a few important ones and their explanations.<br>
     }
     ```
 1.  Use camelCase names instead of snake_case_names
-    ```
+    ```javascript
     var goodName; // good
     var bad_name; // bad
     ```
 1.  Strings MUST be single quoted
-    ```
+    ```javascript
     var blah = 'I\'m a single quoted string'; // good
     var blah = "I'm a double quoted string"; // bad 
     ```
 1.  Use backtick interpolation instead of concatenation
-    ```
+    ```javascript
     var builtString = `Hello, ${useName}!`; // good
     var concatString = 'Hello, ' + userName + '!'; // bad
     ```
 1.  Functions must have jsdoc strings that give the variable name, type, and explanation for EACH variable
-    ```
+    ```javascript
     // good example
     /**
      *
@@ -73,7 +73,7 @@ Here are a few important ones and their explanations.<br>
 
     ```
 1.  Comparisons must use 3 signs instead of 2. ( === and !== instead of == and != )
-    ```
+    ```javascript
     // good
     log( firstName === 'Weadababy' );
     
