@@ -349,7 +349,7 @@ function sendMove(direction) {
             case 'up':
                 // 1st Maximize
                 initApp(app);
-                moveApp(app, {'row': 0, 'col': 0, 'height': config.rows, 'width': 2});
+                moveApp(app, {'row': 0, 'col': 0, 'height': config.rows, 'width': colCount});
                 break;
             case 'down':
                 // Minimize
