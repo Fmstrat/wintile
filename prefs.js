@@ -10,34 +10,15 @@ const Gettext = imports.gettext;
 const _ = Gettext.domain('wintile').gettext;
 
 const Config = imports.misc.config;
-const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
+const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 
-let gschema;
-let gsettings;
 
 /**
  *
  */
 function init() {
-    gschema = Gio.SettingsSchemaSource.new_from_directory(
-        Me.dir.get_child('schemas').get_path(),
-        Gio.SettingsSchemaSource.get_default(),
-        false
-    );
-
-    gsettings = new Gio.Settings({
-        settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true),
-    });
+    // empty
 }
-
-/**
- *
- */
-function disable() {
-    gschema = null;
-    gsettings = null;
-}
-
 
 /**
  *
@@ -53,6 +34,26 @@ function buildPrefsWidget() {
         row_spacing: 12,
         visible: true,
     });
+
+    let gsettings;
+    let gschema;
+    // Ubuntu 18.04 LTS expired in April 2023, but I'd like to support until
+    // at least 2024
+    log(`[WinTile] buildPrefsWidget SHELL_VERSION ${SHELL_VERSION}`);
+    if (SHELL_VERSION < 3.36) {
+        gschema = Gio.SettingsSchemaSource.new_from_directory(
+            Me.dir.get_child('schemas').get_path(),
+            Gio.SettingsSchemaSource.get_default(),
+            false
+        );
+
+        gsettings = new Gio.Settings({
+            settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true),
+        });
+    } else {
+        gsettings = ExtensionUtils.getSettings();
+    }
+    layout._gsettings = gsettings;
 
     let row = 0;
 
@@ -87,7 +88,7 @@ function buildPrefsWidget() {
         visible: true,
     });
     colsSettingInt.set_value(gsettings.get_int('cols'));
-    if (SHELL_VERSION_MAJOR >= 40)
+    if (SHELL_VERSION >= 40)
         colsInput.append(colsSettingInt);
     else
         colsInput.add(colsSettingInt);
@@ -193,7 +194,7 @@ function buildPrefsWidget() {
         visible: true,
     });
     previewDistanceSettingInt.set_value(gsettings.get_int('distance'));
-    if (SHELL_VERSION_MAJOR >= 40)
+    if (SHELL_VERSION >= 40)
         previewDistanceInput.append(previewDistanceSettingInt);
     else
         previewDistanceInput.add(previewDistanceSettingInt);
@@ -223,7 +224,7 @@ function buildPrefsWidget() {
         visible: true,
     });
     previewDelaySettingInt.set_value(gsettings.get_int('delay'));
-    if (SHELL_VERSION_MAJOR >= 40)
+    if (SHELL_VERSION >= 40)
         previewDelayInput.append(previewDelaySettingInt);
     else
         previewDelayInput.add(previewDelaySettingInt);
@@ -253,7 +254,7 @@ function buildPrefsWidget() {
         visible: true,
     });
     gapSettingInt.set_value(gsettings.get_int('gap'));
-    if (SHELL_VERSION_MAJOR >= 40)
+    if (SHELL_VERSION >= 40)
         gapInput.append(gapSettingInt);
     else
         gapInput.add(gapSettingInt);
