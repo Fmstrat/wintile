@@ -254,7 +254,7 @@ function buildPrefsWidget() {
         visible: true,
     });
     gapSettingInt.set_value(gsettings.get_int('gap'));
-    if (SHELL_VERSION_MAJOR >= 40)
+    if (SHELL_VERSION >= 40)
         gapInput.append(gapSettingInt);
     else
         gapInput.add(gapSettingInt);
