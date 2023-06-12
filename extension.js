@@ -5,19 +5,19 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 
 const ExtensionUtils = imports.misc.extensionUtils;
-const Extension = ExtensionUtils.getCurrentExtension();
+const Me = ExtensionUtils.getCurrentExtension();
 
 const {Clutter, St} = imports.gi;
 
 const Config = imports.misc.config;
-const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
+const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 
 let onWindowGrabBegin, onWindowGrabEnd;
 let requestMoveTimer, checkForMoveTimer, windowGrabBeginTimer, windowGrabEndTimer, checkIfNearGridTimer, keyManagerTimer;
 let preview;
 let windowMoving = false;
 let gschema;
-let settings;
+let gsettings;
 
 
 // View logs with `journalctl -qf |grep -i -e Wintile -e 'js error' `
@@ -47,15 +47,15 @@ let config = {
  *
  */
 function updateSettings() {
-    config.cols = settings.get_value('cols').deep_unpack();
-    config.preview.doubleWidth = settings.get_value('double-width').deep_unpack();
-    config.ultrawideOnly = settings.get_value('ultrawide-only').deep_unpack();
-    config.useMaximize = settings.get_value('use-maximize').deep_unpack();
-    config.useMinimize = settings.get_value('use-minimize').deep_unpack();
-    config.preview.enabled = settings.get_value('preview').deep_unpack();
-    config.preview.distance = settings.get_value('distance').deep_unpack();
-    config.preview.delay = settings.get_value('delay').deep_unpack();
-    config.debug = settings.get_value('debug').deep_unpack();
+    config.cols = gsettings.get_value('cols').deep_unpack();
+    config.preview.doubleWidth = gsettings.get_value('double-width').deep_unpack();
+    config.ultrawideOnly = gsettings.get_value('ultrawide-only').deep_unpack();
+    config.useMaximize = gsettings.get_value('use-maximize').deep_unpack();
+    config.useMinimize = gsettings.get_value('use-minimize').deep_unpack();
+    config.preview.enabled = gsettings.get_value('preview').deep_unpack();
+    config.preview.distance = gsettings.get_value('distance').deep_unpack();
+    config.preview.delay = gsettings.get_value('delay').deep_unpack();
+    config.debug = gsettings.get_value('debug').deep_unpack();
     _log(JSON.stringify(config));
 }
 
@@ -1160,38 +1160,45 @@ function enable() {
     // Since GNOME 40 the metaDisplay argument isn't passed anymore to these callbacks.
     // We "translate" the parameters here so that things work on both GNOME 3 and 40.
     onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
-        if (SHELL_VERSION_MAJOR >= 40)
+        if (SHELL_VERSION >= 40)
             windowGrabBegin(metaScreen, metaWindow);
         else
             windowGrabBegin(metaWindow, metaGrabOp);
     });
     onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
-        if (SHELL_VERSION_MAJOR >= 40)
+        if (SHELL_VERSION >= 40)
             windowGrabEnd(metaScreen, metaWindow);
         else
             windowGrabEnd(metaWindow, metaGrabOp);
     });
 
-    // Get the GSchema for our settings
-    gschema = Gio.SettingsSchemaSource.new_from_directory(
-        Extension.dir.get_child('schemas').get_path(),
-        Gio.SettingsSchemaSource.get_default(),
-        false
-    );
-    // Create a new settings object
+    // Create a new gsettings object
     preview = new St.BoxLayout({
         style_class: 'tile-preview',
         visible: false,
     });
     Main.uiGroup.add_actor(preview);
 
-    settings = new Gio.Settings({
-        settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true),
-    });
+    // Ubuntu 18.04 LTS expired in April 2023, but I'd like to support until
+    // at least 2024
+    log(`[WinTile] buildPrefsWidget SHELL_VERSION ${SHELL_VERSION}`);
+    if (SHELL_VERSION < 3.36) {
+        gschema = Gio.SettingsSchemaSource.new_from_directory(
+            Me.dir.get_child('schemas').get_path(),
+            Gio.SettingsSchemaSource.get_default(),
+            false
+        );
+
+        gsettings = new Gio.Settings({
+            settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true),
+        });
+    } else {
+        gsettings = ExtensionUtils.getSettings();
+    }
     updateSettings();
 
-    // Watch the settings for changes
-    settings.connect('changed', updateSettings.bind());
+    // Watch the gsettings for changes
+    gsettings.connect('changed', updateSettings.bind());
 }
 
 /**
@@ -1231,6 +1238,6 @@ function disable() {
     GLib.source_remove(checkIfNearGridTimer);
     GLib.source_remove(keyManagerTimer);
     gschema = null;
-    settings = null;
+    gsettings = null;
     preview = null;
 }
