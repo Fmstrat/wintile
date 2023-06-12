@@ -44,6 +44,12 @@
       <description></description>
       <range min="25" max="1000"/>
     </key>
+    <key name="gap" type="i">
+      <default>0</default>
+      <summary>Gap width around tiles</summary>
+      <description></description>
+      <range min="0" max="50"/>
+    </key>
     <key name="debug" type="b">
       <default>false</default>
       <summary>Turn on/off debug output</summary>
