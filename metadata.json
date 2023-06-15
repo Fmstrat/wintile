@@ -5,10 +5,6 @@
 	"url": "https://github.com/fmstrat/wintile",
 	"settings-schema":"org.gnome.shell.extensions.wintile",
 	"shell-version": [
-		"3.28",
-		"3.30",
-		"3.32",
-		"3.34",
 		"3.36",
 		"3.38",
 		"40",
@@ -17,5 +13,5 @@
 		"43",
 		"44"
 	],
-	"version": 11.1
+	"version": 11.2
 }

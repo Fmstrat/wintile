@@ -16,13 +16,6 @@ const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 /**
  *
  */
-function init() {
-    // empty
-}
-
-/**
- *
- */
 function buildPrefsWidget() {
     // Create a parent widget that we'll return from this function
     let layout = new Gtk.Grid({
@@ -36,23 +29,7 @@ function buildPrefsWidget() {
     });
 
     let gsettings;
-    let gschema;
-    // Ubuntu 18.04 LTS expired in April 2023, but I'd like to support until
-    // at least 2024
-    log(`[WinTile] buildPrefsWidget SHELL_VERSION ${SHELL_VERSION}`);
-    if (SHELL_VERSION < 3.36) {
-        gschema = Gio.SettingsSchemaSource.new_from_directory(
-            Me.dir.get_child('schemas').get_path(),
-            Gio.SettingsSchemaSource.get_default(),
-            false
-        );
-
-        gsettings = new Gio.Settings({
-            settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true),
-        });
-    } else {
-        gsettings = ExtensionUtils.getSettings();
-    }
+    gsettings = ExtensionUtils.getSettings();
     layout._gsettings = gsettings;
 
     let row = 0;
