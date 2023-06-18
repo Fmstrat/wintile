@@ -734,34 +734,41 @@ function checkForMove(x, y, app) {
 
 /**
  *
+ * @param {object} mask - the mouse event mask from metaGrabOp
+ *
+ */
+function isResize(mask) {
+    let resizes = [Meta.GrabOp.RESIZING_NW,
+        Meta.GrabOp.RESIZING_N,
+        Meta.GrabOp.RESIZING_NE,
+        Meta.GrabOp.RESIZING_E,
+        Meta.GrabOp.RESIZING_SW,
+        Meta.GrabOp.RESIZING_S,
+        Meta.GrabOp.RESIZING_SE,
+        Meta.GrabOp.RESIZING_W];
+
+    const resize = resizes.some(value => mask === value);
+    _log(`isResize) mask: ${mask} resize: ${resize}`);
+    return resize;
+}
+
+
+/**
+ *
  * @param {object} metaWindow - window object
  * @param {object} metaGrabOp - type of window being grabbed
  */
 function windowGrabBegin(metaWindow, metaGrabOp) {
     _log('windowGrabBegin');
     let [mouseX, mouseY] = global.get_pointer();
+    if (isResize(metaGrabOp))
+        return false;
+
     var app = global.display.focus_window;
     let window = app.get_frame_rect();
-    var leeway = 10;
     _log(`grabBegin) mouse - mouseX:${mouseX} mouseY:${mouseY}`);
     _log(`grabBegin) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-    var output = '';
-    if (mouseY > window.y - leeway && mouseY < window.y + leeway)
-        output += 'top ';
 
-    if (mouseY > window.y + window.height - leeway && mouseY < window.y + window.height + leeway)
-        output += 'bottom ';
-
-    if (mouseX > window.x - leeway && mouseX < window.x + leeway)
-        output += 'left ';
-
-    if (mouseX > window.x + window.width - leeway && mouseX < window.x + window.width + leeway)
-        output += 'right ';
-
-    if (output) {
-        _log(`grabBegin) Mouse is on the ${output}side. Ignoring`);
-        return;
-    }
     if (metaWindow && metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP) {
         windowMoving = true;
 
