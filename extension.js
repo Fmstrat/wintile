@@ -5,7 +5,6 @@ const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 
 const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
 
 const {Clutter, St} = imports.gi;
 
@@ -16,7 +15,6 @@ let onWindowGrabBegin, onWindowGrabEnd;
 let requestMoveTimer, checkForMoveTimer, windowGrabBeginTimer, windowGrabEndTimer, checkIfNearGridTimer, keyManagerTimer;
 let preview;
 let windowMoving = false;
-let gschema;
 let gsettings;
 
 
@@ -1198,22 +1196,8 @@ function enable() {
     });
     Main.uiGroup.add_actor(preview);
 
-    // Ubuntu 18.04 LTS expired in April 2023, but I'd like to support until
-    // at least 2024
     log(`[WinTile] buildPrefsWidget SHELL_VERSION ${SHELL_VERSION}`);
-    if (SHELL_VERSION < 3.36) {
-        gschema = Gio.SettingsSchemaSource.new_from_directory(
-            Me.dir.get_child('schemas').get_path(),
-            Gio.SettingsSchemaSource.get_default(),
-            false
-        );
-
-        gsettings = new Gio.Settings({
-            settings_schema: gschema.lookup('org.gnome.shell.extensions.wintile', true),
-        });
-    } else {
-        gsettings = ExtensionUtils.getSettings();
-    }
+    gsettings = ExtensionUtils.getSettings();
     updateSettings();
 
     // Watch the gsettings for changes
@@ -1256,7 +1240,6 @@ function disable() {
     GLib.source_remove(windowGrabEndTimer);
     GLib.source_remove(checkIfNearGridTimer);
     GLib.source_remove(keyManagerTimer);
-    gschema = null;
     gsettings = null;
     preview = null;
 }
