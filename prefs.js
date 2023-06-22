@@ -14,7 +14,7 @@ const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 
 
 /**
- *
+ * intentionally empty
  */
 function init() {
     // empty
