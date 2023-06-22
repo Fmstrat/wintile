@@ -922,17 +922,17 @@ function checkIfNearGrid(app) {
             for (var i = 0; i < colCount; i++) {
                 var gridX = i * colWidth + space.x;
                 var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
-                var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + colWidth - (colWidth  / 3));
-                var topRow = space.y < mouseY && mouseY < space.y + rowHeight;
-                var bottomRow = mouseY > space.y + rowHeight;
+                var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
+                var topRow = mouseY < space.y + rowHeight;
+                var bottomRow = mouseY > space.y + space.height - rowHeight;
                 var nearTop = isClose(mouseY, space.y) || mouseY < space.y;
                 var nearBottom = isClose(mouseY, space.y + space.height) || mouseY > space.y + space.height;
                 var nearLeft = isClose(mouseX, space.x) || mouseX < space.x;
                 var nearRight = isClose(mouseX, space.x + space.width) || mouseX > space.x + space.width;
 
-                var centerHorizontalLeft  = Math.floor(space.x + (space.width / 2) - (colWidth / 5));
-                var centerHorizontalRight = Math.floor(space.x + (space.width / 2) + (colWidth / 5));
-                var nearCenterH = centerHorizontalLeft < mouseX && mouseX < centerHorizontalRight;
+                var centerOfScreen = space.x + Math.floor(space.width / 2);
+                var columnWidthFraction = Math.floor(colWidth / 5);
+                var nearCenterH = mouseX > centerOfScreen - (columnWidthFraction / 2) && mouseX < centerOfScreen + (columnWidthFraction / 2);
 
                 var centerVerticalTop = Math.floor(space.height / 2 + space.y - rowHeight / 2);
                 var centerVerticalBottom = Math.floor(space.height / 2 + space.y + rowHeight / 2);
