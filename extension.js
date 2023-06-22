@@ -921,8 +921,8 @@ function checkIfNearGrid(app) {
     _log(`space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
     _log(`window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
     if (inMonitorBounds) {
-        for (var i = 0; i < colCount; i++) {
-            var gridX = i * colWidth + space.x;
+        for (var c = 0; c < colCount; c++) {
+            var gridX = c * colWidth + space.x;
             var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
             var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
             var topRow = mouseY < space.y + rowHeight;
@@ -1077,7 +1077,7 @@ function checkIfNearGrid(app) {
             } else if (nearTop && inGrid) {
                 // If we are close to the top, show a preview for the top grid item
                 showPreview({
-                    col: i,
+                    col: c,
                     row: 0,
                     width: 1,
                     height: 1,
@@ -1087,7 +1087,7 @@ function checkIfNearGrid(app) {
             } else if (nearBottom && centerOfGrid) {
                 // If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
                 showPreview({
-                    col: i,
+                    col: c,
                     row: 0,
                     width: 1,
                     height: config.rows,
@@ -1097,7 +1097,7 @@ function checkIfNearGrid(app) {
             } else if (nearBottom && inGrid) {
                 // If we are close to the bottom, show a preview for the bottom grid item
                 showPreview({
-                    col: i,
+                    col: c,
                     row: config.rows - 1,
                     width: 1,
                     height: 1,
