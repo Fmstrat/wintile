@@ -12,14 +12,6 @@ const _ = Gettext.domain('wintile').gettext;
 const Config = imports.misc.config;
 const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 
-
-/**
- *
- */
-function init() {
-    // empty
-}
-
 /**
  *
  */
