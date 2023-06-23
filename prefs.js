@@ -15,6 +15,13 @@ const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 /**
  *
  */
+function init() {
+    // empty
+}
+
+/**
+ *
+ */
 function buildPrefsWidget() {
     // Create a parent widget that we'll return from this function
     let layout = new Gtk.Grid({
