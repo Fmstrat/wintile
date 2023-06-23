@@ -29,7 +29,7 @@ function _log(message) {
 
 let config = {
     cols: 2,
-    rows: 3,
+    rows: 2,
     ultrawideOnly: false,
     useMaximize: true,
     useMinimize: true,
@@ -48,6 +48,7 @@ let config = {
  */
 function updateSettings() {
     config.cols = gsettings.get_value('cols').deep_unpack();
+    config.rows = gsettings.get_value('rows').deep_unpack();
     config.preview.doubleWidth = gsettings.get_value('double-width').deep_unpack();
     config.ultrawideOnly = gsettings.get_value('ultrawide-only').deep_unpack();
     config.useMaximize = gsettings.get_value('use-maximize').deep_unpack();

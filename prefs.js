@@ -79,6 +79,36 @@ function buildPrefsWidget() {
     layout.attach(colsLabel, 0, row, 1, 1);
     layout.attach(colsInput, 1, row++, 1, 1);
 
+    // Rows setting
+    let rowsLabel = new Gtk.Label({
+        label: _('Number of rows'),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START,
+    });
+    let rowsInput = new Gtk.Box({
+        orientation: Gtk.Orientation.HORIZONTAL,
+        visible: true,
+    });
+    let rowsAdjustment = new Gtk.Adjustment({
+        lower: 1,
+        upper: 5,
+        step_increment: 1,
+    });
+    let rowsSettingInt = new Gtk.SpinButton({
+        adjustment: rowsAdjustment,
+        snap_to_ticks: true,
+        visible: true,
+    });
+    rowsSettingInt.set_value(gsettings.get_int('rows'));
+    if (SHELL_VERSION >= 40)
+        rowsInput.append(rowsSettingInt);
+    else
+        rowsInput.add(rowsSettingInt);
+
+    layout.attach(rowsLabel, 0, row, 1, 1);
+    layout.attach(rowsInput, 1, row++, 1, 1);
+
     // 16:9 and 16:10 always 2x2 setting
     let ultrawideOnlyLabel = new Gtk.Label({
         label: _('Treat monitors <= 16:9 as 2x2'),
@@ -272,6 +302,7 @@ function buildPrefsWidget() {
 
     // settings that aren't toggles need a connect
     connectAndSetInt(colsSettingInt, 'cols');
+    connectAndSetInt(rowsSettingInt, 'rows');
     connectAndSetInt(previewDistanceSettingInt, 'distance');
     connectAndSetInt(previewDelaySettingInt, 'delay');
     connectAndSetInt(gapSettingInt, 'gap');
