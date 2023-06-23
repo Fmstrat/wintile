@@ -1,17 +1,22 @@
-name: Lint
+name: lint
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  push:
+    branches:
+      - master
+      - develop
 
 jobs:
-  eslint:
+  Linting:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-          cache: "npm"
-      # install dependencies
-      - run: npm ci
-      # run ESLint & Prettier
-      - run: npm run lint
+      - uses: actions/checkout@v3
+      - name: Install eslint
+        run: npm install --save-dev eslint
+      - name: Run ESLint
+        run: ./node_modules/.bin/eslint . --ext .js --ignore-pattern node_modules/
