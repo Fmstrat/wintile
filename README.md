@@ -69,3 +69,10 @@ https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for
 Wayland users need to reboot to enable the extension.
 
 Gnome users can press `<Alt>`+`<F2>` and run `r` from the prompt. **(IT WILL NOT WORK from a terminal)**
+
+### Debugging
+If you're having issues, please attach some debug logs to your issue. 
+
+```bash
+journalctl -qf | grep -i -e wintile -e 'js error'
+```
