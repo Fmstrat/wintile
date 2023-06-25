@@ -916,7 +916,8 @@ function checkIfNearGrid(app) {
     if (!windowMoving)
         return;
 
-    let [mouseX, mouseY] = global.get_pointer();
+    let [mouseX, mouseY, mask] = global.get_pointer();
+    let ctrlPressed = mask & Clutter.ModifierType.CONTROL_MASK;
     var close = false;
     var curMonitor = getCurrentMonitor();
     var monitor = Main.layoutManager.monitors[curMonitor];
@@ -1116,8 +1117,8 @@ function checkIfNearGrid(app) {
                 height: 1,
             }, space.x, space.y, colWidth, rowHeight);
             close = true;
-        } else if (nearLeft || nearRight) {
-            // If we are close to the left or right, show the preview
+        } else if (nearLeft || nearRight || ctrlPressed) {
+            // If we are close to the left or right or ctrl pressed, show the preview, wherever the pointer is
             showPreview({
                 col: c,
                 row: r,
