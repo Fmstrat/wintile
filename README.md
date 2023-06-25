@@ -72,6 +72,7 @@ Gnome users can press `<Alt>`+`<F2>` and run `r` from the prompt. **(IT WILL NOT
 
 ### Debugging
 If you're having issues, please attach some debug logs to your issue. 
+Note: debugging must be enabled in WinTile settings
 
 ```bash
 journalctl -qf | grep -i -e wintile -e 'js error'
