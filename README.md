@@ -41,7 +41,7 @@ There are a few zones to be aware of
 - Right or left center will maximize vertically in a column
     - If using 4 columns and double-width is enabled, it will maximize on that half of the screen
 
-- Holding `<CTRL>` while dragging will create a 1x1 anywhere in the grib without needing to be at an edge
+- Holding `<CTRL>` while dragging will create a 1x1 anywhere in the grid without needing to be at an edge
 - Any other zone along the edge will create a 1x1 tile
 
 
