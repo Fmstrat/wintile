@@ -736,15 +736,15 @@ function requestMove(direction) {
  */
 function checkForMove(x, y, app) {
     _log(`checkForMove) x: ${x}, y: ${y}`);
-    if (windowMoving) {
-        checkForMoveTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 10, () => {
-            let [xAfter, yAfter] = global.get_pointer();
-            if (x !== xAfter || y !== yAfter)
-                restoreApp(app, false);
-            else
-                checkForMove(x, y, app);
-        });
-    }
+    if (!windowMoving)
+        return;
+    checkForMoveTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 10, () => {
+        let [xAfter, yAfter] = global.get_pointer();
+        if (x !== xAfter || y !== yAfter)
+            restoreApp(app, false);
+        else
+            checkForMove(x, y, app);
+    });
 }
 
 /**
@@ -928,6 +928,7 @@ function checkIfNearGrid(app) {
 
     var rowCount = config.ultrawideOnly && isNotUltrawide ? 2 : config.rows;
     var rowHeight = Math.floor(space.height / rowCount);
+
     var inMonitorBounds = false;
     if (mouseX >= monitor.x && mouseX < monitor.x + monitor.width && mouseY >= monitor.y && mouseY < monitor.y + monitor.width)
         inMonitorBounds = true;
@@ -963,7 +964,7 @@ function checkIfNearGrid(app) {
                     col: 0,
                     row: 0,
                     width: colCount,
-                    height: config.rows,
+                    height: rowCount,
                 }, space.x, space.y, colWidth, rowHeight);
                 close = true;
                 break;
@@ -971,7 +972,7 @@ function checkIfNearGrid(app) {
                 // If we are in the center bottom, show a preview for bottom maximized horizontally
                 showPreview({
                     col: 0,
-                    row: config.rows - 1,
+                    row: rowCount - 1,
                     width: colCount,
                     height: 1,
                 }, space.x, space.y, colWidth, rowHeight);
@@ -983,27 +984,9 @@ function checkIfNearGrid(app) {
                     showPreview({
                         col: 0,
                         row: 0,
-                        width: colCount,
+                        width: 2,
                         height: rowCount,
                     }, space.x, space.y, colWidth, rowHeight);
-                } else {
-                    showPreview({
-                        col: 0,
-                        row: rowCount - 1,
-                        width: colCount,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                    close = true;
-                    break;
-                } else if (nearLeft && nearCenterV) {
-                    // If we are in the center left, show a preview for left maximize
-                    if (colCount === 4 && config.preview.doubleWidth) {
-                        showPreview({
-                            col: 0,
-                            row: 0,
-                            width: 2,
-                            height: rowCount,
-                        }, space.x, space.y, colWidth, rowHeight);
                     } else {
                         showPreview({
                             col: 0,
@@ -1140,7 +1123,12 @@ function checkIfNearGrid(app) {
                     close = true;
                     break;
                 } else {
-                    // else case....
+                    showPreview({
+                        col: 0,
+                        row: 0,
+                        width: 1,
+                        height: rowCount,
+                    }, space.x, space.y, colWidth, rowHeight);
                 }
                 close = true;
                 break;
@@ -1151,14 +1139,14 @@ function checkIfNearGrid(app) {
                         col: colCount - 2,
                         row: 0,
                         width: 2,
-                        height: config.rows,
+                        height: rowCount,
                     }, space.x, space.y, colWidth, rowHeight);
                 } else {
                     showPreview({
                         col: colCount - 1,
                         row: 0,
                         width: 1,
-                        height: config.rows,
+                        height: rowCount,
                     }, space.x, space.y, colWidth, rowHeight);
                 }
                 close = true;
@@ -1187,14 +1175,14 @@ function checkIfNearGrid(app) {
                 if (colCount === 4 && config.preview.doubleWidth) {
                     showPreview({
                         col: 0,
-                        row: config.rows - 1,
+                        row: rowCount - 1,
                         width: 2,
                         height: 1,
                     }, space.x, space.y, colWidth, rowHeight);
                 } else {
                     showPreview({
                         col: 0,
-                        row: config.rows - 1,
+                        row: rowCount - 1,
                         width: 1,
                         height: 1,
                     }, space.x, space.y, colWidth, rowHeight);
@@ -1225,14 +1213,14 @@ function checkIfNearGrid(app) {
                 if (colCount === 4 && config.preview.doubleWidth) {
                     showPreview({
                         col: colCount - 2,
-                        row: config.rows - 1,
+                        row: rowCount - 1,
                         width: 2,
                         height: 1,
                     }, space.x, space.y, colWidth, rowHeight);
                 } else {
                     showPreview({
                         col: colCount - 1,
-                        row: config.rows - 1,
+                        row: rowCount - 1,
                         width: 1,
                         height: 1,
                     }, space.x, space.y, colWidth, rowHeight);
@@ -1255,7 +1243,7 @@ function checkIfNearGrid(app) {
                     col: c,
                     row: 0,
                     width: 1,
-                    height: config.rows,
+                    height: rowCount,
                 }, space.x, space.y, colWidth, rowHeight);
                 close = true;
                 break;
@@ -1263,7 +1251,7 @@ function checkIfNearGrid(app) {
                 // If we are close to the bottom, show a preview for the bottom grid item
                 showPreview({
                     col: c,
-                    row: config.rows - 1,
+                    row: rowCount - 1,
                     width: 1,
                     height: 1,
                 }, space.x, space.y, colWidth, rowHeight);
