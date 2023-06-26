@@ -463,7 +463,11 @@ function sendMove(direction) {
                 break;
             case 'up':
                 _log('sendMove) up');
-                if (app.wintile.height === rowCount && app.wintile.width === 1) {
+                if (app.wintile.row === 0 && app.wintile.height > 1) {
+                    // We are already on the top, shrink
+                    _log('sendMove) up - shrink');
+                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
+                } else if (app.wintile.height === rowCount && app.wintile.width === 1) {
                     // We are full height and not maximized, go to half height
                     _log('sendMove) up - 1');
                     moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': 1, 'width': 1});
@@ -559,7 +563,11 @@ function sendMove(direction) {
                 break;
             case 'up':
                 _log('sendMove) up');
-                if (app.wintile.height === rowCount) {
+                if (app.wintile.row === 0 && app.wintile.height > 1) {
+                    // We are already on the top, shrink
+                    _log('sendMove) up - shrink');
+                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
+                } else if (app.wintile.height === rowCount) {
                     // We are full height on half, go to top while keeping width
                     _log('sendMove) up - 1');
                     moveApp(app, {'row': 0, 'col': app.wintile.col, 'height': 1, 'width': app.wintile.width});
@@ -651,7 +659,11 @@ function sendMove(direction) {
                 break;
             case 'up':
                 _log('sendMove) up');
-                if (app.wintile.height === rowCount && app.wintile.width === 2 && app.wintile.col === 1) {
+                if (app.wintile.row === 0 && app.wintile.height > 1) {
+                    // We are already on the top, shrink
+                    _log('sendMove) up - shrink');
+                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
+                } else if (app.wintile.height === rowCount && app.wintile.width === 2 && app.wintile.col === 1) {
                     // We are in 1st maximize, go to full maximize
                     _log('sendMove) up - 1');
                     moveApp(app, {'row': 0, 'col': 0, 'height': rowCount, 'width': colCount});
