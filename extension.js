@@ -465,7 +465,7 @@ function sendMove(direction) {
                     // We are 2nd maximized, go to 1st maximized
                     _log('sendMove) down - 2nd max to 1st max');
                     moveApp(app, {'row': 0, 'col': 1, 'height': rowCount, 'width': 2});
-                } else { 
+                } else {
                     // We are maximized, restore
                     _log('sendMove) down - restore');
                     restoreApp(app);
