@@ -464,14 +464,14 @@ function sendMove(direction) {
                 break;
             case 'up':
                 _log('sendMove) up');
-                if (app.wintile.row === 0 && app.wintile.height > 1) {
-                    // We are already on the top, shrink
-                    _log('sendMove) up - shrink');
-                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
-                } else if (app.wintile.row > 0) {
+                if (app.wintile.row > 0) {
                     // We can move up on this monitor and keep our size
                     _log('sendMove) up - move');
                     moveApp(app, {'row': app.wintile.row - 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
+                } else if (app.wintile.row === 0 && app.wintile.height > 1) {
+                    // We are already on the top, shrink
+                    _log('sendMove) up - shrink');
+                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
                 } else if (app.wintile.height === rowCount && app.wintile.width === 1) {
                     // We are full height and not maximized, go to half height
                     _log('sendMove) up - 1');
@@ -492,11 +492,7 @@ function sendMove(direction) {
                 break;
             case 'down':
                 _log('sendMove) down');
-                if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.height === rowCount) {
-                    // We are maximized, restore
-                    _log('sendMove) down - 1');
-                    restoreApp(app);
-                } else if (app.wintile.row + app.wintile.height < rowCount) {
+                if (app.wintile.row + app.wintile.height < rowCount) {
                     // We can move down on this monitor and keep our size
                     _log('sendMove) down - move');
                     moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
@@ -504,14 +500,18 @@ function sendMove(direction) {
                     // We are already at the bottom, shrink
                     _log('sendMove) down - shrink');
                     moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
+                } else if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.height === rowCount) {
+                    // We are maximized, restore
+                    _log('sendMove) down - 1');
+                    restoreApp(app);
                 } else if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.row === 0) {
                     // We are top half, go to bottom half
                     _log('sendMove) down - 2');
-                    moveApp(app, {'row': 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
+                    moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
                 } else if (app.wintile.height === rowCount) {
                     // We are full height, go to half height
                     _log('sendMove) down - 3');
-                    moveApp(app, {'row': 1, 'col': app.wintile.col, 'height': 1, 'width': 1});
+                    moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': 1});
                 } else if (app.wintile.row === 0) {
                     // We are top half, go to full height
                     _log('sendMove) down - 4');
@@ -576,7 +576,11 @@ function sendMove(direction) {
                 break;
             case 'up':
                 _log('sendMove) up');
-                if (app.wintile.row === 0 && app.wintile.height > 1) {
+                if (app.wintile.row > 0) {
+                    // We can move up on this monitor and keep our size
+                    _log('sendMove) up - move');
+                    moveApp(app, {'row': app.wintile.row - 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
+                } else if (app.wintile.row === 0 && app.wintile.height > 1) {
                     // We are already on the top, shrink
                     _log('sendMove) up - shrink');
                     moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
@@ -596,14 +600,18 @@ function sendMove(direction) {
                 break;
             case 'down':
                 _log('sendMove) down');
-                if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.height === rowCount) {
-                    // We are maximized, restore
-                    _log('sendMove) down - 1');
-                    restoreApp(app);
+                if (app.wintile.row + app.wintile.height < rowCount) {
+                    // We can move down on this monitor and keep our size
+                    _log('sendMove) down - move');
+                    moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
                 } else if (app.wintile.row + app.wintile.height === rowCount && app.wintile.height > 1) {
                     // We are already at the bottom, shrink
                     _log('sendMove) down - shrink');
                     moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
+                } else if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.height === rowCount) {
+                    // We are maximized, restore
+                    _log('sendMove) down - 1');
+                    restoreApp(app);
                 } else if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.row === 0) {
                     // We are top half, go to bottom half
                     _log('sendMove) down - 2');
@@ -619,7 +627,7 @@ function sendMove(direction) {
                 } else if (app.wintile.width !== colCount) {
                     // We are not full bottom but are a tile, go full width
                     _log('sendMove) down - 5');
-                    moveApp(app, {'row': 1, 'col': 0, 'height': 1, 'width': colCount});
+                    moveApp(app, {'row': app.wintile.row, 'col': 0, 'height': 1, 'width': colCount});
                 } else {
                     // We are bottom half, minimize
                     _log('sendMove) down - 6');
@@ -676,7 +684,11 @@ function sendMove(direction) {
                 break;
             case 'up':
                 _log('sendMove) up');
-                if (app.wintile.height === rowCount && app.wintile.width === 2 && app.wintile.col === 1) {
+                if (app.wintile.row > 0) {
+                    // We can move up on this monitor and keep our size
+                    _log('sendMove) up - move');
+                    moveApp(app, {'row': app.wintile.row - 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
+                } else if (app.wintile.height === rowCount && app.wintile.width === 2 && app.wintile.col === 1) {
                     // We are in 1st maximize, go to full maximize
                     _log('sendMove) up - 1');
                     moveApp(app, {'row': 0, 'col': 0, 'height': rowCount, 'width': colCount});
