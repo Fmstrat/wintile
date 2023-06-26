@@ -939,325 +939,191 @@ function checkIfNearGrid(app) {
     _log(`checkIfNearGrid) space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
     _log(`checkIfNearGrid) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
     if (inMonitorBounds) {
-        for (var c = 0; c < colCount; c++) {
-            var gridX = c * colWidth + space.x;
-            var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
-            var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
-            var topRow = mouseY < space.y + rowHeight;
-            var bottomRow = mouseY > space.y + space.height - rowHeight;
-            var nearTop = isClose(mouseY, space.y) || mouseY < space.y;
-            var nearBottom = isClose(mouseY, space.y + space.height) || mouseY > space.y + space.height;
-            var nearLeft = isClose(mouseX, space.x) || mouseX < space.x;
-            var nearRight = isClose(mouseX, space.x + space.width) || mouseX > space.x + space.width;
+        var c = Math.floor((mouseX - space.x) / colWidth);
+        var r = Math.floor((mouseY - space.y) / rowHeight);
+        c = Math.max(0, Math.min(c, colCount - 1));
+        r = Math.max(0, Math.min(r, rowCount - 1));
 
-            var centerOfScreen = space.x + Math.floor(space.width / 2);
-            var columnWidthFraction = Math.floor(colWidth / 5);
-            var nearCenterH = mouseX > centerOfScreen - (columnWidthFraction / 2) && mouseX < centerOfScreen + (columnWidthFraction / 2);
+        var gridX = c * colWidth + space.x;
+        var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
+        var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
+        var topRow = mouseY < space.y + rowHeight;
+        var bottomRow = mouseY > space.y + space.height - rowHeight;
+        var nearTop = isClose(mouseY, space.y) || mouseY < space.y;
+        var nearBottom = isClose(mouseY, space.y + space.height) || mouseY > space.y + space.height;
+        var nearLeft = isClose(mouseX, space.x) || mouseX < space.x;
+        var nearRight = isClose(mouseX, space.x + space.width) || mouseX > space.x + space.width;
 
-            var centerVerticalTop = Math.floor(space.height / 2 + space.y - rowHeight / 2);
-            var centerVerticalBottom = Math.floor(space.height / 2 + space.y + rowHeight / 2);
-            var nearCenterV = centerVerticalTop < mouseY && mouseY < centerVerticalBottom;
+        var centerOfScreenH = space.x + Math.floor(space.width / 2);
+        var columnWidthFraction = Math.floor(colWidth / 5);
+        var nearCenterH = mouseX > centerOfScreenH - (columnWidthFraction / 2) && mouseX < centerOfScreenH + (columnWidthFraction / 2);
 
-            if (nearTop && nearCenterH) {
-                // If we are in the center top, show a preview for maximize
+        var centerOfScreenV = space.y + Math.floor(space.height / 2);
+        var rowHeightFraction = Math.floor(rowHeight / 5);
+        var nearCenterV = mouseY > centerOfScreenV - (rowHeightFraction / 2) && mouseY < centerOfScreenV + (rowHeightFraction / 2);
+
+        if (nearTop && nearCenterH) {
+            // If we are in the center top, show a preview for maximize
+            showPreview({
+                col: 0,
+                row: 0,
+                width: colCount,
+                height: rowCount,
+            }, space.x, space.y, colWidth, rowHeight);
+            close = true;
+        } else if (nearBottom && nearCenterH) {
+            // If we are in the center bottom, show a preview for bottom maximized horizontally
+            showPreview({
+                col: 0,
+                row: rowCount - 1,
+                width: colCount,
+                height: 1,
+            }, space.x, space.y, colWidth, rowHeight);
+            close = true;
+        } else if (nearLeft && nearCenterV) {
+            // If we are in the center left, show a preview for left maximize
+            if (colCount === 4 && config.preview.doubleWidth) {
                 showPreview({
                     col: 0,
                     row: 0,
-                    width: colCount,
+                    width: 2,
                     height: rowCount,
                 }, space.x, space.y, colWidth, rowHeight);
-                close = true;
-                break;
-            } else if (nearBottom && nearCenterH) {
-                // If we are in the center bottom, show a preview for bottom maximized horizontally
+            } else {
                 showPreview({
                     col: 0,
-                    row: rowCount - 1,
-                    width: colCount,
-                    height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
-                close = true;
-                break;
-            } else if (nearLeft && nearCenterV) {
-                // If we are in the center left, show a preview for left maximize
-                if (colCount === 4 && config.preview.doubleWidth) {
-                    showPreview({
-                        col: 0,
-                        row: 0,
-                        width: 2,
-                        height: rowCount,
-                    }, space.x, space.y, colWidth, rowHeight);
-                    } else {
-                        showPreview({
-                            col: 0,
-                            row: 0,
-                            width: 1,
-                            height: rowCount,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    }
-                    close = true;
-                    break;
-                } else if (nearRight && nearCenterV) {
-                    // If we are in the center right, show a preview for right maximize
-                    if (colCount === 4 && config.preview.doubleWidth) {
-                        showPreview({
-                            col: colCount - 2,
-                            row: 0,
-                            width: 2,
-                            height: rowCount,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    } else {
-                        showPreview({
-                            col: colCount - 1,
-                            row: 0,
-                            width: 1,
-                            height: rowCount,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    }
-                    close = true;
-                    break;
-                } else if (nearLeft && topRow) {
-                    // If we are close to the top left, show the top left grid item
-                    if (colCount === 4 && config.preview.doubleWidth) {
-                        showPreview({
-                            col: 0,
-                            row: 0,
-                            width: 2,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    } else {
-                        showPreview({
-                            col: 0,
-                            row: 0,
-                            width: 1,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    }
-                    close = true;
-                    break;
-                } else if (nearLeft && bottomRow) {
-                    // If we are close to the bottom left, show the bottom left grid item
-                    if (colCount === 4 && config.preview.doubleWidth) {
-                        showPreview({
-                            col: 0,
-                            row: rowCount - 1,
-                            width: 2,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    } else {
-                        showPreview({
-                            col: 0,
-                            row: rowCount - 1,
-                            width: 1,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    }
-                    close = true;
-                    break;
-                } else if (nearRight && topRow) {
-                    // If we are close to the top right, show the top right grid item
-                    if (colCount === 4 && config.preview.doubleWidth) {
-                        showPreview({
-                            col: colCount - 2,
-                            row: 0,
-                            width: 2,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    } else {
-                        showPreview({
-                            col: colCount - 1,
-                            row: 0,
-                            width: 1,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    }
-                    close = true;
-                    break;
-                } else if (nearRight && bottomRow) {
-                    // If we are close to the bottom right, show the bottom right grid item
-                    if (colCount === 4 && config.preview.doubleWidth) {
-                        showPreview({
-                            col: colCount - 2,
-                            row: rowCount - 1,
-                            width: 2,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    } else {
-                        showPreview({
-                            col: colCount - 1,
-                            row: rowCount - 1,
-                            width: 1,
-                            height: 1,
-                        }, space.x, space.y, colWidth, rowHeight);
-                    }
-                    close = true;
-                    break;
-                } else if (nearTop && inGrid) {
-                    // If we are close to the top, show a preview for the top grid item
-                    showPreview({
-                        col: c,
-                        row: 0,
-                        width: 1,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                    close = true;
-                    break;
-                } else if (nearBottom && centerOfGrid) {
-                    // If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
-                    showPreview({
-                        col: c,
-                        row: 0,
-                        width: 1,
-                        height: rowCount,
-                    }, space.x, space.y, colWidth, rowHeight);
-                    close = true;
-                    break;
-                } else if (nearBottom && inGrid) {
-                    // If we are close to the bottom, show a preview for the bottom grid item
-                    showPreview({
-                        col: c,
-                        row: rowCount - 1,
-                        width: 1,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                    close = true;
-                    break;
-                } else {
-                    showPreview({
-                        col: 0,
-                        row: 0,
-                        width: 1,
-                        height: rowCount,
-                    }, space.x, space.y, colWidth, rowHeight);
-                }
-                close = true;
-                break;
-            } else if (nearRight && nearCenterV) {
-                // If we are in the center right, show a preview for right maximize
-                if (colCount === 4 && config.preview.doubleWidth) {
-                    showPreview({
-                        col: colCount - 2,
-                        row: 0,
-                        width: 2,
-                        height: rowCount,
-                    }, space.x, space.y, colWidth, rowHeight);
-                } else {
-                    showPreview({
-                        col: colCount - 1,
-                        row: 0,
-                        width: 1,
-                        height: rowCount,
-                    }, space.x, space.y, colWidth, rowHeight);
-                }
-                close = true;
-                break;
-            } else if (nearLeft && topRow) {
-                // If we are close to the top left, show the top left grid item
-                if (colCount === 4 && config.preview.doubleWidth) {
-                    showPreview({
-                        col: 0,
-                        row: 0,
-                        width: 2,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                } else {
-                    showPreview({
-                        col: 0,
-                        row: 0,
-                        width: 1,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                }
-                close = true;
-                break;
-            } else if (nearLeft && bottomRow) {
-                // If we are close to the bottom left, show the bottom left grid item
-                if (colCount === 4 && config.preview.doubleWidth) {
-                    showPreview({
-                        col: 0,
-                        row: rowCount - 1,
-                        width: 2,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                } else {
-                    showPreview({
-                        col: 0,
-                        row: rowCount - 1,
-                        width: 1,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                }
-                close = true;
-                break;
-            } else if (nearRight && topRow) {
-                // If we are close to the top right, show the top right grid item
-                if (colCount === 4 && config.preview.doubleWidth) {
-                    showPreview({
-                        col: colCount - 2,
-                        row: 0,
-                        width: 2,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                } else {
-                    showPreview({
-                        col: colCount - 1,
-                        row: 0,
-                        width: 1,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                }
-                close = true;
-                break;
-            } else if (nearRight && bottomRow) {
-                // If we are close to the bottom right, show the bottom right grid item
-                if (colCount === 4 && config.preview.doubleWidth) {
-                    showPreview({
-                        col: colCount - 2,
-                        row: rowCount - 1,
-                        width: 2,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                } else {
-                    showPreview({
-                        col: colCount - 1,
-                        row: rowCount - 1,
-                        width: 1,
-                        height: 1,
-                    }, space.x, space.y, colWidth, rowHeight);
-                }
-                close = true;
-                break;
-            } else if (nearTop && inGrid) {
-                // If we are close to the top, show a preview for the top grid item
-                showPreview({
-                    col: c,
-                    row: 0,
-                    width: 1,
-                    height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
-                close = true;
-                break;
-            } else if (nearBottom && centerOfGrid) {
-                // If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
-                showPreview({
-                    col: c,
                     row: 0,
                     width: 1,
                     height: rowCount,
                 }, space.x, space.y, colWidth, rowHeight);
-                close = true;
-                break;
-            } else if (nearBottom && inGrid) {
-                // If we are close to the bottom, show a preview for the bottom grid item
-                showPreview({
-                    col: c,
-                    row: rowCount - 1,
-                    width: 1,
-                    height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
-                close = true;
-                break;
             }
+            close = true;
+        } else if (nearRight && nearCenterV) {
+            // If we are in the center right, show a preview for right maximize
+            if (colCount === 4 && config.preview.doubleWidth) {
+                showPreview({
+                    col: colCount - 2,
+                    row: 0,
+                    width: 2,
+                    height: rowCount,
+                }, space.x, space.y, colWidth, rowHeight);
+            } else {
+                showPreview({
+                    col: colCount - 1,
+                    row: 0,
+                    width: 1,
+                    height: rowCount,
+                }, space.x, space.y, colWidth, rowHeight);
+            }
+            close = true;
+        } else if (nearLeft && topRow) {
+            // If we are close to the top left, show the top left grid item
+            if (colCount === 4 && config.preview.doubleWidth) {
+                showPreview({
+                    col: 0,
+                    row: 0,
+                    width: 2,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            } else {
+                showPreview({
+                    col: 0,
+                    row: 0,
+                    width: 1,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            }
+            close = true;
+        } else if (nearLeft && bottomRow) {
+            // If we are close to the bottom left, show the bottom left grid item
+            if (colCount === 4 && config.preview.doubleWidth) {
+                showPreview({
+                    col: 0,
+                    row: rowCount - 1,
+                    width: 2,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            } else {
+                showPreview({
+                    col: 0,
+                    row: rowCount - 1,
+                    width: 1,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            }
+            close = true;
+        } else if (nearRight && topRow) {
+            // If we are close to the top right, show the top right grid item
+            if (colCount === 4 && config.preview.doubleWidth) {
+                showPreview({
+                    col: colCount - 2,
+                    row: 0,
+                    width: 2,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            } else {
+                showPreview({
+                    col: colCount - 1,
+                    row: 0,
+                    width: 1,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            }
+            close = true;
+        } else if (nearRight && bottomRow) {
+            // If we are close to the bottom right, show the bottom right grid item
+            if (colCount === 4 && config.preview.doubleWidth) {
+                showPreview({
+                    col: colCount - 2,
+                    row: rowCount - 1,
+                    width: 2,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            } else {
+                showPreview({
+                    col: colCount - 1,
+                    row: rowCount - 1,
+                    width: 1,
+                    height: 1,
+                }, space.x, space.y, colWidth, rowHeight);
+            }
+            close = true;
+        } else if (nearTop && inGrid) {
+            // If we are close to the top, show a preview for the top grid item
+            showPreview({
+                col: c,
+                row: 0,
+                width: 1,
+                height: 1,
+            }, space.x, space.y, colWidth, rowHeight);
+            close = true;
+        } else if (nearBottom && centerOfGrid) {
+            // If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
+            showPreview({
+                col: c,
+                row: 0,
+                width: 1,
+                height: rowCount,
+            }, space.x, space.y, colWidth, rowHeight);
+            close = true;
+        } else if (nearBottom && inGrid) {
+            // If we are close to the bottom, show a preview for the bottom grid item
+            showPreview({
+                col: c,
+                row: rowCount - 1,
+                width: 1,
+                height: 1,
+            }, space.x, space.y, colWidth, rowHeight);
+            close = true;
+        } else if (nearLeft || nearRight) {
+            // If we are close to the left or right, show the preview
+            showPreview({
+                col: c,
+                row: r,
+                width: 1,
+                height: 1,
+            }, space.x, space.y, colWidth, rowHeight);
+            close = true;
         }
     }
     if (!close)
