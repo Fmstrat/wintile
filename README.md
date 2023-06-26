@@ -8,6 +8,7 @@ WinTile also supports:
 - Mouse preview and snapping for placing tiles
 - "Maximize" mode, which adds/removes GNOME animations
 - Ultrawide-only mode limits 16:9 screens to a 2x2 grid
+- Adding gaps around tiles
 
 <img src='demo.gif'>
 
@@ -61,10 +62,18 @@ https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for
 1. unzip the file
 1. cd into the directory it creates
 1. run `./build.sh`
-1. run `unzip wintile@nowsci.com.zip`
+1. run `unzip -d wintile@nowsci.com wintile@nowsci.com.zip`
 1. run `cp -r wintile@nowsci.com ~/.local/share/gnome-shell/extensions/`
 1. restart your session
 
 Wayland users need to reboot to enable the extension.
 
 Gnome users can press `<Alt>`+`<F2>` and run `r` from the prompt. **(IT WILL NOT WORK from a terminal)**
+
+### Debugging
+If you're having issues, please attach some debug logs to your issue. 
+Note: debugging must be enabled in WinTile settings
+
+```bash
+journalctl -qf | grep -i -e wintile -e 'js error'
+```

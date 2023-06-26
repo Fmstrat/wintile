@@ -215,6 +215,36 @@ function buildPrefsWidget() {
     layout.attach(previewDelayLabel, 0, row, 1, 1);
     layout.attach(previewDelayInput, 1, row++, 1, 1);
 
+    // Gap setting
+    let gapLabel = new Gtk.Label({
+        label: _('Gap width around tiles'),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START,
+    });
+    let gapInput = new Gtk.Box({
+        orientation: Gtk.Orientation.HORIZONTAL,
+        visible: true,
+    });
+    let gapAdjustment = new Gtk.Adjustment({
+        lower: 0,
+        upper: 50,
+        step_increment: 2,
+    });
+    let gapSettingInt = new Gtk.SpinButton({
+        adjustment: gapAdjustment,
+        snap_to_ticks: true,
+        visible: true,
+    });
+    gapSettingInt.set_value(gsettings.get_int('gap'));
+    if (SHELL_VERSION >= 40)
+        gapInput.append(gapSettingInt);
+    else
+        gapInput.add(gapSettingInt);
+
+    layout.attach(gapLabel, 0, row, 1, 1);
+    layout.attach(gapInput, 1, row++, 1, 1);
+
     // Debug setting
     let debugLabel = new Gtk.Label({
         label: _('Turn on debugging'),
@@ -230,23 +260,29 @@ function buildPrefsWidget() {
     layout.attach(debugLabel, 0, row, 1, 1);
     layout.attach(debugInput, 1, row++, 1, 1);
 
-    gsettings.bind('cols', colsInput, 'active', Gio.SettingsBindFlags.DEFAULT);
-    gsettings.bind('ultrawide-only', ultrawideOnlyInput, 'active', Gio.SettingsBindFlags.DEFAULT);
-    gsettings.bind('use-maximize', maximizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
-    gsettings.bind('use-minimize', minimizeInput, 'active', Gio.SettingsBindFlags.DEFAULT);
-    gsettings.bind('preview', previewInput, 'active', Gio.SettingsBindFlags.DEFAULT);
-    gsettings.bind('double-width', doubleWidthInput, 'active', Gio.SettingsBindFlags.DEFAULT);
-    colsSettingInt.connect('value-changed', function (entry) {
-        gsettings.set_int('cols', entry.value);
-    });
-    previewDistanceSettingInt.connect('value-changed', function (entry) {
-        gsettings.set_int('distance', entry.value);
-    });
-    previewDelaySettingInt.connect('value-changed', function (entry) {
-        gsettings.set_int('delay', entry.value);
-    });
-    gsettings.bind('debug', debugInput, 'active', Gio.SettingsBindFlags.DEFAULT);
+    const bindSettings = (key, input) => {
+        gsettings.bind(key, input, 'active', Gio.SettingsBindFlags.DEFAULT);
+    };
 
+    const connectAndSetInt = (setting, key) => {
+        setting.connect('value-changed', entry => {
+            gsettings.set_int(key, entry.value);
+        });
+    };
+
+    // settings that aren't toggles need a connect
+    connectAndSetInt(colsSettingInt, 'cols');
+    connectAndSetInt(previewDistanceSettingInt, 'distance');
+    connectAndSetInt(previewDelaySettingInt, 'delay');
+    connectAndSetInt(gapSettingInt, 'gap');
+
+    // all other settings need a bind
+    bindSettings('ultrawide-only', ultrawideOnlyInput);
+    bindSettings('use-maximize', maximizeInput);
+    bindSettings('use-minimize', minimizeInput);
+    bindSettings('preview', previewInput);
+    bindSettings('double-width', doubleWidthInput);
+    bindSettings('debug', debugInput);
 
     // Return our widget which will be added to the window
     return layout;
