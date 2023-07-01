@@ -75,7 +75,6 @@ function buildPrefsWidget() {
         colsInput.append(colsSettingInt);
     else
         colsInput.add(colsSettingInt);
-
     layout.attach(colsLabel, 0, row, 1, 1);
     layout.attach(colsInput, 1, row++, 1, 1);
 
@@ -105,13 +104,12 @@ function buildPrefsWidget() {
         rowsInput.append(rowsSettingInt);
     else
         rowsInput.add(rowsSettingInt);
-
     layout.attach(rowsLabel, 0, row, 1, 1);
     layout.attach(rowsInput, 1, row++, 1, 1);
 
     // 16:9 and 16:10 always 2x2 setting
     let ultrawideOnlyLabel = new Gtk.Label({
-        label: _('Treat monitors <= 16:9 as 2x2'),
+        label: _('Use different rows and columns for non-ultrawide monitors'),
         visible: true,
         hexpand: true,
         halign: Gtk.Align.START,
@@ -123,6 +121,80 @@ function buildPrefsWidget() {
     });
     layout.attach(ultrawideOnlyLabel, 0, row, 1, 1);
     layout.attach(ultrawideOnlyInput, 1, row++, 1, 1);
+
+    // ultrawide-only cols
+    let nonUltraColsLabel = new Gtk.Label({
+        label: _('     Number of columns for non-ultrawide'),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START,
+    });
+    let nonUltraColsInput = new Gtk.Box({
+        orientation: Gtk.Orientation.HORIZONTAL,
+        visible: true,
+    });
+    let nonUltraColsAdjustment = new Gtk.Adjustment({
+        lower: 1,
+        upper: 5,
+        step_increment: 1,
+    });
+    let nonUltraColsSettingInt = new Gtk.SpinButton({
+        adjustment: nonUltraColsAdjustment,
+        snap_to_ticks: true,
+        visible: true,
+    });
+    nonUltraColsSettingInt.set_value(gsettings.get_int('non-ultra-cols'));
+    if (SHELL_VERSION >= 40)
+        nonUltraColsInput.append(nonUltraColsSettingInt);
+    else
+        nonUltraColsInput.add(nonUltraColsSettingInt);
+    layout.attach(nonUltraColsLabel, 0, row, 1, 1);
+    layout.attach(nonUltraColsInput, 1, row++, 1, 1);
+
+    // ultrawide-only rows
+    let nonUltraRowsLabel = new Gtk.Label({
+        label: _('     Number of rows for non-ultrawide'),
+        visible: true,
+        hexpand: true,
+        halign: Gtk.Align.START,
+    });
+    let nonUltraRowsInput = new Gtk.Box({
+        orientation: Gtk.Orientation.HORIZONTAL,
+        visible: true,
+    });
+    let nonUltraRowsAdjustment = new Gtk.Adjustment({
+        lower: 1,
+        upper: 5,
+        step_increment: 1,
+    });
+    let nonUltraRowsSettingInt = new Gtk.SpinButton({
+        adjustment: nonUltraRowsAdjustment,
+        snap_to_ticks: true,
+        visible: true,
+    });
+    nonUltraRowsSettingInt.set_value(gsettings.get_int('non-ultra-rows'));
+    if (SHELL_VERSION >= 40)
+        nonUltraRowsInput.append(nonUltraRowsSettingInt);
+    else
+        nonUltraRowsInput.add(nonUltraRowsSettingInt);
+    layout.attach(nonUltraRowsLabel, 0, row, 1, 1);
+    layout.attach(nonUltraRowsInput, 1, row++, 1, 1);
+
+    ultrawideOnlyInput.connect('notify::active', function () {
+        if (ultrawideOnlyInput.active) {
+            // Show rows and columns options
+            nonUltraRowsLabel.show();
+            nonUltraRowsInput.show();
+            nonUltraColsLabel.show();
+            nonUltraColsInput.show();
+        } else {
+            // Hide rows and columns options
+            nonUltraRowsLabel.hide();
+            nonUltraRowsInput.hide();
+            nonUltraColsLabel.hide();
+            nonUltraColsInput.hide();
+        }
+    });
 
     // Maximize setting
     let maximizeLabel = new Gtk.Label({
@@ -211,7 +283,6 @@ function buildPrefsWidget() {
         previewDistanceInput.append(previewDistanceSettingInt);
     else
         previewDistanceInput.add(previewDistanceSettingInt);
-
     layout.attach(previewDistanceLabel, 0, row, 1, 1);
     layout.attach(previewDistanceInput, 1, row++, 1, 1);
 
@@ -241,7 +312,6 @@ function buildPrefsWidget() {
         previewDelayInput.append(previewDelaySettingInt);
     else
         previewDelayInput.add(previewDelaySettingInt);
-
     layout.attach(previewDelayLabel, 0, row, 1, 1);
     layout.attach(previewDelayInput, 1, row++, 1, 1);
 
@@ -271,7 +341,6 @@ function buildPrefsWidget() {
         gapInput.append(gapSettingInt);
     else
         gapInput.add(gapSettingInt);
-
     layout.attach(gapLabel, 0, row, 1, 1);
     layout.attach(gapInput, 1, row++, 1, 1);
 
@@ -303,6 +372,8 @@ function buildPrefsWidget() {
     // settings that aren't toggles need a connect
     connectAndSetInt(colsSettingInt, 'cols');
     connectAndSetInt(rowsSettingInt, 'rows');
+    connectAndSetInt(nonUltraColsSettingInt, 'non-ultra-cols');
+    connectAndSetInt(nonUltraRowsSettingInt, 'non-ultra-rows');
     connectAndSetInt(previewDistanceSettingInt, 'distance');
     connectAndSetInt(previewDelaySettingInt, 'delay');
     connectAndSetInt(gapSettingInt, 'gap');

@@ -18,6 +18,18 @@
         <summary>Ultrawide only</summary>
         <description>When turned on, any monitor with a ratio less &lt;= 16:9 will be treated as a 2x2 grid.</description>
     </key>
+    <key name="non-ultra-cols" type="i">
+      <default>2</default>
+      <summary>Number of columns for non-ultrawide</summary>
+      <description></description>
+      <range min="2" max="4"/>
+    </key>
+    <key name="non-ultra-rows" type="i">
+      <default>2</default>
+      <summary>Number of rows for non-ultrawide</summary>
+      <description></description>
+      <range min="1" max="4"/>
+    </key>
     <key name="use-maximize" type="b">
       <default>true</default>
       <summary>Turn on/off use of maximizing windows</summary>

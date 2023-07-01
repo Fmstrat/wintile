@@ -31,6 +31,8 @@ let config = {
     cols: 2,
     rows: 2,
     ultrawideOnly: false,
+    nonUltraCols: 2,
+    nonUltraRows: 2,
     useMaximize: true,
     useMinimize: true,
     preview: {
@@ -51,6 +53,8 @@ function updateSettings() {
     config.rows = gsettings.get_value('rows').deep_unpack();
     config.preview.doubleWidth = gsettings.get_value('double-width').deep_unpack();
     config.ultrawideOnly = gsettings.get_value('ultrawide-only').deep_unpack();
+    config.nonUltraCols = gsettings.get_value('non-ultra-cols').deep_unpack();
+    config.nonUltraRows = gsettings.get_value('non-ultra-rows').deep_unpack();
     config.useMaximize = gsettings.get_value('use-maximize').deep_unpack();
     config.useMinimize = gsettings.get_value('use-minimize').deep_unpack();
     config.preview.enabled = gsettings.get_value('preview').deep_unpack();
@@ -135,12 +139,12 @@ function moveApp(app, loc) {
     const isNotUltrawide = (space.width / space.height) < 1.9;
     _log(`moveApp) isNotUltrawide: ${isNotUltrawide}`);
 
-    var colCount = config.ultrawideOnly && isNotUltrawide ? 2 : config.cols;
+    var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
     // if the colCount >= than loc.col means that we're moving into a non-ultrawide monitor
     if (loc.col >= colCount)
         loc.col = 1;
 
-    var rowCount = config.ultrawideOnly && isNotUltrawide ? 2 : config.rows;
+    var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
     // if the rowCount >= than loc.row means that we're moving into a non-ultrawide monitor
     if (loc.row >= rowCount)
         loc.row = 1;
@@ -331,8 +335,8 @@ function sendMove(direction) {
 
     const isNotUltrawide = (space.width / space.height) < 1.9;
     _log(`sendMove) isNotUltrawide: ${isNotUltrawide}`);
-    var colCount = config.ultrawideOnly && isNotUltrawide ? 2 : config.cols;
-    var rowCount = config.ultrawideOnly && isNotUltrawide ? 2 : config.rows;
+    var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
+    var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
 
     if (!app.wintile) {
         // We are not in a tile. Reset and find the most logical position
@@ -702,10 +706,10 @@ function checkIfNearGrid(app) {
     const isNotUltrawide = (space.width / space.height) < 1.9;
     _log(`checkIfNearGrid) isNotUltrawide: ${isNotUltrawide}`);
 
-    var colCount = config.ultrawideOnly && isNotUltrawide ? 2 : config.cols;
+    var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
     var colWidth = Math.floor(space.width / colCount);
 
-    var rowCount = config.ultrawideOnly && isNotUltrawide ? 2 : config.rows;
+    var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
     var rowHeight = Math.floor(space.height / rowCount);
 
     var inMonitorBounds = false;
