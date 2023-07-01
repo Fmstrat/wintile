@@ -4,7 +4,8 @@ standard `Win-Arrow` keys of Windows 10, allowing you to maximize, maximize
 to sides, or 1/4 sized to corner a window using just `<Super>`+`<Arrows>`.
 
 WinTile also supports:
-- 2, 3, or 4 rows/columns for standard or ultrawide monitors
+- 2-5 columns for standard or ultrawide monitors
+- 2-4 rows for standard or ultrawide monitors
 - Mouse preview and snapping for placing tiles
 - "Maximize" mode, which adds/removes GNOME animations
 - Ultrawide-only mode allows 16:9 screens to use separate row/col counts
@@ -18,7 +19,7 @@ Pressing `<Super>`+`<Arrows>` will move tile around the screen.
 - `<Super>`+`<Up>` will maximize your tile with a few different levels
 	- Maximized vertically in the current column
 	- Maximized horizontally in the top row
-	- If you're using 4 col mode, it will maximize in the center at double-width first
+	- If you're using 4-5 col mode, it will maximize in the center leaving 1 column on either side first
 
 - `<Super>`+`<Left>` or `<Super>`+`<Right>`
 	- Move a tile in that direction. If it's at the edge of a screen, it will go full-height
@@ -26,7 +27,7 @@ Pressing `<Super>`+`<Arrows>` will move tile around the screen.
  it will shrink by 1 column
 
 - `<Super>`+`<Down>` will maximize your tile with a few different levels
-	- If you're already maximized in 4 col mode, it will downsize in the center at double-width 
+	- If you're already maximized in 4/5 col mode, it will downsize in the center leaving 1 column on either side
 	- If maximized vertically, it will shrink to the bottom row
 	- If minimizing is enabled, the tile will disappear to the task bar
 
@@ -39,7 +40,7 @@ There are a few zones to be aware of
 - Bottom Center maximizes horizontally in the bottom row
 - In the center of any column on the bottom row will maximize vertically in that column
 - Right or left center will maximize vertically in a column
-    - If using 4 columns and double-width is enabled, it will maximize on that half of the screen
+    - If using 4/5 columns and double-width is enabled, it will maximize on that half of the screen
 
 - Holding `<CTRL>` while dragging will create a 1x1 anywhere in the grid without needing to be at an edge
 - Any other zone along the edge will create a 1x1 tile

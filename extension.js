@@ -338,7 +338,7 @@ function sendMove(direction) {
     if (!app.wintile) {
         // We are not in a tile. Reset and find the most logical position
         _log('sendMove) Not in tile.');
-        if (colCount === 4) {
+        if (colCount === 4 || colCount === 5) {
             // 4 col grid
             switch (direction) {
             case 'left':
@@ -349,12 +349,12 @@ function sendMove(direction) {
             case 'right':
                 // Move to the right half at full height
                 initApp(app);
-                moveApp(app, {'row': 0, 'col': 2, 'height': rowCount, 'width': 2});
+                moveApp(app, {'row': 0, 'col': colCount - 2, 'height': rowCount, 'width': 2});
                 break;
             case 'up':
-                // Maximize to center 4
+                // Maximize to center leaving 1 column on either side
                 initApp(app);
-                moveApp(app, {'row': 0, 'col': 1, 'height': rowCount, 'width': 2});
+                moveApp(app, {'row': 0, 'col': 1, 'height': rowCount, 'width': colCount - 2});
                 break;
             case 'down':
                 // Minimize
@@ -441,7 +441,7 @@ function sendMove(direction) {
                 // We can move up on this monitor and keep our size
                 _log('sendMove) up - move');
                 moveApp(app, {'row': app.wintile.row - 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
-            } else if (colCount === 4 && app.wintile.height === rowCount && app.wintile.width === 2 && app.wintile.col === 1) {
+            } else if ((colCount === 4 || colCount === 5) && app.wintile.height === rowCount && app.wintile.width === colCount - 2 && app.wintile.col === 1) {
                 // We are in 1st maximize, go to full maximize
                 _log('sendMove) up - 1st max to full max');
                 moveApp(app, {'row': 0, 'col': 0, 'height': rowCount, 'width': colCount});
@@ -462,16 +462,16 @@ function sendMove(direction) {
         case 'down':
             _log('sendMove) down');
             if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.height === rowCount) {
-                if (colCount === 4) {
+                if (colCount === 4 || colCount === 5) {
                     // We are 2nd maximized, go to 1st maximized
                     _log('sendMove) down - 2nd max to 1st max');
-                    moveApp(app, {'row': 0, 'col': 1, 'height': rowCount, 'width': 2});
+                    moveApp(app, {'row': 0, 'col': 1, 'height': rowCount, 'width': colCount - 2});
                 } else {
                     // We are maximized, restore
                     _log('sendMove) down - restore');
                     restoreApp(app);
                 }
-            } else if (colCount === 4 && app.wintile.col === 1 && app.wintile.width === 2) {
+            } else if ((colCount === 4 || colCount === 5) && app.wintile.col === 1 && app.wintile.width === colCount - 2) {
                 // We are 1st maximized, restore
                 _log('sendMove) down - 1st max to restore');
                 restoreApp(app);
@@ -762,7 +762,7 @@ function checkIfNearGrid(app) {
             close = true;
         } else if (nearLeft && nearCenterV) {
             // If we are in the center left, show a preview for left maximize
-            if (colCount === 4 && config.preview.doubleWidth) {
+            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
                 showPreview({
                     col: 0,
                     row: 0,
@@ -780,7 +780,7 @@ function checkIfNearGrid(app) {
             close = true;
         } else if (nearRight && nearCenterV) {
             // If we are in the center right, show a preview for right maximize
-            if (colCount === 4 && config.preview.doubleWidth) {
+            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
                 showPreview({
                     col: colCount - 2,
                     row: 0,
@@ -798,7 +798,7 @@ function checkIfNearGrid(app) {
             close = true;
         } else if (nearLeft && topRow) {
             // If we are close to the top left, show the top left grid item
-            if (colCount === 4 && config.preview.doubleWidth) {
+            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
                 showPreview({
                     col: 0,
                     row: 0,
@@ -816,7 +816,7 @@ function checkIfNearGrid(app) {
             close = true;
         } else if (nearLeft && bottomRow) {
             // If we are close to the bottom left, show the bottom left grid item
-            if (colCount === 4 && config.preview.doubleWidth) {
+            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
                 showPreview({
                     col: 0,
                     row: rowCount - 1,
@@ -834,7 +834,7 @@ function checkIfNearGrid(app) {
             close = true;
         } else if (nearRight && topRow) {
             // If we are close to the top right, show the top right grid item
-            if (colCount === 4 && config.preview.doubleWidth) {
+            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
                 showPreview({
                     col: colCount - 2,
                     row: 0,
@@ -852,7 +852,7 @@ function checkIfNearGrid(app) {
             close = true;
         } else if (nearRight && bottomRow) {
             // If we are close to the bottom right, show the bottom right grid item
-            if (colCount === 4 && config.preview.doubleWidth) {
+            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
                 showPreview({
                     col: colCount - 2,
                     row: rowCount - 1,
