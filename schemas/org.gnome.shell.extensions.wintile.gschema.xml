@@ -7,6 +7,12 @@
       <description></description>
       <range min="2" max="4"/>
     </key>
+    <key name="rows" type="i">
+      <default>2</default>
+      <summary>Number of rows</summary>
+      <description></description>
+      <range min="1" max="4"/>
+    </key>
     <key name="ultrawide-only" type="b">
         <default>false</default>
         <summary>Ultrawide only</summary>
