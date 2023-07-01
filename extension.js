@@ -306,28 +306,25 @@ function sendMove(direction) {
     _log(`sendMove) ${direction}`);
     var app = global.display.focus_window;
     var space = app.get_work_area_current_monitor();
-    var curMonitor = app.get_monitor();
+    var monitorIndex = app.get_monitor();
+    var curMonitor = Main.layoutManager.monitors[monitorIndex];
     let monitorToLeft = -1;
     let monitorToRight = -1;
-    // If a monitor's Y is within 100px, it's beside it.
-    // Calculate monitors height difference, to account for monitors different resolution
-    // If a monitor's Y is within 100px + height difference, it's beside it.
     for (var i = 0; i < Main.layoutManager.monitors.length; i++) {
-        let monitorHeightDiff = Math.abs(Main.layoutManager.monitors[i].height - Main.layoutManager.monitors[curMonitor].height);
-        _log(`sendMove) monitor ${i} height : ${Main.layoutManager.monitors[i].height}`);
-        _log(`sendMove) monitorsHeightDiff :${monitorHeightDiff}`);
+        if (i === monitorIndex)
+            continue;
 
-        if (Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[curMonitor].x &&
-            Math.abs(Main.layoutManager.monitors[i].y - Main.layoutManager.monitors[curMonitor].y) < (100 + monitorHeightDiff) &&
-            (monitorToLeft === -1 || (monitorToLeft >= 0 && Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[monitorToLeft].x)))
+        let testMonitor = Main.layoutManager.monitors[i];
+        _log(`sendMove) curMonitor: ${i} x: ${curMonitor.x} width: ${curMonitor.width}`);
+        _log(`sendMove) testMonitor: ${i} x: ${testMonitor.x} width: ${testMonitor.width}`);
+
+        if (testMonitor.x + testMonitor.width === curMonitor.x)
             monitorToLeft = i;
 
-        if (Main.layoutManager.monitors[i].x > Main.layoutManager.monitors[curMonitor].x && Math.abs(Main.layoutManager.monitors[i].y - Main.layoutManager.monitors[curMonitor].y) < (100 + monitorHeightDiff) &&
-            (monitorToRight === -1 || (monitorToRight >= 0 && Main.layoutManager.monitors[i].x < Main.layoutManager.monitors[monitorToRight].x)))
+        if (curMonitor.x + curMonitor.width === testMonitor.x)
             monitorToRight = i;
     }
-    _log(`sendMove) monitorToLeft: ${monitorToLeft}`);
-    _log(`sendMove) monitorToRight: ${monitorToRight}`);
+    _log(`sendMove) monitorToLeft: ${monitorToLeft} monitorToRight: ${monitorToRight}`);
 
     // First, check if maximized and apply a wintile state if so
     if (!app.wintile && app.maximized_horizontally && app.maximized_vertically)
