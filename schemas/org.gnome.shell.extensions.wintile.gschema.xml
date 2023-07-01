@@ -5,7 +5,7 @@
       <default>2</default>
       <summary>Number of columns</summary>
       <description></description>
-      <range min="2" max="4"/>
+      <range min="2" max="5"/>
     </key>
     <key name="rows" type="i">
       <default>2</default>
@@ -22,7 +22,7 @@
       <default>2</default>
       <summary>Number of columns for non-ultrawide</summary>
       <description></description>
-      <range min="2" max="4"/>
+      <range min="2" max="5"/>
     </key>
     <key name="non-ultra-rows" type="i">
       <default>2</default>

@@ -62,7 +62,7 @@ function buildPrefsWidget() {
     });
     let colsAdjustment = new Gtk.Adjustment({
         lower: 2,
-        upper: 4,
+        upper: 5,
         step_increment: 1,
     });
     let colsSettingInt = new Gtk.SpinButton({
@@ -135,7 +135,7 @@ function buildPrefsWidget() {
     });
     let nonUltraColsAdjustment = new Gtk.Adjustment({
         lower: 1,
-        upper: 4,
+        upper: 5,
         step_increment: 1,
     });
     let nonUltraColsSettingInt = new Gtk.SpinButton({

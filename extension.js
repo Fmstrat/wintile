@@ -441,7 +441,7 @@ function sendMove(direction) {
                 // We can move up on this monitor and keep our size
                 _log('sendMove) up - move');
                 moveApp(app, {'row': app.wintile.row - 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
-            } else if (rowCount === 4 && app.wintile.height === rowCount && app.wintile.width === 2 && app.wintile.col === 1) {
+            } else if (colCount === 4 && app.wintile.height === rowCount && app.wintile.width === 2 && app.wintile.col === 1) {
                 // We are in 1st maximize, go to full maximize
                 _log('sendMove) up - 1st max to full max');
                 moveApp(app, {'row': 0, 'col': 0, 'height': rowCount, 'width': colCount});
@@ -462,7 +462,7 @@ function sendMove(direction) {
         case 'down':
             _log('sendMove) down');
             if (app.wintile.col === 0 && app.wintile.width === colCount && app.wintile.height === rowCount) {
-                if (rowCount === 4) {
+                if (colCount === 4) {
                     // We are 2nd maximized, go to 1st maximized
                     _log('sendMove) down - 2nd max to 1st max');
                     moveApp(app, {'row': 0, 'col': 1, 'height': rowCount, 'width': 2});
@@ -471,7 +471,7 @@ function sendMove(direction) {
                     _log('sendMove) down - restore');
                     restoreApp(app);
                 }
-            } else if (rowCount === 4 && app.wintile.col === 1 && app.wintile.width === 2) {
+            } else if (colCount === 4 && app.wintile.col === 1 && app.wintile.width === 2) {
                 // We are 1st maximized, restore
                 _log('sendMove) down - 1st max to restore');
                 restoreApp(app);
