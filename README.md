@@ -4,10 +4,10 @@ standard `Win-Arrow` keys of Windows 10, allowing you to maximize, maximize
 to sides, or 1/4 sized to corner a window using just `<Super>`+`<Arrows>`.
 
 WinTile also supports:
-- 2, 3, or 4 columns for standard or ultrawide monitors
+- 2, 3, or 4 rows/columns for standard or ultrawide monitors
 - Mouse preview and snapping for placing tiles
 - "Maximize" mode, which adds/removes GNOME animations
-- Ultrawide-only mode limits 16:9 screens to a 2x2 grid
+- Ultrawide-only mode allows 16:9 screens to use separate row/col counts
 - Adding gaps around tiles
 
 <img src='demo.gif'>
