@@ -241,7 +241,7 @@ function initApp(app, maximized = false) {
             width: config.cols,
         };
     }
-    _log(`initApp) app: ${JSON.stringify(app)}`);
+    _log(`initApp) app.wintile: ${JSON.stringify(app.wintile)}`);
 }
 
 /**
