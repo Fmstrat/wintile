@@ -31,6 +31,8 @@ Pressing `<Super>`+`<Arrows>` will move tile around the screen.
 	- If maximized vertically, it will shrink to the bottom row
 	- If minimizing is enabled, the tile will disappear to the task bar
 
+- `<Super>`+`<Ctrl>`+`<Arrow>` will grow the window in that direction if there is room
+
 ### Moving with the mouse:
 Dragging a window around the edge of the screen will create a preview of
 where that tile will snap.
