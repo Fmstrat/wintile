@@ -140,14 +140,14 @@ function moveApp(app, loc) {
     _log(`moveApp) isNotUltrawide: ${isNotUltrawide}`);
 
     var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
-    // if the colCount >= than loc.col means that we're moving into a non-ultrawide monitor
+    // if the colCount >= than loc.col means that we're moving into a non-ultrawide monitor and it's near the right of the screen
     if (loc.col >= colCount)
-        loc.col = 1;
+        loc.col = colCount - 1;
 
     var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
-    // if the rowCount >= than loc.row means that we're moving into a non-ultrawide monitor
+    // if the rowCount >= than loc.row means that we're moving into a non-ultrawide monitor and it's near the bottom of the screen
     if (loc.row >= rowCount)
-        loc.row = 1;
+        loc.row = rowCount - 1;
 
     var colWidth = Math.floor(space.width / colCount);
     var rowHeight = Math.floor(space.height / rowCount);
