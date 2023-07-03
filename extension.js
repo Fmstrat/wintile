@@ -195,7 +195,7 @@ function moveApp(app, loc) {
         x -= leftShift;
         w = window.width;
     }
-    if (upShift && loc.row === 1) {
+    if (upShift && loc.row === rowCount - 1) {
         _log(`moveApp) window lower than anticipated. Shift up by ${upShift} px`);
         y -= upShift;
         h = window.height;
