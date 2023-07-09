@@ -722,7 +722,7 @@ function checkIfNearGrid(app) {
 
     let [mouseX, mouseY, mask] = global.get_pointer();
     let ctrlPressed = mask & Clutter.ModifierType.CONTROL_MASK;
-    let superPressed = mask & 64;
+    let superPressed = mask & Clutter.ModifierType.MOD4_MASK; // windows key
     var close = false;
     var curMonitor = getCurrentMonitor();
     var monitor = Main.layoutManager.monitors[curMonitor];
