@@ -1,4 +1,5 @@
 /* global global */
+
 const Meta = imports.gi.Meta;
 const Main = imports.ui.main;
 const Gio = imports.gi.Gio;
@@ -15,6 +16,7 @@ let onWindowGrabBegin, onWindowGrabEnd;
 let requestMoveTimer, checkForMoveTimer, windowGrabBeginTimer, windowGrabEndTimer, checkIfNearGridTimer, keyManagerTimer;
 let preview;
 let windowMoving = false;
+let dragStart = null;
 let gsettings;
 
 
@@ -587,6 +589,7 @@ function windowGrabBegin(metaWindow, metaGrabOp) {
 
     if (metaWindow && metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP) {
         windowMoving = true;
+        unMaximizeIfMaximized(app);
 
         if (app.wintile) {
             window = app.wintile.origFrame;
@@ -635,6 +638,7 @@ function windowGrabEnd(metaWindow, metaGrabOp) {
             }
         }
     }
+    dragStart = null;
 }
 
 /**
@@ -719,6 +723,7 @@ function checkIfNearGrid(app) {
 
     let [mouseX, mouseY, mask] = global.get_pointer();
     let ctrlPressed = mask & Clutter.ModifierType.CONTROL_MASK;
+    let superPressed = mask & 64;
     var close = false;
     var curMonitor = getCurrentMonitor();
     var monitor = Main.layoutManager.monitors[curMonitor];
@@ -737,7 +742,8 @@ function checkIfNearGrid(app) {
         inMonitorBounds = true;
 
     let window = app.get_frame_rect();
-    _log(`checkIfNearGrid) mouse - mouseX:${mouseX} mouseY:${mouseY}`);
+    _log(`checkIfNearGrid) mouse - mouseX:${mouseX} mouseY:${mouseY} mask:${mask}`);
+    _log(`checkIfNearGrid) keys - ctrl:${ctrlPressed} superPressed:${superPressed}`);
     _log(`checkIfNearGrid) monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
     _log(`checkIfNearGrid) space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
     _log(`checkIfNearGrid) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
@@ -765,7 +771,24 @@ function checkIfNearGrid(app) {
         var rowHeightFraction = Math.floor(rowHeight / 5);
         var nearCenterV = mouseY > centerOfScreenV - (rowHeightFraction / 2) && mouseY < centerOfScreenV + (rowHeightFraction / 2);
 
-        if (nearTop && nearCenterH) {
+        if (ctrlPressed && superPressed && dragStart === null) {
+            dragStart = {col: c, row: r, monitor: curMonitor};
+            _log(`checkIfNearGrid) dragStart: ${JSON.stringify(dragStart)}`);
+        }
+
+        if (ctrlPressed && superPressed) {
+            // check if it's on the samescreen it was on before, otherwise reinitialize dragStart
+            if (dragStart.monitor !== curMonitor)
+                dragStart = {col: c, row: r, monitor: curMonitor};
+            // If ctrl and super are pressed, draw the box from start to finish
+            showPreview({
+                col: Math.min(c, dragStart.col),
+                row: Math.min(r, dragStart.row),
+                width: Math.abs(c - dragStart.col) + 1,
+                height: Math.abs(r - dragStart.row) + 1,
+            }, space.x, space.y, colWidth, rowHeight);
+            close = true;
+        } else if (nearTop && nearCenterH) {
             // If we are in the center top, show a preview for maximize
             showPreview({
                 col: 0,
@@ -918,7 +941,7 @@ function checkIfNearGrid(app) {
                 height: 1,
             }, space.x, space.y, colWidth, rowHeight);
             close = true;
-        } else if (nearLeft || nearRight || ctrlPressed) {
+        } else if (ctrlPressed) {
             // If we are close to the left or right or ctrl pressed, show the preview, wherever the pointer is
             showPreview({
                 col: c,
@@ -1074,4 +1097,5 @@ function disable() {
     GLib.source_remove(keyManagerTimer);
     gsettings = null;
     preview = null;
+    dragStart = null;
 }
