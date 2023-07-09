@@ -589,7 +589,6 @@ function windowGrabBegin(metaWindow, metaGrabOp) {
 
     if (metaWindow && metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP) {
         windowMoving = true;
-        unMaximizeIfMaximized(app);
 
         if (app.wintile) {
             window = app.wintile.origFrame;
