@@ -364,6 +364,28 @@ function sendMove(direction, ctrlPressed = false) {
                 requestMinimize(app);
                 break;
             }
+        } else {
+            switch (direction) {
+            case 'left':
+                // Move to the far left at full height
+                initApp(app);
+                moveApp(app, {'row': 0, 'col': 0, 'height': rowCount, 'width': 1});
+                break;
+            case 'right':
+                // Move to the far right at full height
+                initApp(app);
+                moveApp(app, {'row': 0, 'col': colCount - 1, 'height': rowCount, 'width': 1});
+                break;
+            case 'up':
+                // Maximize
+                initApp(app);
+                moveApp(app, {'row': 0, 'col': 0, 'height': rowCount, 'width': colCount});
+                break;
+            case 'down':
+                // Minimize
+                requestMinimize(app);
+                break;
+            }
         }
     } else {
         // We are already in a tile.
