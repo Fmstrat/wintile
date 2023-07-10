@@ -6,9 +6,7 @@ const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
 const Shell = imports.gi.Shell;
 
-const SHELL_VERSION_MAJOR = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
-const SHELL_VERSION_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
-
+const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 
 /**
  * Keybindings.Manager is a simple convenience class for managing keyboard
@@ -57,7 +55,7 @@ var Manager = class Manager {
         let action = Meta.KeyBindingAction.NONE;
 
         // A flags argument was added somewhere between 3.30-3.32
-        if (SHELL_VERSION_MAJOR === 3 && SHELL_VERSION_MINOR < 30)
+        if (SHELL_VERSION < 3.30)
             action = global.display.grab_accelerator(accelerator);
         else
             action = global.display.grab_accelerator(accelerator, 0);
