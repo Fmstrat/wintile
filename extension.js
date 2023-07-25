@@ -390,7 +390,16 @@ function sendMove(direction, ctrlPressed = false) {
     } else {
         // We are already in a tile.
         _log('sendMove) Already in a tile.');
-        _log(JSON.stringify(app.wintile));
+        _log(`sendMove) ${JSON.stringify(app.wintile)}`);
+        if (app.wintile.width > colCount) {
+            _log(`sendMove) columns higher than expected. Lowering to ${colCount}`);
+            app.wintile.width = colCount;
+        }
+        if (app.wintile.height > rowCount) {
+            _log(`sendMove) rows higher than expected. Lowering to ${rowCount}`);
+            app.wintile.height = rowCount;
+        }
+
         if (ctrlPressed) {
             // any amount of columns
             switch (direction) {
