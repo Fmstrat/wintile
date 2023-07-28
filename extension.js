@@ -768,7 +768,7 @@ function checkIfNearGrid(app) {
     var rowHeight = Math.floor(space.height / rowCount);
 
     var inMonitorBounds = false;
-    if (mouseX >= monitor.x && mouseX < monitor.x + monitor.width && mouseY >= monitor.y && mouseY < monitor.y + monitor.width)
+    if (mouseX >= monitor.x && mouseX < monitor.x + monitor.width && mouseY >= monitor.y && mouseY < monitor.y + monitor.height)
         inMonitorBounds = true;
 
     let window = app.get_frame_rect();
