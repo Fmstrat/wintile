@@ -131,36 +131,38 @@ function moveAppCoordinates(app, x, y, w, h) {
  */
 function moveApp(app, loc) {
     _log(`moveApp) ${JSON.stringify(loc)}`);
-    var space = null;
-    if (loc.mouse) {
-        var curMonitor = getCurrentMonitor();
-        space = getActiveWorkspace().get_work_area_for_monitor(curMonitor);
-    } else {
-        space = app.get_work_area_current_monitor();
-    }
-    const isNotUltrawide = (space.width / space.height) < 1.9;
-    _log(`moveApp) isNotUltrawide: ${isNotUltrawide}`);
+    var monitor = null;
+    var monitorIndex = null;
+    if (loc.mouse)
+        monitorIndex = getCurrentMonitor();
+    else
+        monitorIndex = app.get_monitor();
 
-    var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
+    monitor = getMonitorInfo(monitorIndex);
+
+    _log(`moveApp) monitor: ${JSON.stringify(monitor)}`);
+
+    var colCount = monitor.colCount;
+    var rowCount = monitor.rowCount;
+
     // if the colCount >= than loc.col means that we're moving into a non-ultrawide monitor and it's near the right of the screen
     if (loc.col >= colCount)
         loc.col = colCount - 1;
 
-    var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
     // if the rowCount >= than loc.row means that we're moving into a non-ultrawide monitor and it's near the bottom of the screen
     if (loc.row >= rowCount)
         loc.row = rowCount - 1;
 
-    var colWidth = Math.floor(space.width / colCount);
-    var rowHeight = Math.floor(space.height / rowCount);
+    var colWidth = Math.floor(monitor.width / colCount);
+    var rowHeight = Math.floor(monitor.height / rowCount);
 
-    let x = loc.col * colWidth + space.x;
-    let y = loc.row * rowHeight + space.y;
+    let x = loc.col * colWidth + monitor.x;
+    let y = loc.row * rowHeight + monitor.y;
     let w = loc.width * colWidth;
     let h = loc.height * rowHeight;
 
     if (loc.col + loc.width === colCount)
-        w += space.width % colCount;
+        w += monitor.width % colCount;
 
     if (!config.useMaximize) {
         unMaximizeIfMaximized(app);
@@ -308,18 +310,18 @@ function sendMove(direction, ctrlPressed = false) {
     _log('---');
     _log(`sendMove) ${direction} ctrl: ${ctrlPressed}`);
     var app = global.display.focus_window;
-    var space = app.get_work_area_current_monitor();
     var monitorIndex = app.get_monitor();
-    var curMonitor = Main.layoutManager.monitors[monitorIndex];
+    var curMonitor = getMonitorInfo(monitorIndex);
+
     let monitorToLeft = -1;
     let monitorToRight = -1;
     for (var i = 0; i < Main.layoutManager.monitors.length; i++) {
         if (i === monitorIndex)
             continue;
 
-        let testMonitor = Main.layoutManager.monitors[i];
-        _log(`sendMove) curMonitor: ${i} x: ${curMonitor.x} width: ${curMonitor.width}`);
-        _log(`sendMove) testMonitor: ${i} x: ${testMonitor.x} width: ${testMonitor.width}`);
+        let testMonitor = getMonitorInfo(i);
+        _log(`sendMove) curMonitor: ${JSON.stringify(curMonitor)}`);
+        _log(`sendMove) testMonitor: ${JSON.stringify(testMonitor)}`);
 
         if (testMonitor.x + testMonitor.width === curMonitor.x)
             monitorToLeft = i;
@@ -333,10 +335,8 @@ function sendMove(direction, ctrlPressed = false) {
     if (!app.wintile && app.maximized_horizontally && app.maximized_vertically)
         initApp(app, true);
 
-    const isNotUltrawide = (space.width / space.height) < 1.9;
-    _log(`sendMove) isNotUltrawide: ${isNotUltrawide}`);
-    var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
-    var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
+    var colCount = curMonitor.colCount;
+    var rowCount = curMonitor.rowCount;
 
     if (!app.wintile) {
         // We are not in a tile. Reset and find the most logical position
@@ -755,17 +755,16 @@ function checkIfNearGrid(app) {
     let ctrlPressed = mask & Clutter.ModifierType.CONTROL_MASK;
     let superPressed = mask & Clutter.ModifierType.MOD4_MASK; // windows key
     var close = false;
-    var curMonitor = getCurrentMonitor();
-    var monitor = Main.layoutManager.monitors[curMonitor];
-    var space = getActiveWorkspace().get_work_area_for_monitor(curMonitor);
-    const isNotUltrawide = (space.width / space.height) < 1.9;
-    _log(`checkIfNearGrid) isNotUltrawide: ${isNotUltrawide}`);
 
-    var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
-    var colWidth = Math.floor(space.width / colCount);
+    var monitorIndex = getCurrentMonitor();
+    var monitor = getMonitorInfo(monitorIndex);
+    _log(`checkIfNearGrid) monitor: ${JSON.stringify(monitor)}`);
 
-    var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
-    var rowHeight = Math.floor(space.height / rowCount);
+    var colCount = monitor.colCount;
+    var rowCount = monitor.rowCount;
+
+    var colWidth = Math.floor(monitor.width / colCount);
+    var rowHeight = Math.floor(monitor.height / rowCount);
 
     var inMonitorBounds = false;
     if (mouseX >= monitor.x && mouseX < monitor.x + monitor.width && mouseY >= monitor.y && mouseY < monitor.y + monitor.height)
@@ -775,48 +774,47 @@ function checkIfNearGrid(app) {
     _log(`checkIfNearGrid) mouse - mouseX:${mouseX} mouseY:${mouseY} mask:${mask}`);
     _log(`checkIfNearGrid) keys - ctrl:${ctrlPressed} superPressed:${superPressed}`);
     _log(`checkIfNearGrid) monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
-    _log(`checkIfNearGrid) space - x:${space.x} y:${space.y} w:${space.width} h:${space.height}`);
     _log(`checkIfNearGrid) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
     if (inMonitorBounds) {
-        var c = Math.floor((mouseX - space.x) / colWidth);
-        var r = Math.floor((mouseY - space.y) / rowHeight);
+        var c = Math.floor((mouseX - monitor.x) / colWidth);
+        var r = Math.floor((mouseY - monitor.y) / rowHeight);
         c = Math.max(0, Math.min(c, colCount - 1));
         r = Math.max(0, Math.min(r, rowCount - 1));
 
-        var gridX = c * colWidth + space.x;
+        var gridX = c * colWidth + monitor.x;
         var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
         var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
-        var topRow = mouseY < space.y + rowHeight;
-        var bottomRow = mouseY > space.y + space.height - rowHeight;
-        var nearTop = isClose(mouseY, space.y) || mouseY < space.y;
-        var nearBottom = isClose(mouseY, space.y + space.height) || mouseY > space.y + space.height;
-        var nearLeft = isClose(mouseX, space.x) || mouseX < space.x;
-        var nearRight = isClose(mouseX, space.x + space.width) || mouseX > space.x + space.width;
+        var topRow = mouseY < monitor.y + rowHeight;
+        var bottomRow = mouseY > monitor.y + monitor.height - rowHeight;
+        var nearTop = isClose(mouseY, monitor.y) || mouseY < monitor.y;
+        var nearBottom = isClose(mouseY, monitor.y + monitor.height) || mouseY > monitor.y + monitor.height;
+        var nearLeft = isClose(mouseX, monitor.x) || mouseX < monitor.x;
+        var nearRight = isClose(mouseX, monitor.x + monitor.width) || mouseX > monitor.x + monitor.width;
 
-        var centerOfScreenH = space.x + Math.floor(space.width / 2);
+        var centerOfScreenH = monitor.x + Math.floor(monitor.width / 2);
         var columnWidthFraction = Math.floor(colWidth / 5);
         var nearCenterH = mouseX > centerOfScreenH - (columnWidthFraction / 2) && mouseX < centerOfScreenH + (columnWidthFraction / 2);
 
-        var centerOfScreenV = space.y + Math.floor(space.height / 2);
+        var centerOfScreenV = monitor.y + Math.floor(monitor.height / 2);
         var rowHeightFraction = Math.floor(rowHeight / 5);
         var nearCenterV = mouseY > centerOfScreenV - (rowHeightFraction / 2) && mouseY < centerOfScreenV + (rowHeightFraction / 2);
 
         if (ctrlPressed && superPressed && dragStart === null) {
-            dragStart = {col: c, row: r, monitor: curMonitor};
+            dragStart = {col: c, row: r, monitorIndex};
             _log(`checkIfNearGrid) dragStart: ${JSON.stringify(dragStart)}`);
         }
 
         if (ctrlPressed && superPressed) {
             // check if it's on the samescreen it was on before, otherwise reinitialize dragStart
-            if (dragStart.monitor !== curMonitor)
-                dragStart = {col: c, row: r, monitor: curMonitor};
+            if (dragStart.monitorIndex !== monitorIndex)
+                dragStart = {col: c, row: r, monitor};
             // If ctrl and super are pressed, draw the box from start to finish
             showPreview({
                 col: Math.min(c, dragStart.col),
                 row: Math.min(r, dragStart.row),
                 width: Math.abs(c - dragStart.col) + 1,
                 height: Math.abs(r - dragStart.row) + 1,
-            }, space.x, space.y, colWidth, rowHeight);
+            }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         } else if (nearTop && nearCenterH) {
             // If we are in the center top, show a preview for maximize
@@ -825,7 +823,7 @@ function checkIfNearGrid(app) {
                 row: 0,
                 width: colCount,
                 height: rowCount,
-            }, space.x, space.y, colWidth, rowHeight);
+            }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         } else if (nearBottom && nearCenterH) {
             // If we are in the center bottom, show a preview for bottom maximized horizontally
@@ -834,7 +832,7 @@ function checkIfNearGrid(app) {
                 row: rowCount - 1,
                 width: colCount,
                 height: 1,
-            }, space.x, space.y, colWidth, rowHeight);
+            }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         } else if (nearLeft && nearCenterV) {
             // If we are in the center left, show a preview for left maximize
@@ -844,14 +842,14 @@ function checkIfNearGrid(app) {
                     row: 0,
                     width: 2,
                     height: rowCount,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             } else {
                 showPreview({
                     col: 0,
                     row: 0,
                     width: 1,
                     height: rowCount,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             }
             close = true;
         } else if (nearRight && nearCenterV) {
@@ -862,14 +860,14 @@ function checkIfNearGrid(app) {
                     row: 0,
                     width: 2,
                     height: rowCount,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             } else {
                 showPreview({
                     col: colCount - 1,
                     row: 0,
                     width: 1,
                     height: rowCount,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             }
             close = true;
         } else if (nearLeft && topRow) {
@@ -880,14 +878,14 @@ function checkIfNearGrid(app) {
                     row: 0,
                     width: 2,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             } else {
                 showPreview({
                     col: 0,
                     row: 0,
                     width: 1,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             }
             close = true;
         } else if (nearLeft && bottomRow) {
@@ -898,14 +896,14 @@ function checkIfNearGrid(app) {
                     row: rowCount - 1,
                     width: 2,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             } else {
                 showPreview({
                     col: 0,
                     row: rowCount - 1,
                     width: 1,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             }
             close = true;
         } else if (nearRight && topRow) {
@@ -916,14 +914,14 @@ function checkIfNearGrid(app) {
                     row: 0,
                     width: 2,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             } else {
                 showPreview({
                     col: colCount - 1,
                     row: 0,
                     width: 1,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             }
             close = true;
         } else if (nearRight && bottomRow) {
@@ -934,14 +932,14 @@ function checkIfNearGrid(app) {
                     row: rowCount - 1,
                     width: 2,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             } else {
                 showPreview({
                     col: colCount - 1,
                     row: rowCount - 1,
                     width: 1,
                     height: 1,
-                }, space.x, space.y, colWidth, rowHeight);
+                }, monitor.x, monitor.y, colWidth, rowHeight);
             }
             close = true;
         } else if (nearTop && inGrid) {
@@ -951,7 +949,7 @@ function checkIfNearGrid(app) {
                 row: 0,
                 width: 1,
                 height: 1,
-            }, space.x, space.y, colWidth, rowHeight);
+            }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         } else if (nearBottom && centerOfGrid) {
             // If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
@@ -960,7 +958,7 @@ function checkIfNearGrid(app) {
                 row: 0,
                 width: 1,
                 height: rowCount,
-            }, space.x, space.y, colWidth, rowHeight);
+            }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         } else if (nearBottom && inGrid) {
             // If we are close to the bottom, show a preview for the bottom grid item
@@ -969,7 +967,7 @@ function checkIfNearGrid(app) {
                 row: rowCount - 1,
                 width: 1,
                 height: 1,
-            }, space.x, space.y, colWidth, rowHeight);
+            }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         } else if (ctrlPressed) {
             // If we are close to the left or right or ctrl pressed, show the preview, wherever the pointer is
@@ -978,7 +976,7 @@ function checkIfNearGrid(app) {
                 row: r,
                 width: 1,
                 height: 1,
-            }, space.x, space.y, colWidth, rowHeight);
+            }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         }
     }
@@ -1008,6 +1006,34 @@ function getActiveWorkspace() {
 function getCurrentMonitor() {
     let monitorProvider = global.screen || global.display;
     return monitorProvider.get_current_monitor();
+}
+
+/**
+ * @param {int} monitorIndex self explanatory
+ */
+function getMonitorInfo(monitorIndex) {
+    let space = getActiveWorkspace().get_work_area_for_monitor(monitorIndex);
+    let isPortrait = space.width < space.height;
+    let isNotUltrawide = (space.height / space.width) < 1.9 && (space.width / space.height) < 1.9;
+    var colCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraCols : config.cols;
+    var rowCount = config.ultrawideOnly && isNotUltrawide ? config.nonUltraRows : config.rows;
+
+    // swap col and row in portrait mode
+    if (isPortrait)
+        [colCount, rowCount] = [rowCount, colCount];
+
+    let monitor = {
+        monitorIndex,
+        x: space.x,
+        y: space.y,
+        width: space.width,
+        height: space.height,
+        isPortrait,
+        isNotUltrawide,
+        colCount,
+        rowCount,
+    };
+    return monitor;
 }
 
 /**
