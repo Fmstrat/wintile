@@ -1,16 +1,21 @@
 'use strict';
 
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
 
-const ExtensionUtils = imports.misc.extensionUtils;
+
+import Gio from 'gi://Gio';
+import Gtk from 'gi://Gtk';
+
+import * as ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
 const Me = ExtensionUtils.getCurrentExtension();
 
-const Gettext = imports.gettext;
-const _ = Gettext.domain('wintile').gettext;
+// For Gettext, GNOME Shell 45 seems to handle translations differently.
+// You should specify `gettext-domain` in `metadata.json`.
+// GNOME Shell will automatically initiate the translation for you when it sees the `gettext-domain` key in `metadata.json`.
+import { gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 
-const Config = imports.misc.config;
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
+
 
 /**
  *
