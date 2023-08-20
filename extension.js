@@ -1,16 +1,15 @@
 /* global global */
 
-const Meta = imports.gi.Meta;
-const Main = imports.ui.main;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
+import Meta from 'gi://Meta';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import * as ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
+import { Clutter, St } from 'gi://';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-
-const {Clutter, St} = imports.gi;
-
-const Config = imports.misc.config;
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
 const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
+
 
 let onWindowGrabBegin, onWindowGrabEnd;
 let requestMoveTimer, checkForMoveTimer, windowGrabBeginTimer, windowGrabEndTimer, checkIfNearGridTimer, keyManagerTimer;
