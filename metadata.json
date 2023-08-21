@@ -4,14 +4,9 @@
 	"uuid": "wintile@nowsci.com",
 	"url": "https://github.com/fmstrat/wintile",
 	"settings-schema":"org.gnome.shell.extensions.wintile",
+	"gettext-domain": "wintile",
 	"shell-version": [
-		"3.36",
-		"3.38",
-		"40",
-		"41",
-		"42",
-		"43",
-		"44"
+		"45"
 	],
-	"version": 14
+	"version": 15
 }

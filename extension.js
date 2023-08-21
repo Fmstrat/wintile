@@ -1,14 +1,13 @@
 /* global global */
 
 import Meta from 'gi://Meta';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Main  from 'resource:///org/gnome/shell/ui/main.js';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import * as ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
-import { Clutter, St } from 'gi://';
-
-import * as Config from 'resource:///org/gnome/shell/misc/config.js';
-const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
+import { Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import  Clutter  from 'gi://Clutter';
+import  St  from 'gi://St';
+import * as Manager from './keybindings.js';
 
 
 let onWindowGrabBegin, onWindowGrabEnd;
@@ -17,7 +16,7 @@ let preview;
 let windowMoving = false;
 let dragStart = null;
 let gsettings;
-
+//let keyManager = null;
 
 // View logs with `journalctl -qf |grep -i -e Wintile -e 'js error' `
 /**
@@ -67,12 +66,12 @@ function updateSettings() {
 }
 
 const wintile = {
-    extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
-    shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10),
+    extdatadir: Extension.path,
+//    shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10),
 };
-imports.searchPath.unshift(wintile.extdatadir);
+//imports.searchPath.unshift(wintile.extdatadir);
 
-const KeyBindings = imports.keybindings;
+//const KeyBindings = imports.keybindings;
 let keyManager = null;
 var oldbindings = {
     unmaximize: [],
@@ -1038,119 +1037,119 @@ function getMonitorInfo(monitorIndex) {
 /**
  *
  */
-function enable() {
-    _log('enable) Keymanager is being defined');
-    keyManager = new KeyBindings.Manager();
-    let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
-    let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
-    let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
-    try {
-        let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
-        shellSettings.set_boolean('edge-tiling', false);
-    } catch (error) {
-        _log('enable) org.gnome.shell.overrides does not exist');
-    }
-    oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
-    oldbindings['maximize'] = desktopSettings.get_strv('maximize');
-    oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
-    oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
-    changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
-    changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
-    changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
-    changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
-    mutterSettings.set_boolean('edge-tiling', false);
-    keyManagerTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, () => {
-        keyManager.add('<Super><Control>left', () => {
-            requestMove('left', true);
-        });
-        keyManager.add('<Super><Control>right', () => {
-            requestMove('right', true);
-        });
-        keyManager.add('<Super><Control>up', () => {
-            requestMove('up', true);
-        });
-        keyManager.add('<Super><Control>down', () => {
-            requestMove('down', true);
-        });
-        keyManager.add('<Super>left', () => {
-            requestMove('left');
-        });
-        keyManager.add('<Super>right', () => {
-            requestMove('right');
-        });
-        keyManager.add('<Super>up', () => {
-            requestMove('up');
-        });
-        keyManager.add('<Super>down', () => {
-            requestMove('down');
-        });
-    });
+export default class WintileExtension extends Extension{
 
-    // Since GNOME 40 the metaDisplay argument isn't passed anymore to these callbacks.
-    // We "translate" the parameters here so that things work on both GNOME 3 and 40.
-    onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
-        if (SHELL_VERSION >= 40)
+    enable() {
+        _log('enable) Keymanager is being defined');
+        keyManager = new Manager.Manager();
+        let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
+        let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
+        let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
+        try {
+            let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
+            shellSettings.set_boolean('edge-tiling', false);
+        } catch (error) {
+            _log('enable) org.gnome.shell.overrides does not exist');
+        }
+        oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
+        oldbindings['maximize'] = desktopSettings.get_strv('maximize');
+        oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
+        oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
+        changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
+        changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
+        changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
+        changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+        mutterSettings.set_boolean('edge-tiling', false);
+        keyManagerTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, () => {
+            keyManager.add('<Super><Control>left', () => {
+                requestMove('left', true);
+            });
+            keyManager.add('<Super><Control>right', () => {
+                requestMove('right', true);
+            });
+            keyManager.add('<Super><Control>up', () => {
+                requestMove('up', true);
+            });
+            keyManager.add('<Super><Control>down', () => {
+                requestMove('down', true);
+            });
+            keyManager.add('<Super>left', () => {
+                requestMove('left');
+            });
+            keyManager.add('<Super>right', () => {
+                requestMove('right');
+            });
+            keyManager.add('<Super>up', () => {
+                requestMove('up');
+            });
+            keyManager.add('<Super>down', () => {
+                requestMove('down');
+            });
+        });
+
+        // Since GNOME 40 the metaDisplay argument isn't passed anymore to these callbacks.
+        // We "translate" the parameters here so that things work on both GNOME 3 and 40.
+        onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
             windowGrabBegin(metaScreen, metaWindow);
-        else
-            windowGrabBegin(metaWindow, metaGrabOp);
-    });
-    onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
-        if (SHELL_VERSION >= 40)
+
+        });
+        onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
+
             windowGrabEnd(metaScreen, metaWindow);
-        else
-            windowGrabEnd(metaWindow, metaGrabOp);
-    });
 
-    // Create a new gsettings object
-    preview = new St.BoxLayout({
-        style_class: 'tile-preview',
-        visible: false,
-    });
-    Main.uiGroup.add_actor(preview);
+        });
 
-    gsettings = ExtensionUtils.getSettings();
-    updateSettings();
+        // Create a new gsettings object
+        preview = new St.BoxLayout({
+            style_class: 'tile-preview',
+            visible: false,
+        });
+        Main.uiGroup.add_actor(preview);
 
-    // Watch the gsettings for changes
-    gsettings.connect('changed', updateSettings.bind());
-}
+        gsettings = this.getSettings();
+        updateSettings();
 
-/**
- *
- */
-function disable() {
-    _log('disable) Keymanager is being removed');
-    keyManager.removeAll();
-    keyManager.destroy();
-    keyManager = null;
-    let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
-    let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
-    let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
-    try {
-        let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
-        shellSettings.reset('edge-tiling');
-    } catch (error) {
-        _log('disable) org.gnome.shell.overrides does not exist');
+        // Watch the gsettings for changes
+        gsettings.connect('changed', updateSettings.bind());
     }
-    desktopSettings.reset('unmaximize');
-    desktopSettings.reset('maximize');
-    desktopSettings = null;
-    mutterKeybindingSettings.reset('toggle-tiled-left');
-    mutterKeybindingSettings.reset('toggle-tiled-right');
-    mutterKeybindingSettings = null;
-    mutterSettings.reset('edge-tiling');
-    mutterSettings = null;
-    global.display.disconnect(onWindowGrabBegin);
-    global.display.disconnect(onWindowGrabEnd);
-    onWindowGrabBegin = null;
-    onWindowGrabEnd = null;
-    GLib.source_remove(requestMoveTimer);
-    GLib.source_remove(checkForMoveTimer);
-    GLib.source_remove(windowGrabBeginTimer);
-    GLib.source_remove(windowGrabEndTimer);
-    GLib.source_remove(checkIfNearGridTimer);
-    GLib.source_remove(keyManagerTimer);
-    gsettings = null;
-    preview = null;
-    dragStart = null;
+
+    /**
+     *
+     */
+    disable() {
+        _log('disable) Keymanager is being removed');
+        keyManager.removeAll();
+        keyManager.destroy();
+        keyManager = null;
+        let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
+        let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
+        let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
+        try {
+            let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
+            shellSettings.reset('edge-tiling');
+        } catch (error) {
+            _log('disable) org.gnome.shell.overrides does not exist');
+        }
+        desktopSettings.reset('unmaximize');
+        desktopSettings.reset('maximize');
+        desktopSettings = null;
+        mutterKeybindingSettings.reset('toggle-tiled-left');
+        mutterKeybindingSettings.reset('toggle-tiled-right');
+        mutterKeybindingSettings = null;
+        mutterSettings.reset('edge-tiling');
+        mutterSettings = null;
+        global.display.disconnect(onWindowGrabBegin);
+        global.display.disconnect(onWindowGrabEnd);
+        onWindowGrabBegin = null;
+        onWindowGrabEnd = null;
+        GLib.source_remove(requestMoveTimer);
+        GLib.source_remove(checkForMoveTimer);
+        GLib.source_remove(windowGrabBeginTimer);
+        GLib.source_remove(windowGrabEndTimer);
+        GLib.source_remove(checkIfNearGridTimer);
+        GLib.source_remove(keyManagerTimer);
+        gsettings = null;
+        preview = null;
+        dragStart = null;
+    }
 }
