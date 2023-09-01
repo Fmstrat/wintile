@@ -1,20 +1,15 @@
-"use strict";
+'use strict';
 
-import GLib from "gi://GLib";
-import Adw from "gi://Adw";
-import Gtk from "gi://Gtk";
+import Adw from 'gi://Adw';
+import Gtk from 'gi://Gtk';
 import Gio from 'gi://Gio';
 
-import { ExtensionPreferences, gettext as _} from "resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js";
+import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 export default class WintilePreferences extends ExtensionPreferences {
-
     buildPrefsWidget() {
-
-        const page = new Adw.PreferencesPage();
-
         // Create a parent widget that we'll return from this function
-        let layout = new  Adw.PreferencesGroup({
+        let layout = new Adw.PreferencesGroup({
             margin_bottom: 18,
             margin_end: 18,
             margin_start: 18,
@@ -372,7 +367,6 @@ export default class WintilePreferences extends ExtensionPreferences {
 
         // Return our widget which will be added to the window
         return layout;
-
     }
 
     fillPreferencesWindow(window) {

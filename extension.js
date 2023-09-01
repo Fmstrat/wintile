@@ -1,22 +1,22 @@
 /* global global */
 
 import Meta from 'gi://Meta';
-import * as Main  from 'resource:///org/gnome/shell/ui/main.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import { Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-import  Clutter  from 'gi://Clutter';
-import  St  from 'gi://St';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
 import * as Manager from './keybindings.js';
 
-
 let onWindowGrabBegin, onWindowGrabEnd;
-let requestMoveTimer, checkForMoveTimer, windowGrabBeginTimer, windowGrabEndTimer, checkIfNearGridTimer, keyManagerTimer;
+let requestMoveTimer, checkForMoveTimer, windowGrabBeginTimer, windowGrabEndTimer, checkIfNearGridTimer,
+    keyManagerTimer;
 let preview;
 let windowMoving = false;
 let dragStart = null;
 let gsettings;
-//let keyManager = null;
+// let keyManager = null;
 
 // View logs with `journalctl -qf |grep -i -e Wintile -e 'js error' `
 /**
@@ -65,13 +65,9 @@ function updateSettings() {
     _log(JSON.stringify(config));
 }
 
-const wintile = {
-    extdatadir: Extension.path,
-//    shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10),
-};
-//imports.searchPath.unshift(wintile.extdatadir);
+// imports.searchPath.unshift(wintile.extdatadir);
 
-//const KeyBindings = imports.keybindings;
+// const KeyBindings = imports.keybindings;
 let keyManager = null;
 var oldbindings = {
     unmaximize: [],
@@ -404,7 +400,12 @@ function sendMove(direction, ctrlPressed = false) {
             case 'left':
                 if (app.wintile.col > 0) {
                     _log('sendMove) left - grow');
-                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col - 1, 'height': app.wintile.height, 'width': app.wintile.width + 1});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': app.wintile.col - 1,
+                        'height': app.wintile.height,
+                        'width': app.wintile.width + 1,
+                    });
                 } else {
                     _log('sendMove) left - can\'t grow');
                 }
@@ -412,7 +413,12 @@ function sendMove(direction, ctrlPressed = false) {
             case 'right':
                 if (app.wintile.col + app.wintile.width < colCount) {
                     _log('sendMove) right - grow');
-                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width + 1});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': app.wintile.col,
+                        'height': app.wintile.height,
+                        'width': app.wintile.width + 1,
+                    });
                 } else {
                     _log('sendMove) right - can\'t grow');
                 }
@@ -420,7 +426,12 @@ function sendMove(direction, ctrlPressed = false) {
             case 'up':
                 if (app.wintile.row > 0) {
                     _log('sendMove) up - grow');
-                    moveApp(app, {'row': app.wintile.row - 1, 'col': app.wintile.col, 'height': app.wintile.height + 1, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': app.wintile.row - 1,
+                        'col': app.wintile.col,
+                        'height': app.wintile.height + 1,
+                        'width': app.wintile.width,
+                    });
                 } else {
                     _log('sendMove) up - can\'t grow');
                 }
@@ -428,7 +439,12 @@ function sendMove(direction, ctrlPressed = false) {
             case 'down':
                 if (app.wintile.row + app.wintile.height < rowCount) {
                     _log('sendMove) down - grow');
-                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height + 1, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': app.wintile.col,
+                        'height': app.wintile.height + 1,
+                        'width': app.wintile.width,
+                    });
                 } else {
                     _log('sendMove) down - can\'t grow');
                 }
@@ -443,21 +459,41 @@ function sendMove(direction, ctrlPressed = false) {
                     if (ctrlPressed) {
                         // We can grow left
                         _log('sendMove) left - grow');
-                        moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col - 1, 'height': app.wintile.height, 'width': app.wintile.width + 1});
+                        moveApp(app, {
+                            'row': app.wintile.row,
+                            'col': app.wintile.col - 1,
+                            'height': app.wintile.height,
+                            'width': app.wintile.width + 1,
+                        });
                     } else {
                         // We can move left on this monitor and keep our size
                         _log('sendMove) left - move');
-                        moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col - 1, 'height': app.wintile.height, 'width': app.wintile.width});
+                        moveApp(app, {
+                            'row': app.wintile.row,
+                            'col': app.wintile.col - 1,
+                            'height': app.wintile.height,
+                            'width': app.wintile.width,
+                        });
                     }
                 } else if (app.wintile.col === 0 && app.wintile.width > 1) {
                     // We are not yet to smallest width, so shrink
                     _log('sendMove) left - shrink');
-                    moveApp(app, {'row': app.wintile.row, 'col': 0, 'height': app.wintile.height, 'width': app.wintile.width - 1});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': 0,
+                        'height': app.wintile.height,
+                        'width': app.wintile.width - 1,
+                    });
                 } else if (monitorToLeft !== -1) {
                     // There is a monitor to the left, so let's go there
                     _log('sendMove) left - yes monitor');
                     app.move_to_monitor(monitorToLeft);
-                    moveApp(app, {'row': app.wintile.row, 'col': colCount - 1, 'height': app.wintile.height, 'width': 1});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': colCount - 1,
+                        'height': app.wintile.height,
+                        'width': 1,
+                    });
                 } else {
                     // We are already on the left, and there is no other monitor to the left
                     // Move to the left most column at full height
@@ -470,11 +506,21 @@ function sendMove(direction, ctrlPressed = false) {
                 if (app.wintile.col + app.wintile.width - 1 < colCount - 1) {
                     // We can move right on this monitor and keep our size
                     _log('sendMove) right - move');
-                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col + 1, 'height': app.wintile.height, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': app.wintile.col + 1,
+                        'height': app.wintile.height,
+                        'width': app.wintile.width,
+                    });
                 } else if (app.wintile.col + app.wintile.width - 1 === colCount - 1 && app.wintile.width > 1) {
                     // We are not yet to smallest width, so shrink
                     _log('sendMove) right - shrink');
-                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col + 1, 'height': app.wintile.height, 'width': app.wintile.width - 1});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': app.wintile.col + 1,
+                        'height': app.wintile.height,
+                        'width': app.wintile.width - 1,
+                    });
                 } else if (monitorToRight !== -1) {
                     // There is a monitor to the right, so let's go there
                     _log('sendMove) right - yes monitor');
@@ -492,7 +538,12 @@ function sendMove(direction, ctrlPressed = false) {
                 if (app.wintile.row > 0) {
                     // We can move up on this monitor and keep our size
                     _log('sendMove) up - move');
-                    moveApp(app, {'row': app.wintile.row - 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': app.wintile.row - 1,
+                        'col': app.wintile.col,
+                        'height': app.wintile.height,
+                        'width': app.wintile.width,
+                    });
                 } else if ((colCount === 4 || colCount === 5) && app.wintile.height === rowCount && app.wintile.width === colCount - 2 && app.wintile.col === 1) {
                     // We are in 1st maximize, go to full maximize
                     _log('sendMove) up - 1st max to full max');
@@ -500,11 +551,21 @@ function sendMove(direction, ctrlPressed = false) {
                 } else if (app.wintile.row === 0 && app.wintile.height > 1) {
                     // We are already on the top, shrink
                     _log('sendMove) up - shrink');
-                    moveApp(app, {'row': app.wintile.row, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': app.wintile.row,
+                        'col': app.wintile.col,
+                        'height': app.wintile.height - 1,
+                        'width': app.wintile.width,
+                    });
                 } else if (app.wintile.row === rowCount - 1) {
                     // We are bottom row, go to full height, keeping width
                     _log('sendMove) up - bottom up');
-                    moveApp(app, {'row': 0, 'col': app.wintile.col, 'height': rowCount, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': 0,
+                        'col': app.wintile.col,
+                        'height': rowCount,
+                        'width': app.wintile.width,
+                    });
                 } else {
                     // We are top row, go straight to 2nd maximize
                     _log('sendMove) up - top up');
@@ -530,11 +591,21 @@ function sendMove(direction, ctrlPressed = false) {
                 } else if (app.wintile.row + app.wintile.height < rowCount) {
                     // We can move down on this monitor and keep our size
                     _log('sendMove) down - move');
-                    moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': app.wintile.row + 1,
+                        'col': app.wintile.col,
+                        'height': app.wintile.height,
+                        'width': app.wintile.width,
+                    });
                 } else if (app.wintile.row + app.wintile.height === rowCount && app.wintile.height > 1) {
                     // We are already at the bottom, shrink
                     _log('sendMove) down - shrink');
-                    moveApp(app, {'row': app.wintile.row + 1, 'col': app.wintile.col, 'height': app.wintile.height - 1, 'width': app.wintile.width});
+                    moveApp(app, {
+                        'row': app.wintile.row + 1,
+                        'col': app.wintile.col,
+                        'height': app.wintile.height - 1,
+                        'width': app.wintile.width,
+                    });
                 } else if (app.wintile.row === rowCount - 1 && app.wintile.width !== colCount) {
                     // We are not full bottom but are a tile, go full width
                     _log('sendMove) down - full-width');
@@ -1037,8 +1108,7 @@ function getMonitorInfo(monitorIndex) {
 /**
  *
  */
-export default class WintileExtension extends Extension{
-
+export default class WintileExtension extends Extension {
     enable() {
         _log('enable) Keymanager is being defined');
         keyManager = new Manager.Manager();
@@ -1089,14 +1159,13 @@ export default class WintileExtension extends Extension{
 
         // Since GNOME 40 the metaDisplay argument isn't passed anymore to these callbacks.
         // We "translate" the parameters here so that things work on both GNOME 3 and 40.
+        // eslint-disable-next-line no-unused-vars
         onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
             windowGrabBegin(metaScreen, metaWindow);
-
         });
+        // eslint-disable-next-line no-unused-vars
         onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
-
             windowGrabEnd(metaScreen, metaWindow);
-
         });
 
         // Create a new gsettings object
