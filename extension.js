@@ -458,8 +458,9 @@ function sendMove(direction, ctrlPressed = false) {
                 } else if (monitorToLeft !== -1) {
                     // There is a monitor to the left, so let's go there
                     _log('sendMove) left - yes monitor');
+                    let newMonitor = getMonitorInfo(monitorToLeft);
                     app.move_to_monitor(monitorToLeft);
-                    moveApp(app, {'row': app.wintile.row, 'col': colCount - 1, 'height': app.wintile.height, 'width': 1});
+                    moveApp(app, {'row': app.wintile.row, 'col': newMonitor.colCount - 1, 'height': app.wintile.height, 'width': 1});
                 } else {
                     // We are already on the left, and there is no other monitor to the left
                     // Move to the left most column at full height
