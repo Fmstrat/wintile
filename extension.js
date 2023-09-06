@@ -315,18 +315,23 @@ function sendMove(direction, ctrlPressed = false) {
 
     let monitorToLeft = -1;
     let monitorToRight = -1;
+    _log(`sendMove) curMonitor: ${JSON.stringify(curMonitor)}`);
     for (var i = 0; i < Main.layoutManager.monitors.length; i++) {
         if (i === monitorIndex)
             continue;
 
         let testMonitor = getMonitorInfo(i);
-        _log(`sendMove) curMonitor: ${JSON.stringify(curMonitor)}`);
+        let monitorHeightDiff = Math.abs(testMonitor.height - curMonitor.height);
         _log(`sendMove) testMonitor: ${JSON.stringify(testMonitor)}`);
+        _log(`sendMove) monitorsHeightDiff :${monitorHeightDiff}`);
 
-        if (testMonitor.x + testMonitor.width === curMonitor.x)
+        if (testMonitor.x < curMonitor.x &&
+            Math.abs(testMonitor.y - curMonitor.y) < (100 + monitorHeightDiff) &&
+            (monitorToLeft === -1 || (monitorToLeft >= 0 && testMonitor.x > Main.layoutManager.monitors[monitorToLeft].x)))
             monitorToLeft = i;
 
-        if (curMonitor.x + curMonitor.width === testMonitor.x)
+        if (testMonitor.x > curMonitor.x && Math.abs(testMonitor.y - curMonitor.y) < (100 + monitorHeightDiff) &&
+            (monitorToRight === -1 || (monitorToRight >= 0 && testMonitor.x < Main.layoutManager.monitors[monitorToRight].x)))
             monitorToRight = i;
     }
     _log(`sendMove) monitorToLeft: ${monitorToLeft} monitorToRight: ${monitorToRight}`);
