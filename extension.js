@@ -788,11 +788,11 @@ function checkIfNearGrid(app) {
     var nearRight = isClose(mouseX, monitor.rightEdge) || mouseX > monitor.rightEdge;
 
     var centerOfScreenH = monitor.x + Math.floor(monitor.width / 2);
-    var columnWidthFraction = Math.floor(colWidth / 5);
+    var columnWidthFraction = Math.floor(colWidth / 3);
     var nearCenterH = mouseX > centerOfScreenH - (columnWidthFraction / 2) && mouseX < centerOfScreenH + (columnWidthFraction / 2);
 
     var centerOfScreenV = monitor.y + Math.floor(monitor.height / 2);
-    var rowHeightFraction = Math.floor(rowHeight / 5);
+    var rowHeightFraction = Math.floor(rowHeight / 3);
     var nearCenterV = mouseY > centerOfScreenV - (rowHeightFraction / 2) && mouseY < centerOfScreenV + (rowHeightFraction / 2);
 
     if (ctrlPressed && superPressed && dragStart === null) {
@@ -929,7 +929,9 @@ function checkIfNearGrid(app) {
                 width: 2,
                 height: 1,
             }, monitor.x, monitor.y, colWidth, rowHeight);
-        } else {
+            close = true;
+        } else if (ctrlPressed || nearLeft || nearRight) {
+            // If we are close to the left or right or ctrl pressed, show the preview, wherever the pointer is
             showPreview({
                 col: colCount - 1,
                 row: rowCount - 1,
