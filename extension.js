@@ -772,220 +772,217 @@ function checkIfNearGrid(app) {
     var colWidth = Math.floor(monitor.width / colCount);
     var rowHeight = Math.floor(monitor.height / rowCount);
 
-    var inMonitorBounds = false;
-    if (mouseX >= monitor.x && mouseX < monitor.x + monitor.width && mouseY >= monitor.y && mouseY < monitor.y + monitor.height)
-        inMonitorBounds = true;
-
     let window = app.get_frame_rect();
     _log(`checkIfNearGrid) mouse - mouseX:${mouseX} mouseY:${mouseY} mask:${mask}`);
     _log(`checkIfNearGrid) keys - ctrl:${ctrlPressed} superPressed:${superPressed}`);
-    _log(`checkIfNearGrid) monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height} inB:${inMonitorBounds}`);
+    _log(`checkIfNearGrid) monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height}`);
     _log(`checkIfNearGrid) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-    if (inMonitorBounds) {
-        var c = Math.floor((mouseX - monitor.x) / colWidth);
-        var r = Math.floor((mouseY - monitor.y) / rowHeight);
-        c = Math.max(0, Math.min(c, colCount - 1));
-        r = Math.max(0, Math.min(r, rowCount - 1));
+    var c = Math.floor((mouseX - monitor.x) / colWidth);
+    var r = Math.floor((mouseY - monitor.y) / rowHeight);
+    c = Math.max(0, Math.min(c, colCount - 1));
+    r = Math.max(0, Math.min(r, rowCount - 1));
 
-        var gridX = c * colWidth + monitor.x;
-        var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
-        var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
-        var topRow = mouseY < monitor.y + rowHeight;
-        var bottomRow = mouseY > monitor.y + monitor.height - rowHeight;
-        var nearTop = isClose(mouseY, monitor.y) || mouseY < monitor.y;
-        var nearBottom = isClose(mouseY, monitor.y + monitor.height) || mouseY > monitor.y + monitor.height;
-        var nearLeft = isClose(mouseX, monitor.x) || mouseX < monitor.x;
-        var nearRight = isClose(mouseX, monitor.x + monitor.width) || mouseX > monitor.x + monitor.width;
+    var gridX = c * colWidth + monitor.x;
+    var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
+    var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
+    var topRow = mouseY < monitor.y + rowHeight;
+    var bottomRow = mouseY > monitor.y + monitor.height - rowHeight;
+    var nearTop = isClose(mouseY, monitor.y) || mouseY < monitor.y;
+    var nearBottom = isClose(mouseY, monitor.y + monitor.height) || mouseY > monitor.y + monitor.height;
+    var nearLeft = isClose(mouseX, monitor.x) || mouseX < monitor.x;
+    var nearRight = isClose(mouseX, monitor.rightEdge) || mouseX > monitor.rightEdge;
 
-        var centerOfScreenH = monitor.x + Math.floor(monitor.width / 2);
-        var columnWidthFraction = Math.floor(colWidth / 3);
-        var nearCenterH = mouseX > centerOfScreenH - (columnWidthFraction / 2) && mouseX < centerOfScreenH + (columnWidthFraction / 2);
+    var centerOfScreenH = monitor.x + Math.floor(monitor.width / 2);
+    var columnWidthFraction = Math.floor(colWidth / 3);
+    var nearCenterH = mouseX > centerOfScreenH - (columnWidthFraction / 2) && mouseX < centerOfScreenH + (columnWidthFraction / 2);
 
-        var centerOfScreenV = monitor.y + Math.floor(monitor.height / 2);
-        var rowHeightFraction = Math.floor(rowHeight / 3);
-        var nearCenterV = mouseY > centerOfScreenV - (rowHeightFraction / 2) && mouseY < centerOfScreenV + (rowHeightFraction / 2);
+    var centerOfScreenV = monitor.y + Math.floor(monitor.height / 2);
+    var rowHeightFraction = Math.floor(rowHeight / 3);
+    var nearCenterV = mouseY > centerOfScreenV - (rowHeightFraction / 2) && mouseY < centerOfScreenV + (rowHeightFraction / 2);
 
-        if (ctrlPressed && superPressed && dragStart === null) {
-            dragStart = {col: c, row: r, monitorIndex};
-            _log(`checkIfNearGrid) dragStart: ${JSON.stringify(dragStart)}`);
+    if (ctrlPressed && superPressed && dragStart === null) {
+        dragStart = {col: c, row: r, monitorIndex};
+        _log(`checkIfNearGrid) dragStart: ${JSON.stringify(dragStart)}`);
+    }
+
+    if (ctrlPressed && superPressed) {
+        // check if it's on the samescreen it was on before, otherwise reinitialize dragStart
+        if (dragStart.monitorIndex !== monitorIndex)
+            dragStart = {col: c, row: r, monitor};
+        // If ctrl and super are pressed, draw the box from start to finish
+        showPreview({
+            col: Math.min(c, dragStart.col),
+            row: Math.min(r, dragStart.row),
+            width: Math.abs(c - dragStart.col) + 1,
+            height: Math.abs(r - dragStart.row) + 1,
+        }, monitor.x, monitor.y, colWidth, rowHeight);
+        close = true;
+    } else if (nearTop && nearCenterH) {
+        // If we are in the center top, show a preview for maximize
+        showPreview({
+            col: 0,
+            row: 0,
+            width: colCount,
+            height: rowCount,
+        }, monitor.x, monitor.y, colWidth, rowHeight);
+        close = true;
+    } else if (nearBottom && nearCenterH) {
+        // If we are in the center bottom, show a preview for bottom maximized horizontally
+        showPreview({
+            col: 0,
+            row: rowCount - 1,
+            width: colCount,
+            height: 1,
+        }, monitor.x, monitor.y, colWidth, rowHeight);
+        close = true;
+    } else if (nearLeft && nearCenterV) {
+        // If we are in the center left, show a preview for left maximize
+        if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
+            showPreview({
+                col: 0,
+                row: 0,
+                width: 2,
+                height: rowCount,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
+        } else {
+            showPreview({
+                col: 0,
+                row: 0,
+                width: 1,
+                height: rowCount,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
         }
-
-        if (ctrlPressed && superPressed) {
-            // check if it's on the samescreen it was on before, otherwise reinitialize dragStart
-            if (dragStart.monitorIndex !== monitorIndex)
-                dragStart = {col: c, row: r, monitor};
-            // If ctrl and super are pressed, draw the box from start to finish
+        close = true;
+    } else if (nearRight && nearCenterV) {
+        // If we are in the center right, show a preview for right maximize
+        if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
             showPreview({
-                col: Math.min(c, dragStart.col),
-                row: Math.min(r, dragStart.row),
-                width: Math.abs(c - dragStart.col) + 1,
-                height: Math.abs(r - dragStart.row) + 1,
-            }, monitor.x, monitor.y, colWidth, rowHeight);
-            close = true;
-        } else if (nearTop && nearCenterH) {
-            // If we are in the center top, show a preview for maximize
-            showPreview({
-                col: 0,
+                col: colCount - 2,
                 row: 0,
-                width: colCount,
+                width: 2,
                 height: rowCount,
             }, monitor.x, monitor.y, colWidth, rowHeight);
-            close = true;
-        } else if (nearBottom && nearCenterH) {
-            // If we are in the center bottom, show a preview for bottom maximized horizontally
+        } else {
             showPreview({
-                col: 0,
-                row: rowCount - 1,
-                width: colCount,
-                height: 1,
-            }, monitor.x, monitor.y, colWidth, rowHeight);
-            close = true;
-        } else if (nearLeft && nearCenterV) {
-            // If we are in the center left, show a preview for left maximize
-            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
-                showPreview({
-                    col: 0,
-                    row: 0,
-                    width: 2,
-                    height: rowCount,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            } else {
-                showPreview({
-                    col: 0,
-                    row: 0,
-                    width: 1,
-                    height: rowCount,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            }
-            close = true;
-        } else if (nearRight && nearCenterV) {
-            // If we are in the center right, show a preview for right maximize
-            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
-                showPreview({
-                    col: colCount - 2,
-                    row: 0,
-                    width: 2,
-                    height: rowCount,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            } else {
-                showPreview({
-                    col: colCount - 1,
-                    row: 0,
-                    width: 1,
-                    height: rowCount,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            }
-            close = true;
-        } else if (nearLeft && topRow) {
-            // If we are close to the top left, show the top left grid item
-            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
-                showPreview({
-                    col: 0,
-                    row: 0,
-                    width: 2,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            } else {
-                showPreview({
-                    col: 0,
-                    row: 0,
-                    width: 1,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            }
-            close = true;
-        } else if (nearLeft && bottomRow) {
-            // If we are close to the bottom left, show the bottom left grid item
-            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
-                showPreview({
-                    col: 0,
-                    row: rowCount - 1,
-                    width: 2,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            } else {
-                showPreview({
-                    col: 0,
-                    row: rowCount - 1,
-                    width: 1,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            }
-            close = true;
-        } else if (nearRight && topRow) {
-            // If we are close to the top right, show the top right grid item
-            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
-                showPreview({
-                    col: colCount - 2,
-                    row: 0,
-                    width: 2,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            } else {
-                showPreview({
-                    col: colCount - 1,
-                    row: 0,
-                    width: 1,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            }
-            close = true;
-        } else if (nearRight && bottomRow) {
-            // If we are close to the bottom right, show the bottom right grid item
-            if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
-                showPreview({
-                    col: colCount - 2,
-                    row: rowCount - 1,
-                    width: 2,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            } else {
-                showPreview({
-                    col: colCount - 1,
-                    row: rowCount - 1,
-                    width: 1,
-                    height: 1,
-                }, monitor.x, monitor.y, colWidth, rowHeight);
-            }
-            close = true;
-        } else if (nearTop && inGrid) {
-            // If we are close to the top, show a preview for the top grid item
-            showPreview({
-                col: c,
-                row: 0,
-                width: 1,
-                height: 1,
-            }, monitor.x, monitor.y, colWidth, rowHeight);
-            close = true;
-        } else if (nearBottom && centerOfGrid) {
-            // If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
-            showPreview({
-                col: c,
+                col: colCount - 1,
                 row: 0,
                 width: 1,
                 height: rowCount,
             }, monitor.x, monitor.y, colWidth, rowHeight);
-            close = true;
-        } else if (nearBottom && inGrid) {
-            // If we are close to the bottom, show a preview for the bottom grid item
+        }
+        close = true;
+    } else if (nearLeft && topRow) {
+        // If we are close to the top left, show the top left grid item
+        if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
             showPreview({
-                col: c,
+                col: 0,
+                row: 0,
+                width: 2,
+                height: 1,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
+        } else {
+            showPreview({
+                col: 0,
+                row: 0,
+                width: 1,
+                height: 1,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
+        }
+        close = true;
+    } else if (nearLeft && bottomRow) {
+        // If we are close to the bottom left, show the bottom left grid item
+        if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
+            showPreview({
+                col: 0,
+                row: rowCount - 1,
+                width: 2,
+                height: 1,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
+        } else {
+            showPreview({
+                col: 0,
                 row: rowCount - 1,
                 width: 1,
+                height: 1,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
+        }
+        close = true;
+    } else if (nearRight && topRow) {
+        // If we are close to the top right, show the top right grid item
+        if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
+            showPreview({
+                col: colCount - 2,
+                row: 0,
+                width: 2,
+                height: 1,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
+        } else {
+            showPreview({
+                col: colCount - 1,
+                row: 0,
+                width: 1,
+                height: 1,
+            }, monitor.x, monitor.y, colWidth, rowHeight);
+        }
+        close = true;
+    } else if (nearRight && bottomRow) {
+        // If we are close to the bottom right, show the bottom right grid item
+        if ((colCount === 4 || colCount === 5) && config.preview.doubleWidth) {
+            showPreview({
+                col: colCount - 2,
+                row: rowCount - 1,
+                width: 2,
                 height: 1,
             }, monitor.x, monitor.y, colWidth, rowHeight);
             close = true;
         } else if (ctrlPressed || nearLeft || nearRight) {
             // If we are close to the left or right or ctrl pressed, show the preview, wherever the pointer is
             showPreview({
-                col: c,
-                row: r,
+                col: colCount - 1,
+                row: rowCount - 1,
                 width: 1,
                 height: 1,
             }, monitor.x, monitor.y, colWidth, rowHeight);
-            close = true;
         }
+        close = true;
+    } else if (nearTop && inGrid) {
+        // If we are close to the top, show a preview for the top grid item
+        showPreview({
+            col: c,
+            row: 0,
+            width: 1,
+            height: 1,
+        }, monitor.x, monitor.y, colWidth, rowHeight);
+        close = true;
+    } else if (nearBottom && centerOfGrid) {
+        // If we are close to the bottom and in the middle of a grid, show a preview for the bottom grid item at full height
+        showPreview({
+            col: c,
+            row: 0,
+            width: 1,
+            height: rowCount,
+        }, monitor.x, monitor.y, colWidth, rowHeight);
+        close = true;
+    } else if (nearBottom && inGrid) {
+        // If we are close to the bottom, show a preview for the bottom grid item
+        showPreview({
+            col: c,
+            row: rowCount - 1,
+            width: 1,
+            height: 1,
+        }, monitor.x, monitor.y, colWidth, rowHeight);
+        close = true;
+    } else if (ctrlPressed) {
+        // If we are close to the left or right or ctrl pressed, show the preview, wherever the pointer is
+        showPreview({
+            col: c,
+            row: r,
+            width: 1,
+            height: 1,
+        }, monitor.x, monitor.y, colWidth, rowHeight);
+        close = true;
     }
+
     if (!close)
         hidePreview();
 
@@ -1034,6 +1031,10 @@ function getMonitorInfo(monitorIndex) {
         y: space.y,
         width: space.width,
         height: space.height,
+        leftEdge: space.x,
+        rightEdge: space.x + space.width,
+        topEdge: space.y,
+        bottomEdge: space.y + space.height,
         isPortrait,
         isNotUltrawide,
         colCount,
