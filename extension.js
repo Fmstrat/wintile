@@ -465,7 +465,10 @@ function sendMove(direction, ctrlPressed = false) {
                     _log('sendMove) left - yes monitor');
                     let newMonitor = getMonitorInfo(monitorToLeft);
                     app.move_to_monitor(monitorToLeft);
-                    moveApp(app, {'row': app.wintile.row, 'col': newMonitor.colCount - 1, 'height': app.wintile.height, 'width': 1});
+                    if (app.wintile.height === rowCount)
+                        moveApp(app, {'row': app.wintile.row, 'col': newMonitor.colCount - 1, 'height': newMonitor.rowCount, 'width': 1});
+                    else
+                        moveApp(app, {'row': app.wintile.row, 'col': newMonitor.colCount - 1, 'height': app.wintile.height, 'width': 1});
                 } else {
                     // We are already on the left, and there is no other monitor to the left
                     // Move to the left most column at full height
@@ -486,8 +489,12 @@ function sendMove(direction, ctrlPressed = false) {
                 } else if (monitorToRight !== -1) {
                     // There is a monitor to the right, so let's go there
                     _log('sendMove) right - yes monitor');
+                    let newMonitor = getMonitorInfo(monitorToRight);
                     app.move_to_monitor(monitorToRight);
-                    moveApp(app, {'row': app.wintile.row, 'col': 0, 'height': app.wintile.height, 'width': 1});
+                    if (app.wintile.height === rowCount)
+                        moveApp(app, {'row': app.wintile.row, 'col': 0, 'height': newMonitor.rowCount, 'width': 1});
+                    else
+                        moveApp(app, {'row': app.wintile.row, 'col': 0, 'height': app.wintile.height, 'width': 1});
                 } else {
                     // We are already on the right, and there is no other monitor to the right
                     // Move to the right most column at full height
