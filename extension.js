@@ -972,7 +972,7 @@ function checkIfNearGrid(app) {
             height: 1,
         }, monitor.x, monitor.y, colWidth, rowHeight);
         close = true;
-    } else if (ctrlPressed) {
+    } else if (ctrlPressed || nearLeft || nearRight) {
         // If we are close to the left or right or ctrl pressed, show the preview, wherever the pointer is
         showPreview({
             col: c,
