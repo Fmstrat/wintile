@@ -2,15 +2,13 @@
 
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
+const Adw = imports.gi.Adw;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 const Gettext = imports.gettext;
 const _ = Gettext.domain('wintile').gettext;
-
-const Config = imports.misc.config;
-const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 
 /**
  *
@@ -21,343 +19,225 @@ function init() {
 
 /**
  *
+ * @param {object} window - Don't worry about this. Gnome handles it for you.
  */
-function buildPrefsWidget() {
-    // Create a parent widget that we'll return from this function
-    let layout = new Gtk.Grid({
-        margin_bottom: 18,
-        margin_end: 18,
-        margin_start: 18,
-        margin_top: 18,
-        column_spacing: 12,
-        row_spacing: 12,
-        visible: true,
-    });
-
+function fillPreferencesWindow(window) {
     let gsettings;
     gsettings = ExtensionUtils.getSettings();
-    layout._gsettings = gsettings;
 
-    let row = 0;
+    const gridPage = new Adw.PreferencesPage({
+        name: 'Dimensions',
+        title: 'Dimensions',
+        icon_name: 'preferences-desktop-apps-symbolic',
+    });
+    window.add(gridPage);
 
-    // Add a simple title and add it to the layout
-    let title = new Gtk.Label({
-        label: `<b>${Me.metadata.name} Extension Preferences</b>`,
-        halign: Gtk.Align.CENTER,
-        use_markup: true,
-        visible: true,
+    const prefsGroup = new Adw.PreferencesGroup({
+        title: 'Grid size',
+        description: `Configure the rows and columns of ${Me.metadata.name}`,
     });
-    layout.attach(title, 0, row++, 2, 1);
+    gridPage.add(prefsGroup);
 
-    // Column setting
-    let colsLabel = new Gtk.Label({
-        label: _('Number of columns'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    // COLUMNS
+    const colsRow = new Adw.ActionRow({
+        title: 'Columns',
     });
-    let colsInput = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        visible: true,
-    });
-    let colsAdjustment = new Gtk.Adjustment({
-        lower: 1,
-        upper: 5,
-        step_increment: 1,
-    });
+    prefsGroup.add(colsRow);
+
     let colsSettingInt = new Gtk.SpinButton({
-        adjustment: colsAdjustment,
-        snap_to_ticks: true,
-        visible: true,
+        adjustment: new Gtk.Adjustment({
+            'lower': 1,
+            'step-increment': 1,
+            'upper': 5,
+            'value': gsettings.get_int('cols'),
+        }),
     });
-    colsSettingInt.set_value(gsettings.get_int('cols'));
-    if (SHELL_VERSION >= 40)
-        colsInput.append(colsSettingInt);
-    else
-        colsInput.add(colsSettingInt);
-    layout.attach(colsLabel, 0, row, 1, 1);
-    layout.attach(colsInput, 1, row++, 1, 1);
+    colsRow.add_suffix(colsSettingInt);
 
-    // Rows setting
-    let rowsLabel = new Gtk.Label({
-        label: _('Number of rows'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    // ROWS
+    const rowsRow = new Adw.ActionRow({
+        title: 'Rows',
     });
-    let rowsInput = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        visible: true,
-    });
-    let rowsAdjustment = new Gtk.Adjustment({
-        lower: 1,
-        upper: 5,
-        step_increment: 1,
-    });
+    prefsGroup.add(rowsRow);
+
     let rowsSettingInt = new Gtk.SpinButton({
-        adjustment: rowsAdjustment,
-        snap_to_ticks: true,
-        visible: true,
+        adjustment: new Gtk.Adjustment({
+            'lower': 1,
+            'step-increment': 1,
+            'upper': 5,
+            'value': gsettings.get_int('rows'),
+        }),
     });
-    rowsSettingInt.set_value(gsettings.get_int('rows'));
-    if (SHELL_VERSION >= 40)
-        rowsInput.append(rowsSettingInt);
-    else
-        rowsInput.add(rowsSettingInt);
-    layout.attach(rowsLabel, 0, row, 1, 1);
-    layout.attach(rowsInput, 1, row++, 1, 1);
+    rowsRow.add_suffix(rowsSettingInt);
 
-    // 16:9 and 16:10 always 2x2 setting
-    let ultrawideOnlyLabel = new Gtk.Label({
-        label: _('Use different rows and columns for non-ultrawide monitors'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    // ULTRAWIDE
+    const ultrawideOnlyRow = new Adw.ActionRow({
+        title: 'Use different rows and columns for non-ultrawide monitors',
     });
-    let ultrawideOnlyInput = new Gtk.Switch({
-        active: gsettings.get_boolean('ultrawide-only'),
-        halign: Gtk.Align.END,
-        visible: true,
-    });
-    layout.attach(ultrawideOnlyLabel, 0, row, 1, 1);
-    layout.attach(ultrawideOnlyInput, 1, row++, 1, 1);
+    prefsGroup.add(ultrawideOnlyRow);
 
-    // ultrawide-only cols
-    let nonUltraColsLabel = new Gtk.Label({
-        label: _('     Number of columns for non-ultrawide'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const ultrawideOnlyInput = new Gtk.CheckButton();
+    ultrawideOnlyRow.add_suffix(ultrawideOnlyInput);
+    ultrawideOnlyRow.set_activatable_widget(ultrawideOnlyInput);
+    ultrawideOnlyInput.active = gsettings.get_boolean('ultrawide-only');
+
+    // preference group
+    const nonUltrawideGroup = new Adw.PreferencesGroup({
+        title: 'Number of columns for non-ultrawide',
+        description: 'Configure the separate rows and columns of non-ultrawides',
     });
-    let nonUltraColsInput = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        visible: true,
+    gridPage.add(nonUltrawideGroup);
+
+    // NON-ULTRAWIDE COLUMNS
+    const nonUltraColsRow = new Adw.ActionRow({
+        title: 'Columns',
     });
-    let nonUltraColsAdjustment = new Gtk.Adjustment({
-        lower: 1,
-        upper: 5,
-        step_increment: 1,
-    });
+    nonUltrawideGroup.add(nonUltraColsRow);
+
     let nonUltraColsSettingInt = new Gtk.SpinButton({
-        adjustment: nonUltraColsAdjustment,
-        snap_to_ticks: true,
-        visible: true,
+        adjustment: new Gtk.Adjustment({
+            'lower': 1,
+            'step-increment': 1,
+            'upper': 5,
+            'value': gsettings.get_int('non-ultra-cols'),
+        }),
     });
-    nonUltraColsSettingInt.set_value(gsettings.get_int('non-ultra-cols'));
-    if (SHELL_VERSION >= 40)
-        nonUltraColsInput.append(nonUltraColsSettingInt);
-    else
-        nonUltraColsInput.add(nonUltraColsSettingInt);
-    layout.attach(nonUltraColsLabel, 0, row, 1, 1);
-    layout.attach(nonUltraColsInput, 1, row++, 1, 1);
+    nonUltraColsRow.add_suffix(nonUltraColsSettingInt);
 
-    // ultrawide-only rows
-    let nonUltraRowsLabel = new Gtk.Label({
-        label: _('     Number of rows for non-ultrawide'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    // NON-ULTRAWIDE ROWS
+    const nonUltraRowsRow = new Adw.ActionRow({
+        title: 'Rows',
     });
-    let nonUltraRowsInput = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        visible: true,
-    });
-    let nonUltraRowsAdjustment = new Gtk.Adjustment({
-        lower: 1,
-        upper: 5,
-        step_increment: 1,
-    });
+    nonUltrawideGroup.add(nonUltraRowsRow);
+
     let nonUltraRowsSettingInt = new Gtk.SpinButton({
-        adjustment: nonUltraRowsAdjustment,
-        snap_to_ticks: true,
-        visible: true,
+        adjustment: new Gtk.Adjustment({
+            'lower': 1,
+            'step-increment': 1,
+            'upper': 5,
+            'value': gsettings.get_int('non-ultra-rows'),
+        }),
     });
-    nonUltraRowsSettingInt.set_value(gsettings.get_int('non-ultra-rows'));
-    if (SHELL_VERSION >= 40)
-        nonUltraRowsInput.append(nonUltraRowsSettingInt);
-    else
-        nonUltraRowsInput.add(nonUltraRowsSettingInt);
-    layout.attach(nonUltraRowsLabel, 0, row, 1, 1);
-    layout.attach(nonUltraRowsInput, 1, row++, 1, 1);
+    nonUltraRowsRow.add_suffix(nonUltraRowsSettingInt);
 
-    ultrawideOnlyInput.connect('notify::active', function () {
-        if (ultrawideOnlyInput.active) {
-            // Show rows and columns options
-            nonUltraRowsLabel.show();
-            nonUltraRowsInput.show();
-            nonUltraColsLabel.show();
-            nonUltraColsInput.show();
-        } else {
-            // Hide rows and columns options
-            nonUltraRowsLabel.hide();
-            nonUltraRowsInput.hide();
-            nonUltraColsLabel.hide();
-            nonUltraColsInput.hide();
-        }
+    const behaviorPage = new Adw.PreferencesPage({
+        name: 'Behavior',
+        title: 'Behavior',
+        icon_name: 'applications-system-symbolic',
     });
+    window.add(behaviorPage);
+
+    const behaviorGroup = new Adw.PreferencesGroup({
+        title: 'Behavior',
+    });
+    behaviorPage.add(behaviorGroup);
 
     // Maximize setting
-    let maximizeLabel = new Gtk.Label({
-        label: _('Use true maximizing of windows'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const maximizeRow = new Adw.ActionRow({
+        title: 'Use true maximizing of windows',
     });
-    let maximizeInput = new Gtk.Switch({
-        active: gsettings.get_boolean('use-maximize'),
-        halign: Gtk.Align.END,
-        visible: true,
-    });
-    layout.attach(maximizeLabel, 0, row, 1, 1);
-    layout.attach(maximizeInput, 1, row++, 1, 1);
+    behaviorGroup.add(maximizeRow);
+
+    const maximizeInput = new Gtk.CheckButton();
+    maximizeRow.add_suffix(maximizeInput);
+    maximizeRow.set_activatable_widget(maximizeInput);
+    maximizeInput.active = gsettings.get_boolean('use-maximize');
 
     // Minimize setting
-    let minimizeLabel = new Gtk.Label({
-        label: _('Allow minimizing of windows'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const minimizeRow = new Adw.ActionRow({
+        title: 'Use true miniming of windows',
     });
-    let minimizeInput = new Gtk.Switch({
-        active: gsettings.get_boolean('use-minimize'),
-        halign: Gtk.Align.END,
-        visible: true,
-    });
-    layout.attach(minimizeLabel, 0, row, 1, 1);
-    layout.attach(minimizeInput, 1, row++, 1, 1);
+    behaviorGroup.add(minimizeRow);
+
+    const minimizeInput = new Gtk.CheckButton();
+    minimizeRow.add_suffix(minimizeInput);
+    minimizeRow.set_activatable_widget(minimizeInput);
+    minimizeInput.active = gsettings.get_boolean('use-minimize');
 
     // Preview settings
-    let previewEnabled = gsettings.get_boolean('preview');
-    let previewLabel = new Gtk.Label({
-        label: _('Enable preview and snapping when dragging windows'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const previewRow = new Adw.ActionRow({
+        title: 'Enable preview and snapping when dragging windows',
     });
-    let previewInput = new Gtk.Switch({
-        active: previewEnabled,
-        halign: Gtk.Align.END,
-        visible: true,
-    });
-    layout.attach(previewLabel, 0, row, 1, 1);
-    layout.attach(previewInput, 1, row++, 1, 1);
+    behaviorGroup.add(previewRow);
 
-    // Double width previews
-    let doubleWidthLabel = new Gtk.Label({
-        label: _('     Use double width previews on sides in 4 column mode'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
-    });
-    let doubleWidthInput = new Gtk.Switch({
-        active: gsettings.get_boolean('double-width'),
-        halign: Gtk.Align.END,
-        visible: true,
-    });
-    layout.attach(doubleWidthLabel, 0, row, 1, 1);
-    layout.attach(doubleWidthInput, 1, row++, 1, 1);
+    const previewInput = new Gtk.CheckButton();
+    previewRow.add_suffix(previewInput);
+    previewRow.set_activatable_widget(previewInput);
+    previewInput.active = gsettings.get_boolean('preview');
 
     // Preview distance
-    let previewDistanceLabel = new Gtk.Label({
-        label: _('     Pixels from edge to start preview'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const previewDistanceRow = new Adw.ActionRow({
+        title: 'Pixels from edge to start preview',
     });
-    let previewDistanceInput = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        visible: true,
-    });
-    let previewDistanceAdjustment = new Gtk.Adjustment({
-        lower: 0,
-        upper: 150,
-        step_increment: 1,
-    });
+    behaviorGroup.add(previewDistanceRow);
+
     let previewDistanceSettingInt = new Gtk.SpinButton({
-        adjustment: previewDistanceAdjustment,
-        snap_to_ticks: true,
-        visible: true,
+        adjustment: new Gtk.Adjustment({
+            'lower': 0,
+            'step-increment': 1,
+            'upper': 150,
+            'value': gsettings.get_int('distance'),
+        }),
     });
-    previewDistanceSettingInt.set_value(gsettings.get_int('distance'));
-    if (SHELL_VERSION >= 40)
-        previewDistanceInput.append(previewDistanceSettingInt);
-    else
-        previewDistanceInput.add(previewDistanceSettingInt);
-    layout.attach(previewDistanceLabel, 0, row, 1, 1);
-    layout.attach(previewDistanceInput, 1, row++, 1, 1);
+    previewDistanceRow.add_suffix(previewDistanceSettingInt);
+
 
     // Delay
-    let previewDelayLabel = new Gtk.Label({
-        label: _('     Delay in ms before preview displays'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const previewDelayRow = new Adw.ActionRow({
+        title: 'Delay in ms before preview displays',
     });
-    let previewDelayInput = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        visible: true,
-    });
-    let previewDelayAdjustment = new Gtk.Adjustment({
-        lower: 25,
-        upper: 1000,
-        step_increment: 1,
-    });
+    behaviorGroup.add(previewDelayRow);
+
     let previewDelaySettingInt = new Gtk.SpinButton({
-        adjustment: previewDelayAdjustment,
-        snap_to_ticks: true,
-        visible: true,
+        adjustment: new Gtk.Adjustment({
+            'lower': 25,
+            'step-increment': 1,
+            'upper': 1000,
+            'value': gsettings.get_int('delay'),
+        }),
     });
-    previewDelaySettingInt.set_value(gsettings.get_int('delay'));
-    if (SHELL_VERSION >= 40)
-        previewDelayInput.append(previewDelaySettingInt);
-    else
-        previewDelayInput.add(previewDelaySettingInt);
-    layout.attach(previewDelayLabel, 0, row, 1, 1);
-    layout.attach(previewDelayInput, 1, row++, 1, 1);
+    previewDelayRow.add_suffix(previewDelaySettingInt);
+
+
+    // Double width previews
+    const doubleWidthRow = new Adw.ActionRow({
+        title: 'Use double width previews on sides in 4 and 5 column mode',
+    });
+    behaviorGroup.add(doubleWidthRow);
+
+    const doubleWidthInput = new Gtk.CheckButton();
+    doubleWidthRow.add_suffix(doubleWidthInput);
+    doubleWidthRow.set_activatable_widget(doubleWidthInput);
+    doubleWidthInput.active = gsettings.get_boolean('double-width');
 
     // Gap setting
-    let gapLabel = new Gtk.Label({
-        label: _('Gap width around tiles'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const gapRow = new Adw.ActionRow({
+        title: 'Gap width around tiles',
     });
-    let gapInput = new Gtk.Box({
-        orientation: Gtk.Orientation.HORIZONTAL,
-        visible: true,
-    });
-    let gapAdjustment = new Gtk.Adjustment({
-        lower: 0,
-        upper: 50,
-        step_increment: 2,
-    });
+    behaviorGroup.add(gapRow);
+
     let gapSettingInt = new Gtk.SpinButton({
-        adjustment: gapAdjustment,
-        snap_to_ticks: true,
-        visible: true,
+        adjustment: new Gtk.Adjustment({
+            'lower': 0,
+            'step-increment': 2,
+            'upper': 50,
+            'value': gsettings.get_int('gap'),
+        }),
     });
-    gapSettingInt.set_value(gsettings.get_int('gap'));
-    if (SHELL_VERSION >= 40)
-        gapInput.append(gapSettingInt);
-    else
-        gapInput.add(gapSettingInt);
-    layout.attach(gapLabel, 0, row, 1, 1);
-    layout.attach(gapInput, 1, row++, 1, 1);
+    gapRow.add_suffix(gapSettingInt);
 
     // Debug setting
-    let debugLabel = new Gtk.Label({
-        label: _('Turn on debugging'),
-        visible: true,
-        hexpand: true,
-        halign: Gtk.Align.START,
+    const debugRow = new Adw.ActionRow({
+        title: 'Turn on debugging',
     });
-    let debugInput = new Gtk.Switch({
-        active: gsettings.get_boolean('debug'),
-        halign: Gtk.Align.END,
-        visible: true,
-    });
-    layout.attach(debugLabel, 0, row, 1, 1);
-    layout.attach(debugInput, 1, row++, 1, 1);
+    behaviorGroup.add(debugRow);
+
+    const debugInput = new Gtk.CheckButton();
+    debugRow.add_suffix(debugInput);
+    debugRow.set_activatable_widget(debugInput);
+    debugInput.active = gsettings.get_boolean('debug');
+
+
 
     const bindSettings = (key, input) => {
         gsettings.bind(key, input, 'active', Gio.SettingsBindFlags.DEFAULT);
@@ -368,6 +248,17 @@ function buildPrefsWidget() {
             gsettings.set_int(key, entry.value);
         });
     };
+
+    const toggleUltrawide = () => {
+        if (ultrawideOnlyInput.active) {
+            // Show rows and columns options
+            nonUltrawideGroup.show();
+        } else {
+            // Hide rows and columns options
+            nonUltrawideGroup.hide();
+        }
+    };
+
 
     // settings that aren't toggles need a connect
     connectAndSetInt(colsSettingInt, 'cols');
@@ -385,7 +276,8 @@ function buildPrefsWidget() {
     bindSettings('preview', previewInput);
     bindSettings('double-width', doubleWidthInput);
     bindSettings('debug', debugInput);
+    ultrawideOnlyInput.connect('notify::active', toggleUltrawide);
 
-    // Return our widget which will be added to the window
-    return layout;
+    // make sure that the non-ultrawide menu is hidden unless it's enabled
+    toggleUltrawide();
 }
