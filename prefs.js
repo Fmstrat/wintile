@@ -32,17 +32,17 @@ function fillPreferencesWindow(window) {
     });
     window.add(gridPage);
 
-    const prefsGroup = new Adw.PreferencesGroup({
+    const gridGroup = new Adw.PreferencesGroup({
         title: 'Grid size',
         description: `Configure the rows and columns of ${Me.metadata.name}`,
     });
-    gridPage.add(prefsGroup);
+    gridPage.add(gridGroup);
 
     // COLUMNS
     const colsRow = new Adw.ActionRow({
         title: 'Columns',
     });
-    prefsGroup.add(colsRow);
+    gridGroup.add(colsRow);
 
     let colsSettingInt = new Gtk.SpinButton({
         adjustment: new Gtk.Adjustment({
@@ -58,7 +58,7 @@ function fillPreferencesWindow(window) {
     const rowsRow = new Adw.ActionRow({
         title: 'Rows',
     });
-    prefsGroup.add(rowsRow);
+    gridGroup.add(rowsRow);
 
     let rowsSettingInt = new Gtk.SpinButton({
         adjustment: new Gtk.Adjustment({
@@ -74,7 +74,7 @@ function fillPreferencesWindow(window) {
     const ultrawideOnlyRow = new Adw.ActionRow({
         title: 'Use different rows and columns for non-ultrawide monitors',
     });
-    prefsGroup.add(ultrawideOnlyRow);
+    gridGroup.add(ultrawideOnlyRow);
 
     const ultrawideOnlyInput = new Gtk.CheckButton();
     ultrawideOnlyRow.add_suffix(ultrawideOnlyInput);
