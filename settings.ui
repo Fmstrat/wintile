@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <object class="AdwPreferencesPage" id="gridPage">
+        <property name="name">Dimensions</property>
+        <property name="title">Dimensions</property>
+        <property name="icon_name">preferences-desktop-apps-symbolic</property>
+
+        <child>
+            <object class="AdwPreferencesGroup" id="gridGroup">
+                <property name="title">Grid size</property>
+                <property name="description">Configure the rows and columns of YourExtensionName</property>
+
+                <child>
+                    <object class="AdwActionRow" id="colsRow">
+                        <property name="title">Columns</property>
+                        
+                        <child>
+                            <object class="GtkSpinButton" id="colsSettingInt">
+                                <property name="adjustment">colsAdjustment</property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkAdjustment" id="colsAdjustment">
+                                <property name="lower">1</property>
+                                <property name="step_increment">1</property>
+                                <property name="upper">5</property>
+                                <property name="value">2</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="AdwActionRow" id="rowsRow">
+                        <property name="title">Rows</property>
+
+                        <child>
+                            <object class="GtkSpinButton" id="rowsSettingInt">
+                                <property name="adjustment">rowsAdjustment</property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkAdjustment" id="rowsAdjustment">
+                                <property name="lower">1</property>
+                                <property name="step_increment">1</property>
+                                <property name="upper">5</property>
+                                <property name="value">2</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="AdwActionRow" id="ultrawideOnlyRow">
+                        <property name="title">Use different rows and columns for non-ultrawide monitors</property>
+
+                        <child>
+                            <object class="GtkCheckButton" id="ultrawideOnlyInput">
+                                <property name="active">false</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+
+        <child>
+            <object class="AdwPreferencesGroup" id="nonUltrawideGroup">
+                <property name="title">Number of columns for non-ultrawide</property>
+                <property name="description">Configure the separate rows and columns of non-ultrawides</property>
+
+                <child>
+                    <object class="AdwActionRow" id="nonUltraColsRow">
+                        <property name="title">Columns</property>
+                        
+                        <child>
+                            <object class="GtkSpinButton" id="nonUltraColsSettingInt">
+                                <property name="adjustment">nonUltraColsAdjustment</property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkAdjustment" id="nonUltraColsAdjustment">
+                                <property name="lower">1</property>
+                                <property name="step_increment">1</property>
+                                <property name="upper">5</property>
+                                <property name="value">2</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="AdwActionRow" id="nonUltraRowsRow">
+                        <property name="title">Rows</property>
+                        
+                        <child>
+                            <object class="GtkSpinButton" id="nonUltraRowsSettingInt">
+                                <property name="adjustment">nonUltraRowsAdjustment</property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkAdjustment" id="nonUltraRowsAdjustment">
+                                <property name="lower">1</property>
+                                <property name="step_increment">1</property>
+                                <property name="upper">5</property>
+                                <property name="value">2</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+
+    </object>
+
+    <!-- Behavior Page -->
+    <object class="AdwPreferencesPage" id="behaviorPage">
+        <property name="name">Behavior</property>
+        <property name="title">Behavior</property>
+        <property name="icon_name">applications-system-symbolic</property>
+
+        <!-- Behavior Group -->
+        <child>
+            <object class="AdwPreferencesGroup" id="behaviorGroup">
+                <property name="title">Behavior</property>
+
+                <child>
+                    <object class="AdwActionRow" id="maximizeRow">
+                        <property name="title">Use true maximizing of windows</property>
+                        
+                        <child>
+                            <object class="GtkCheckButton" id="maximizeInput">
+                                <property name="active">true</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <!-- Minimize Row -->
+                <child>
+                    <object class="AdwActionRow" id="minimizeRow">
+                        <property name="title">Use true minimizing of windows</property>
+                        
+                        <child>
+                            <object class="GtkCheckButton" id="minimizeInput">
+                                <property name="active">true</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <!-- Preview Row -->
+                <child>
+                    <object class="AdwActionRow" id="previewRow">
+                        <property name="title">Enable preview and snapping when dragging windows</property>
+                        
+                        <child>
+                            <object class="GtkCheckButton" id="previewInput">
+                                <property name="active">true</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <!-- Preview Distance Row -->
+                <child>
+                    <object class="AdwActionRow" id="previewDistanceRow">
+                        <property name="title">Pixels from edge to start preview</property>
+                        
+                        <child>
+                            <object class="GtkSpinButton" id="previewDistanceSettingInt">
+                                <property name="adjustment">previewDistanceAdjustment</property>
+                            </object>
+                        </child>
+                        
+                        <child>
+                            <object class="GtkAdjustment" id="previewDistanceAdjustment">
+                                <property name="lower">0</property>
+                                <property name="step_increment">1</property>
+                                <property name="upper">150</property>
+                                <property name="value">0</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <!-- Preview Delay Row -->
+                <child>
+                    <object class="AdwActionRow" id="previewDelayRow">
+                        <property name="title">Delay in ms before preview displays</property>
+                        
+                        <child>
+                            <object class="GtkSpinButton" id="previewDelaySettingInt">
+                                <property name="adjustment">previewDelayAdjustment</property>
+                            </object>
+                        </child>
+                        
+                        <child>
+                            <object class="GtkAdjustment" id="previewDelayAdjustment">
+                                <property name="lower">25</property>
+                                <property name="step_increment">1</property>
+                                <property name="upper">1000</property>
+                                <property name="value">25</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <!-- Double Width Previews Row -->
+                <child>
+                    <object class="AdwActionRow" id="doubleWidthRow">
+                        <property name="title">Use double width previews on sides in 4 and 5 column mode</property>
+                        
+                        <child>
+                            <object class="GtkCheckButton" id="doubleWidthInput">
+                                <property name="active">true</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <!-- Gap Row -->
+                <child>
+                    <object class="AdwActionRow" id="gapRow">
+                        <property name="title">Gap width around tiles</property>
+                        
+                        <child>
+                            <object class="GtkSpinButton" id="gapSettingInt">
+                                <property name="adjustment">gapAdjustment</property>
+                            </object>
+                        </child>
+                        
+                        <child>
+                            <object class="GtkAdjustment" id="gapAdjustment">
+                                <property name="lower">0</property>
+                                <property name="step_increment">2</property>
+                                <property name="upper">50</property>
+                                <property name="value">0</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <!-- Debug Row -->
+                <child>
+                    <object class="AdwActionRow" id="debugRow">
+                        <property name="title">Turn on debugging</property>
+                        
+                        <child>
+                            <object class="GtkCheckButton" id="debugInput">
+                                <property name="active">true</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </object>
+</interface>
