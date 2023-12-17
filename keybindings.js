@@ -1,9 +1,17 @@
 'use strict';
 /* global global */
 
-const Main = imports.ui.main;
-const Meta = imports.gi.Meta;
-const Shell = imports.gi.Shell;
+/* BEGIN NON-G45 */
+// const Main = imports.ui.main;
+// const Meta = imports.gi.Meta;
+// const Shell = imports.gi.Shell;
+/* END NON-G45 */
+
+/* BEGIN G45 */
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import Meta from "gi://Meta";
+import Shell from "gi://Shell";
+/* END G45 */ 
 
 /**
  * Keybindings.Manager is a simple convenience class for managing keyboard
@@ -20,7 +28,12 @@ const Shell = imports.gi.Shell;
  *     https://developer.gnome.org/meta/stable/meta-MetaKeybinding.html
  *     https://gitlab.gnome.org/GNOME/gnome-shell/blob/master/js/ui/windowManager.js#L1093-1112
  */
-var Manager = class Manager {
+/* BEGIN NON-G45 */
+// var Manager = class Manager {
+/* END NON-G45 */
+/* BEGIN G45 */
+export default class KeyBindingsManager {
+/* END G45 */
     constructor() {
         this._keybindings = new Map();
 
