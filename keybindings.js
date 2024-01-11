@@ -9,9 +9,9 @@
 
 /* BEGIN G45 */
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import Meta from "gi://Meta";
-import Shell from "gi://Shell";
-/* END G45 */ 
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+/* END G45 */
 
 /**
  * Keybindings.Manager is a simple convenience class for managing keyboard
@@ -107,5 +107,5 @@ export default class KeyBindingsManager {
         global.display.disconnect(this._acceleratorActivatedId);
         this.removeAll();
     }
-};
+}
 

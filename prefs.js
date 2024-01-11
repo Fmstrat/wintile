@@ -17,13 +17,13 @@
 //  */
 // function init() {
 //     // empty
-// } 
-/* END NON-G45 */ 
+// }
+/* END NON-G45 */
 
 /* BEGIN G45 */
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
-import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 export default class WinTileExtensionPreferences extends ExtensionPreferences {
 /* END G45 */
@@ -45,7 +45,7 @@ export default class WinTileExtensionPreferences extends ExtensionPreferences {
         window.add(behaviorPage);
 
         /* BEGIN G45 */
-        let gsettings = this.getSettings()
+        let gsettings = this.getSettings();
         /* END G45 */
         const bindSettings = (key, input) => {
             key.value = gsettings.get_value(input).deep_unpack();

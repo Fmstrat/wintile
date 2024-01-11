@@ -17,10 +17,10 @@ import Meta from 'gi://Meta';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import { Extension }from 'resource:///org/gnome/shell/extensions/extension.js';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import Clutter from 'gi://Clutter';
 import St from 'gi://St';
-import { PACKAGE_VERSION } from 'resource:///org/gnome/shell/misc/config.js';
+import {PACKAGE_VERSION} from 'resource:///org/gnome/shell/misc/config.js';
 import KeyBindingsManager from './keybindings.js';
 const SHELL_VERSION = parseFloat(PACKAGE_VERSION);
 /* END G45 */
@@ -88,9 +88,9 @@ function updateSettings() {
 //     extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
 //     shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10),
 // };
-// imports.searchPath.unshift(wintile.extdatadir); 
+// imports.searchPath.unshift(wintile.extdatadir);
 
-// const KeyBindings = imports.keybindings; 
+// const KeyBindings = imports.keybindings;
 /* END NON-G45 */
 
 let keyManager = null;
