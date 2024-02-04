@@ -1,13 +1,11 @@
 {
 	"name": "WinTile",
-	"description": "WinTile is a hotkey driven window tiling system for GNOME that imitates the standard Win-Arrow keys of Windows 10, allowing you to maximize, maximize to sides, or 1/4 sized to corner across a single or multiple monitors using just Super+Arrow.\n\nAs of v16, WinTile also supports:\n- 1-5 columns and 1-5 rows for standard or ultrawide monitors\n- Top/bottom half support\n- Mouse preview and snapping for placing windows\n- 'Maximize' mode, which adds/removes GNOME animations\n- 'Ultrawide-only' mode, to allow standard screens to have different cols/row than ultrawides\n- Portrait screens will automatically swap columns and rows\n- Add gaps around tiles to avoid the 'crowded elevator' feeling'\n- Ctrl+Super+Arrow to grow a tile in that direction if space is available\n- Ctrl+drag to drop a tile in a specific spot\n- Ctrl+Super+drag to draw a grid for the new tile",
+	"description": "WinTile is a hotkey driven window tiling system for GNOME that imitates the standard Win-Arrow keys of Windows 10, allowing you to maximize, maximize to sides, or 1/4 sized to corner across a single or multiple monitors using just Super+Arrow.\n\nAs of v17, WinTile also supports:\n- 1-5 columns and 1-5 rows for standard or ultrawide monitors\n- Top/bottom half support\n- Mouse preview and snapping for placing windows\n- 'Maximize' mode, which adds/removes GNOME animations\n- 'Ultrawide-only' mode, to allow standard screens to have different cols/row than ultrawides\n- Portrait screens will automatically swap columns and rows\n- Add gaps around tiles to avoid the 'crowded elevator' feeling'\n- Ctrl+Super+Arrow to grow a tile in that direction if space is available\n- Ctrl+drag to drop a tile in a specific spot\n- Ctrl+Super+drag to draw a grid for the new tile",
 	"uuid": "wintile@nowsci.com",
 	"url": "https://github.com/fmstrat/wintile",
 	"settings-schema":"org.gnome.shell.extensions.wintile",
 	"shell-version": [
-		"42",
-		"43",
-		"44"
+		"45"
 	],
 	"version": 17
 }
