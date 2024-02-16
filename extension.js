@@ -1,27 +1,28 @@
 /* global global */
 
 /* BEGIN NON-G45 */
-const Meta = imports.gi.Meta;
-const Main = imports.ui.main;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Clutter = imports.gi.Clutter;
-const St = imports.gi.St;
-const Config = imports.misc.config;
-const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
+// const Meta = imports.gi.Meta;
+// const Main = imports.ui.main;
+// const Gio = imports.gi.Gio;
+// const GLib = imports.gi.GLib;
+// const ExtensionUtils = imports.misc.extensionUtils;
+// const Clutter = imports.gi.Clutter;
+// const St = imports.gi.St;
+// const Config = imports.misc.config;
+// const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 /* END NON-G45 */
 
 /* BEGIN G45 */
-// import Meta from 'gi://Meta';
-// import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-// import Gio from 'gi://Gio';
-// import GLib from 'gi://GLib';
-// import Extension from 'resource:///org/gnome/shell/extensions/extension.js';
-// import Clutter from 'gi://Clutter';
-// import St from 'gi://St';
-// import Config from imports.misc.config;
-// const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
+import Meta from 'gi://Meta';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import Clutter from 'gi://Clutter';
+import St from 'gi://St';
+import {PACKAGE_VERSION} from 'resource:///org/gnome/shell/misc/config.js';
+import KeyBindingsManager from './keybindings.js';
+const SHELL_VERSION = parseFloat(PACKAGE_VERSION);
 /* END G45 */
 
 let onWindowGrabBegin, onWindowGrabEnd;
@@ -82,13 +83,16 @@ function updateSettings() {
     _log(JSON.stringify(config));
 }
 
-const wintile = {
-    extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
-    shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10),
-};
-imports.searchPath.unshift(wintile.extdatadir);
+/* BEGIN NON-G45 */
+// const wintile = {
+//     extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
+//     shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10),
+// };
+// imports.searchPath.unshift(wintile.extdatadir);
 
-const KeyBindings = imports.keybindings;
+// const KeyBindings = imports.keybindings;
+/* END NON-G45 */
+
 let keyManager = null;
 var oldbindings = {
     unmaximize: [],
@@ -171,8 +175,8 @@ function moveApp(app, loc) {
     var colWidth = Math.floor(monitor.width / colCount);
     var rowHeight = Math.floor(monitor.height / rowCount);
 
-    let x = loc.col * colWidth + monitor.x;
-    let y = loc.row * rowHeight + monitor.y;
+    let x = loc.col * colWidth + monitor.leftEdge;
+    let y = loc.row * rowHeight + monitor.topEdge;
     let w = loc.width * colWidth;
     let h = loc.height * rowHeight;
 
@@ -799,26 +803,26 @@ function checkIfNearGrid(app) {
     _log(`checkIfNearGrid) keys - ctrl:${ctrlPressed} superPressed:${superPressed}`);
     _log(`checkIfNearGrid) monitor - x:${monitor.x} y:${monitor.y} w:${monitor.width} h:${monitor.height}`);
     _log(`checkIfNearGrid) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
-    var c = Math.floor((mouseX - monitor.x) / colWidth);
-    var r = Math.floor((mouseY - monitor.y) / rowHeight);
+    var c = Math.floor((mouseX - monitor.leftEdge) / colWidth);
+    var r = Math.floor((mouseY - monitor.topEdge) / rowHeight);
     c = Math.max(0, Math.min(c, colCount - 1));
     r = Math.max(0, Math.min(r, rowCount - 1));
 
-    var gridX = c * colWidth + monitor.x;
-    var inGrid = mouseX > gridX && mouseX < gridX + colWidth;
-    var centerOfGrid = mouseX > Math.floor(gridX + colWidth / 3) && mouseX < Math.floor(gridX + (2 * colWidth / 3));
-    var topRow = mouseY < monitor.y + rowHeight;
-    var bottomRow = mouseY > monitor.y + monitor.height - rowHeight;
-    var nearTop = isClose(mouseY, monitor.y) || mouseY < monitor.y;
-    var nearBottom = isClose(mouseY, monitor.y + monitor.height) || mouseY > monitor.y + monitor.height;
-    var nearLeft = isClose(mouseX, monitor.x) || mouseX < monitor.x;
-    var nearRight = isClose(mouseX, monitor.rightEdge) || mouseX > monitor.rightEdge;
+    var gridX = c * colWidth + monitor.leftEdge;
+    var inGrid = mouseX >= gridX && mouseX <= gridX + colWidth;
+    var centerOfGrid = mouseX >= Math.floor(gridX + colWidth / 3) && mouseX <= Math.floor(gridX + (2 * colWidth / 3));
+    var topRow = mouseY <= monitor.topEdge + rowHeight;
+    var bottomRow = mouseY >= monitor.bottomEdge - rowHeight;
+    var nearTop = isClose(mouseY, monitor.topEdge) || mouseY <= monitor.topEdge;
+    var nearBottom = isClose(mouseY, monitor.bottomEdge) || mouseY >= monitor.bottomEdge;
+    var nearLeft = isClose(mouseX, monitor.leftEdge) || mouseX <= monitor.leftEdge;
+    var nearRight = isClose(mouseX, monitor.rightEdge) || mouseX >= monitor.rightEdge;
 
-    var centerOfScreenH = monitor.x + Math.floor(monitor.width / 2);
+    var centerOfScreenH = monitor.leftEdge + Math.floor(monitor.width / 2);
     var columnWidthFraction = Math.floor(colWidth / 3);
     var nearCenterH = mouseX > centerOfScreenH - (columnWidthFraction / 2) && mouseX < centerOfScreenH + (columnWidthFraction / 2);
 
-    var centerOfScreenV = monitor.y + Math.floor(monitor.height / 2);
+    var centerOfScreenV = monitor.topEdge + Math.floor(monitor.height / 2);
     var rowHeightFraction = Math.floor(rowHeight / 3);
     var nearCenterV = mouseY > centerOfScreenV - (rowHeightFraction / 2) && mouseY < centerOfScreenV + (rowHeightFraction / 2);
 
@@ -1068,10 +1072,24 @@ function getMonitorInfo(monitorIndex) {
 /**
  *
  */
-class WintileExtension {
+
+/* BEGIN NON-G45 */
+// class WintileExtension {
+/* END NON-G45 */
+
+/* BEGIN G45 */
+export default class WintileExtension extends Extension {
+/* END G45 */
     enable() {
         _log('enable) Keymanager is being defined');
-        keyManager = new KeyBindings.Manager();
+
+        /* BEGIN G45 */
+        keyManager = new KeyBindingsManager();
+        /* END G45 */
+
+        /* BEGIN NON-G45 */
+        // keyManager = new KeyBindings.Manager();
+        /* END NON-G45 */
         let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
         let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
         let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
@@ -1139,7 +1157,13 @@ class WintileExtension {
         });
         Main.uiGroup.add_actor(preview);
 
-        gsettings = ExtensionUtils.getSettings();
+        /* BEGIN G45 */
+        gsettings = this.getSettings();
+        /* END G45 */
+
+        /* BEGIN NON-G45 */
+        // gsettings = ExtensionUtils.getSettings();
+        /* END NON-G45 */
         updateSettings();
 
         // Watch the gsettings for changes
@@ -1187,10 +1211,12 @@ class WintileExtension {
     }
 }
 
-/**
- *
- * @param {object} _meta = standard meta object
- */
-function init(_meta) {
-    return new WintileExtension();
-}
+/* BEGIN NON-G45 */
+// /**
+//  *
+//  * @param {object} _meta = standard meta object
+//  */
+// function init(_meta) {
+//     return new WintileExtension();
+// }
+/* END NON-G45 */
