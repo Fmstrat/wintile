@@ -5,7 +5,7 @@
 	"url": "https://github.com/fmstrat/wintile",
 	"settings-schema":"org.gnome.shell.extensions.wintile",
 	"shell-version": [
-		"45"
+		"46"
 	],
 	"version": 17
 }

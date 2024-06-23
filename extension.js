@@ -1155,7 +1155,7 @@ export default class WintileExtension extends Extension {
             style_class: 'tile-preview',
             visible: false,
         });
-        Main.uiGroup.add_actor(preview);
+        Main.uiGroup.add_child(preview);
 
         /* BEGIN G45 */
         gsettings = this.getSettings();

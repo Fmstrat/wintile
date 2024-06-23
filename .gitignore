@@ -1,4 +1,8 @@
-wintile@nowsci.com.zip
+# node.js stuff
 node_modules/
 package-lock.json
 package.json
+
+# compiled output
+wintile@nowsci.com
+wintile@nowsci.com.zip
