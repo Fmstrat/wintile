@@ -8,7 +8,7 @@
         <child>
             <object class="AdwPreferencesGroup" id="gridGroup">
                 <property name="title">Grid size</property>
-                <property name="description">Configure the rows and columns of YourExtensionName</property>
+                <property name="description">Configure the rows and columns of Wintile</property>
 
                 <child>
                     <object class="AdwActionRow" id="colsRow">

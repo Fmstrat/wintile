@@ -1,28 +1,32 @@
 /* global global */
 
+
 /* BEGIN NON-G45 */
-// const Meta = imports.gi.Meta;
-// const Main = imports.ui.main;
-// const Gio = imports.gi.Gio;
-// const GLib = imports.gi.GLib;
-// const ExtensionUtils = imports.misc.extensionUtils;
-// const Clutter = imports.gi.Clutter;
-// const St = imports.gi.St;
-// const Config = imports.misc.config;
-// const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
+const Meta = imports.gi.Meta;
+const Main = imports.ui.main;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Clutter = imports.gi.Clutter;
+const St = imports.gi.St;
+const Config = imports.misc.config;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const KeyBindingsManager = Me.imports.keybindings.KeyBindingsManager;
+const SHELL_VERSION = parseFloat(Config.PACKAGE_VERSION);
 /* END NON-G45 */
 
 /* BEGIN G45 */
-import Meta from 'gi://Meta';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
-import Clutter from 'gi://Clutter';
-import St from 'gi://St';
-import {PACKAGE_VERSION} from 'resource:///org/gnome/shell/misc/config.js';
-import KeyBindingsManager from './keybindings.js';
-const SHELL_VERSION = parseFloat(PACKAGE_VERSION);
+// import Meta from 'gi://Meta';
+// import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+// import Gio from 'gi://Gio';
+// import GLib from 'gi://GLib';
+// import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+// import Clutter from 'gi://Clutter';
+// import St from 'gi://St';
+// import {PACKAGE_VERSION} from 'resource:///org/gnome/shell/misc/config.js';
+// import KeyBindingsManager from './keybindings.js';
+// const SHELL_VERSION = parseFloat(PACKAGE_VERSION);
 /* END G45 */
 
 let onWindowGrabBegin, onWindowGrabEnd;
@@ -42,7 +46,7 @@ journalctl -qf | grep -i -e Wintile -e 'js error'
  */
 function _log(message) {
     if (config.debug)
-        log('[WinTile]', message);
+        console.log('[Wintile]', message);
 }
 
 let config = {
@@ -82,16 +86,6 @@ function updateSettings() {
     config.debug = gsettings.get_value('debug').deep_unpack();
     _log(JSON.stringify(config));
 }
-
-/* BEGIN NON-G45 */
-// const wintile = {
-//     extdatadir: imports.misc.extensionUtils.getCurrentExtension().path,
-//     shell_version: parseInt(Config.PACKAGE_VERSION.split('.')[1], 10),
-// };
-// imports.searchPath.unshift(wintile.extdatadir);
-
-// const KeyBindings = imports.keybindings;
-/* END NON-G45 */
 
 let keyManager = null;
 var oldbindings = {
@@ -329,6 +323,10 @@ function sendMove(direction, ctrlPressed = false) {
     _log('---');
     _log(`sendMove) ${direction} ctrl: ${ctrlPressed}`);
     var app = global.display.focus_window;
+    if (!app) {
+        _log('no window selected');
+        return;
+    }
     var monitorIndex = app.get_monitor();
     var curMonitor = getMonitorInfo(monitorIndex);
 
@@ -712,6 +710,7 @@ function windowGrabEnd(metaWindow, metaGrabOp) {
  */
 function changeBinding(settingsObject, key, oldBinding, newBinding) {
     var binding = oldbindings[key.replace(/-/g, '_')];
+    if (!binding) binding = oldbindings[key];
     var _newbindings = [];
     for (var i = 0; i < binding.length; i++) {
         let currentbinding = binding[i];
@@ -1074,22 +1073,24 @@ function getMonitorInfo(monitorIndex) {
  */
 
 /* BEGIN NON-G45 */
-// class WintileExtension {
+var WintileExtension = class WintileExtension {
 /* END NON-G45 */
 
 /* BEGIN G45 */
-export default class WintileExtension extends Extension {
+// export default class WintileExtension extends Extension {
 /* END G45 */
+
     enable() {
         _log('enable) Keymanager is being defined');
 
+        /* BEGIN NON-G45 */
+        keyManager = new KeyBindingsManager(`${Me.path}/schemas`);
+        /* END NON-G45 */
+
         /* BEGIN G45 */
-        keyManager = new KeyBindingsManager();
+        // keyManager = new KeyBindingsManager();
         /* END G45 */
 
-        /* BEGIN NON-G45 */
-        // keyManager = new KeyBindings.Manager();
-        /* END NON-G45 */
         let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
         let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
         let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
@@ -1108,6 +1109,19 @@ export default class WintileExtension extends Extension {
         changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
         changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
         mutterSettings.set_boolean('edge-tiling', false);
+        try {
+            let tilingAssistantSettings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.tiling-assistant'});
+            oldbindings['restore-window'] = tilingAssistantSettings.get_strv('restore-window');
+            oldbindings['tile-left-half'] = tilingAssistantSettings.get_strv('tile-left-half');
+            oldbindings['tile-maximize'] = tilingAssistantSettings.get_strv('tile-maximize');
+            oldbindings['tile-right-half'] = tilingAssistantSettings.get_strv('tile-right-half');
+            changeBinding(tilingAssistantSettings, 'restore-window', '<Super>Down', '<Alt><Shift><Super>Down');
+            changeBinding(tilingAssistantSettings, 'tile-left-half', '<Super>Left', '<Alt><Shift><Super>Left');
+            changeBinding(tilingAssistantSettings, 'tile-maximize', '<Super>Up', '<Alt><Shift><Super>Up');
+            changeBinding(tilingAssistantSettings, 'tile-right-half', '<Super>Right', '<Alt><Shift><Super>Right');
+        } catch (error) {
+            _log('enable) org.gnome.shell.extensions.tiling-assistant does not exist');
+        }
         keyManagerTimer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 3000, () => {
             keyManager.add('<Super><Control>left', () => {
                 requestMove('left', true);
@@ -1135,19 +1149,11 @@ export default class WintileExtension extends Extension {
             });
         });
 
-        // Since GNOME 40 the metaDisplay argument isn't passed anymore to these callbacks.
-        // We "translate" the parameters here so that things work on both GNOME 3 and 40.
-        onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
-            if (SHELL_VERSION >= 40)
-                windowGrabBegin(metaScreen, metaWindow);
-            else
-                windowGrabBegin(metaWindow, metaGrabOp);
+        onWindowGrabBegin = global.display.connect('grab-op-begin', (metaDisplay, metaScreen, metaWindow, _metaGrabOp, _gpointer) => {
+            windowGrabBegin(metaScreen, metaWindow);
         });
-        onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, metaGrabOp, _gpointer) => {
-            if (SHELL_VERSION >= 40)
-                windowGrabEnd(metaScreen, metaWindow);
-            else
-                windowGrabEnd(metaWindow, metaGrabOp);
+        onWindowGrabEnd = global.display.connect('grab-op-end', (metaDisplay, metaScreen, metaWindow, _metaGrabOp, _gpointer) => {
+            windowGrabEnd(metaScreen, metaWindow);
         });
 
         // Create a new gsettings object
@@ -1155,15 +1161,19 @@ export default class WintileExtension extends Extension {
             style_class: 'tile-preview',
             visible: false,
         });
-        Main.uiGroup.add_actor(preview);
-
-        /* BEGIN G45 */
-        gsettings = this.getSettings();
-        /* END G45 */
+        if (SHELL_VERSION < 46.0)
+            Main.uiGroup.add_actor(preview);
+        else
+            Main.uiGroup.add_child(preview);
 
         /* BEGIN NON-G45 */
-        // gsettings = ExtensionUtils.getSettings();
+        gsettings = ExtensionUtils.getSettings();
         /* END NON-G45 */
+
+        /* BEGIN G45 */
+        // gsettings = this.getSettings();
+        /* END G45 */
+
         updateSettings();
 
         // Watch the gsettings for changes
@@ -1195,6 +1205,16 @@ export default class WintileExtension extends Extension {
         mutterKeybindingSettings = null;
         mutterSettings.reset('edge-tiling');
         mutterSettings = null;
+        try {
+            let tilingAssistantSettings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.tiling-assistant'});
+            tilingAssistantSettings.reset('restore-window');
+            tilingAssistantSettings.reset('tile-left-half');
+            tilingAssistantSettings.reset('tile-maximize');
+            tilingAssistantSettings.reset('tile-right-half');
+            tilingAssistantSettings = null;
+        } catch (error) {
+            _log('disable) org.gnome.shell.extensions.tiling-assistant does not exist');
+        }
         global.display.disconnect(onWindowGrabBegin);
         global.display.disconnect(onWindowGrabEnd);
         onWindowGrabBegin = null;
@@ -1212,11 +1232,7 @@ export default class WintileExtension extends Extension {
 }
 
 /* BEGIN NON-G45 */
-// /**
-//  *
-//  * @param {object} _meta = standard meta object
-//  */
-// function init(_meta) {
-//     return new WintileExtension();
-// }
+function init() {
+    return new WintileExtension();
+}
 /* END NON-G45 */

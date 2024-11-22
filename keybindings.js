@@ -2,15 +2,15 @@
 /* global global */
 
 /* BEGIN NON-G45 */
-// const Main = imports.ui.main;
-// const Meta = imports.gi.Meta;
-// const Shell = imports.gi.Shell;
+const Main = imports.ui.main;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
 /* END NON-G45 */
 
 /* BEGIN G45 */
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
+// import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+// import Meta from 'gi://Meta';
+// import Shell from 'gi://Shell';
 /* END G45 */
 
 /**
@@ -29,10 +29,10 @@ import Shell from 'gi://Shell';
  *     https://gitlab.gnome.org/GNOME/gnome-shell/blob/master/js/ui/windowManager.js#L1093-1112
  */
 /* BEGIN NON-G45 */
-// var Manager = class Manager {
+var KeyBindingsManager = class KeyBindingsManager {
 /* END NON-G45 */
 /* BEGIN G45 */
-export default class KeyBindingsManager {
+// export default class KeyBindingsManager {
 /* END G45 */
     constructor() {
         this._keybindings = new Map();

@@ -1,52 +1,60 @@
 'use strict';
 
 /* BEGIN NON-G45 */
-// const Gio = imports.gi.Gio;
-// const Gtk = imports.gi.Gtk;
-
-// const ExtensionUtils = imports.misc.extensionUtils;
-// const Me = ExtensionUtils.getCurrentExtension();
-
-// const Gettext = imports.gettext;
-// const _ = Gettext.domain('wintile').gettext;
-
-// const gsettings = ExtensionUtils.getSettings();
-
-// /**
-//  *
-//  */
-// function init() {
-//     // empty
-// }
+const Gio = imports.gi.Gio;
+const Gtk = imports.gi.Gtk;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
 /* END NON-G45 */
 
 /* BEGIN G45 */
-import Gio from 'gi://Gio';
-import Gtk from 'gi://Gtk';
-import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
-
-export default class WinTileExtensionPreferences extends ExtensionPreferences {
+// import Gio from 'gi://Gio';
+// import Gtk from 'gi://Gtk';
+// import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 /* END G45 */
-    /**
-     *
-     * @param {object} window - Don't worry about this. Gnome handles it for you.
-     */
-    /* BEGIN G45 */
-    fillPreferencesWindow(window) {
-    /* END G45 */
-    /* BEGIN NON-G45 */
-    // function fillPreferencesWindow(window) {
-    /* END NON-G45 */
+
+/* BEGIN NON-G45 */
+function buildPrefsWidget() {
+/* END NON-G45 */
+
+/* BEGIN G45 */
+// export default class WinTileExtensionPreferences extends ExtensionPreferences {
+//     fillPreferencesWindow(window) {
+/* END G45 */
+
         let builder = Gtk.Builder.new();
-        builder.add_from_file(`${this.path}/settings.ui`);
-        let gridPage = builder.get_object('gridPage');
-        let behaviorPage = builder.get_object('behaviorPage');
-        window.add(gridPage);
-        window.add(behaviorPage);
+
+        /* BEGIN NON-G45 */
+        builder.add_from_file(`${Me.path}/settings.ui`);
+        /* END NON-G45 */
 
         /* BEGIN G45 */
-        let gsettings = this.getSettings();
+        // builder.add_from_file(`${this.path}/settings.ui`);
         /* END G45 */
+
+        let gridPage = builder.get_object('gridPage');
+        let behaviorPage = builder.get_object('behaviorPage');
+
+        /* BEGIN NON-G45 */
+        let window = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10,
+            margin_top: 20,
+            margin_bottom: 20,
+            margin_start: 20,
+            margin_end: 20
+        });
+        window.append(gridPage);
+        window.append(behaviorPage);
+        let gsettings = ExtensionUtils.getSettings();
+        /* END NON-G45 */
+
+        /* BEGIN G45 */
+        // window.add(gridPage);
+        // window.add(behaviorPage);
+        // let gsettings = this.getSettings();
+        /* END G45 */
+
         const bindSettings = (key, input) => {
             key.value = gsettings.get_value(input).deep_unpack();
             gsettings.bind(input, key, 'active', Gio.SettingsBindFlags.DEFAULT);
@@ -92,5 +100,17 @@ export default class WinTileExtensionPreferences extends ExtensionPreferences {
 
         // make sure that the non-ultrawide menu is hidden unless it's enabled
         toggleUltrawide();
+
+        /* BEGIN NON-G45 */
+        return window;
+        /* END NON-G45 */
     }
+/* BEGIN G45 */
+// }
+/* END G45 */
+
+/* BEGIN NON-G45 */
+function init() {
+    console.log('init');
 }
+/* END NON-G45 */

@@ -5,7 +5,9 @@
 	"url": "https://nowsci.com/wintile/",
 	"settings-schema":"org.gnome.shell.extensions.wintile",
 	"shell-version": [
-		"43"
+		"45",
+		"46",
+		"47"
 	],
-	"version": 18
+	"version": 19
 }
