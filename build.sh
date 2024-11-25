@@ -10,12 +10,12 @@ G45() {
         elif [[ "${LINE}" = *"/* END G45 */"* ]]; then
             IN_G45=0
         fi
-        if (( IN_G45 == 1 )); then
-            echo "${LINE}" | sed -E 's|^(\s+)?// |\1|'
-        elif (( IN_NON_G45 == 1 )) && ! [[ ${LINE} =~ ^[[:space:]]*// ]]; then
-            echo "${LINE}" | sed -E 's|^(\s+)?|\1// |'
-        else
-            echo "${LINE}"
+        if [[ "${LINE}" != *"/* BEGIN "* ]] && [[ "${LINE}" != *"/* END "* ]]; then
+            if (( IN_G45 == 1 )); then
+                echo "${LINE}" | sed -E 's|^(\s+)?// |\1|'
+            elif (( IN_NON_G45 == 0 )); then
+                echo "${LINE}"
+            fi
         fi
         if [[ "${LINE}" = *"/* BEGIN NON-G45 */"* ]]; then
             IN_NON_G45=1
@@ -35,12 +35,12 @@ NON_G45() {
         elif [[ "${LINE}" = *"/* END G45 */"* ]]; then
             IN_G45=0
         fi
-        if (( IN_G45 == 1 )) && ! [[ ${LINE} =~ ^[[:space:]]*// ]]; then
-            echo "${LINE}" | sed -E 's|^(\s+)?|\1// |'
-        elif (( IN_NON_G45 == 1 )); then
-            echo "${LINE}" | sed -E 's|^(\s+)?// |\1|'
-        else
-            echo "${LINE}"
+        if [[ "${LINE}" != *"/* BEGIN "* ]] && [[ "${LINE}" != *"/* END "* ]]; then
+            if (( IN_NON_G45 == 1 )); then
+                echo "${LINE}" | sed -E 's|^(\s+)?// |\1|'
+            elif (( IN_G45 == 0 )); then
+                echo "${LINE}"
+            fi
         fi
         if [[ "${LINE}" = *"/* BEGIN NON-G45 */"* ]]; then
             IN_NON_G45=1

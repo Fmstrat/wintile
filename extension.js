@@ -1109,8 +1109,9 @@ var WintileExtension = class WintileExtension {
         changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
         changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
         mutterSettings.set_boolean('edge-tiling', false);
+        let tilingAssistantSettings;
         try {
-            let tilingAssistantSettings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.tiling-assistant'});
+            tilingAssistantSettings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.tiling-assistant'});
             oldbindings['restore-window'] = tilingAssistantSettings.get_strv('restore-window');
             oldbindings['tile-left-half'] = tilingAssistantSettings.get_strv('tile-left-half');
             oldbindings['tile-maximize'] = tilingAssistantSettings.get_strv('tile-maximize');
@@ -1188,9 +1189,6 @@ var WintileExtension = class WintileExtension {
         keyManager.removeAll();
         keyManager.destroy();
         keyManager = null;
-        let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
-        let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
-        let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
         try {
             let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
             shellSettings.reset('edge-tiling');
@@ -1206,7 +1204,6 @@ var WintileExtension = class WintileExtension {
         mutterSettings.reset('edge-tiling');
         mutterSettings = null;
         try {
-            let tilingAssistantSettings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.tiling-assistant'});
             tilingAssistantSettings.reset('restore-window');
             tilingAssistantSettings.reset('tile-left-half');
             tilingAssistantSettings.reset('tile-maximize');
