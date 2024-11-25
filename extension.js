@@ -36,6 +36,13 @@ let windowMoving = false;
 let dragStart = null;
 let gsettings;
 
+let settingsStorage = {
+    desktopSettings: null,
+    mutterKeybindingSettings: null,
+    mutterSettings: null,
+    shellSettings: null,
+    tilingAssistantSettings: null,
+}
 
 /* View logs with
 journalctl -qf | grep -i -e Wintile -e 'js error'
@@ -1068,10 +1075,6 @@ function getMonitorInfo(monitorIndex) {
     return monitor;
 }
 
-/**
- *
- */
-
 /* BEGIN NON-G45 */
 var WintileExtension = class WintileExtension {
 /* END NON-G45 */
@@ -1079,6 +1082,8 @@ var WintileExtension = class WintileExtension {
 /* BEGIN G45 */
 // export default class WintileExtension extends Extension {
 /* END G45 */
+
+
 
     enable() {
         _log('enable) Keymanager is being defined');
@@ -1091,35 +1096,34 @@ var WintileExtension = class WintileExtension {
         // keyManager = new KeyBindingsManager();
         /* END G45 */
 
-        let desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
-        let mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
-        let mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
+        settingsStorage.desktopSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.wm.keybindings'});
+        settingsStorage.mutterKeybindingSettings = new Gio.Settings({schema_id: 'org.gnome.mutter.keybindings'});
+        settingsStorage.mutterSettings = new Gio.Settings({schema_id: 'org.gnome.mutter'});
         try {
-            let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
-            shellSettings.set_boolean('edge-tiling', false);
+            settingsStorage.shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
+            settingsStorage.shellSettings.set_boolean('edge-tiling', false);
         } catch (error) {
             _log('enable) org.gnome.shell.overrides does not exist');
         }
-        oldbindings['unmaximize'] = desktopSettings.get_strv('unmaximize');
-        oldbindings['maximize'] = desktopSettings.get_strv('maximize');
-        oldbindings['toggle_tiled_left'] = mutterKeybindingSettings.get_strv('toggle-tiled-left');
-        oldbindings['toggle_tiled_right'] = mutterKeybindingSettings.get_strv('toggle-tiled-right');
-        changeBinding(desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
-        changeBinding(desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
-        changeBinding(mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
-        changeBinding(mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
-        mutterSettings.set_boolean('edge-tiling', false);
-        let tilingAssistantSettings;
+        oldbindings['unmaximize'] = settingsStorage.desktopSettings.get_strv('unmaximize');
+        oldbindings['maximize'] = settingsStorage.desktopSettings.get_strv('maximize');
+        oldbindings['toggle_tiled_left'] = settingsStorage.mutterKeybindingSettings.get_strv('toggle-tiled-left');
+        oldbindings['toggle_tiled_right'] = settingsStorage.mutterKeybindingSettings.get_strv('toggle-tiled-right');
+        changeBinding(settingsStorage.desktopSettings, 'unmaximize', '<Super>Down', '<Control><Shift><Super>Down');
+        changeBinding(settingsStorage.desktopSettings, 'maximize', '<Super>Up', '<Control><Shift><Super>Up');
+        changeBinding(settingsStorage.mutterKeybindingSettings, 'toggle-tiled-left', '<Super>Left', '<Control><Shift><Super>Left');
+        changeBinding(settingsStorage.mutterKeybindingSettings, 'toggle-tiled-right', '<Super>Right', '<Control><Shift><Super>Right');
+        settingsStorage.mutterSettings.set_boolean('edge-tiling', false);
         try {
-            tilingAssistantSettings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.tiling-assistant'});
-            oldbindings['restore-window'] = tilingAssistantSettings.get_strv('restore-window');
-            oldbindings['tile-left-half'] = tilingAssistantSettings.get_strv('tile-left-half');
-            oldbindings['tile-maximize'] = tilingAssistantSettings.get_strv('tile-maximize');
-            oldbindings['tile-right-half'] = tilingAssistantSettings.get_strv('tile-right-half');
-            changeBinding(tilingAssistantSettings, 'restore-window', '<Super>Down', '<Alt><Shift><Super>Down');
-            changeBinding(tilingAssistantSettings, 'tile-left-half', '<Super>Left', '<Alt><Shift><Super>Left');
-            changeBinding(tilingAssistantSettings, 'tile-maximize', '<Super>Up', '<Alt><Shift><Super>Up');
-            changeBinding(tilingAssistantSettings, 'tile-right-half', '<Super>Right', '<Alt><Shift><Super>Right');
+            settingsStorage.tilingAssistantSettings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.tiling-assistant'});
+            oldbindings['restore-window'] = settingsStorage.tilingAssistantSettings.get_strv('restore-window');
+            oldbindings['tile-left-half'] = settingsStorage.tilingAssistantSettings.get_strv('tile-left-half');
+            oldbindings['tile-maximize'] = settingsStorage.tilingAssistantSettings.get_strv('tile-maximize');
+            oldbindings['tile-right-half'] = settingsStorage.tilingAssistantSettings.get_strv('tile-right-half');
+            changeBinding(settingsStorage.tilingAssistantSettings, 'restore-window', '<Super>Down', '<Alt><Shift><Super>Down');
+            changeBinding(settingsStorage.tilingAssistantSettings, 'tile-left-half', '<Super>Left', '<Alt><Shift><Super>Left');
+            changeBinding(settingsStorage.tilingAssistantSettings, 'tile-maximize', '<Super>Up', '<Alt><Shift><Super>Up');
+            changeBinding(settingsStorage.tilingAssistantSettings, 'tile-right-half', '<Super>Right', '<Alt><Shift><Super>Right');
         } catch (error) {
             _log('enable) org.gnome.shell.extensions.tiling-assistant does not exist');
         }
@@ -1190,25 +1194,25 @@ var WintileExtension = class WintileExtension {
         keyManager.destroy();
         keyManager = null;
         try {
-            let shellSettings = new Gio.Settings({schema_id: 'org.gnome.shell.overrides'});
-            shellSettings.reset('edge-tiling');
+            settingsStorage.shellSettings.reset('edge-tiling');
+            settingsStorage.shellSettings = null;
         } catch (error) {
             _log('disable) org.gnome.shell.overrides does not exist');
         }
-        desktopSettings.reset('unmaximize');
-        desktopSettings.reset('maximize');
-        desktopSettings = null;
-        mutterKeybindingSettings.reset('toggle-tiled-left');
-        mutterKeybindingSettings.reset('toggle-tiled-right');
-        mutterKeybindingSettings = null;
-        mutterSettings.reset('edge-tiling');
-        mutterSettings = null;
+        settingsStorage.desktopSettings.reset('unmaximize');
+        settingsStorage.desktopSettings.reset('maximize');
+        settingsStorage.desktopSettings = null;
+        settingsStorage.mutterKeybindingSettings.reset('toggle-tiled-left');
+        settingsStorage.mutterKeybindingSettings.reset('toggle-tiled-right');
+        settingsStorage.mutterKeybindingSettings = null;
+        settingsStorage.mutterSettings.reset('edge-tiling');
+        settingsStorage.mutterSettings = null;
         try {
-            tilingAssistantSettings.reset('restore-window');
-            tilingAssistantSettings.reset('tile-left-half');
-            tilingAssistantSettings.reset('tile-maximize');
-            tilingAssistantSettings.reset('tile-right-half');
-            tilingAssistantSettings = null;
+            settingsStorage.tilingAssistantSettings.reset('restore-window');
+            settingsStorage.tilingAssistantSettings.reset('tile-left-half');
+            settingsStorage.tilingAssistantSettings.reset('tile-maximize');
+            settingsStorage.tilingAssistantSettings.reset('tile-right-half');
+            settingsStorage.tilingAssistantSettings = null;
         } catch (error) {
             _log('disable) org.gnome.shell.extensions.tiling-assistant does not exist');
         }
