@@ -1,0 +1,110 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Fraxinus Acer <>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unnamed project\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-25 23:03+0300\n"
+"PO-Revision-Date: 2025-08-02 15:54+0300\n"
+"Last-Translator: Fraxinus Acer\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 3.6\n"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:6
+msgid "Number of columns"
+msgstr "Количество столбцов"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:12
+msgid "Number of rows"
+msgstr "Количество рядов"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:18
+msgid "Ultrawide only"
+msgstr "Только широкоформатный"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:19
+msgid ""
+"When turned on, any monitor with a ratio less <= 16:9 will use different row "
+"and col counts."
+msgstr ""
+"При включении любой монитор с соотношением сторон менее <= 16:9 будет "
+"использовать другое количество строк и столбцов."
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:23
+msgid "Number of columns for non-ultrawide"
+msgstr "Количество столбцов для не широкоформатных"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:29
+msgid "Number of rows for non-ultrawide"
+msgstr "Количество рядов для не широкоформатных"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:35
+msgid "Turn on/off use of maximizing windows"
+msgstr "Включение/выключение использования разворачивания окон"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:36
+msgid ""
+"When on, certain windows that won't resize full screen like Terminal will, "
+"however animations may occur between tile shifts."
+msgstr ""
+"При включении некоторые окна не будут изменять размер во весь экран, как в "
+"терминале, однако анимация может происходить между сменами плитки."
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:40
+msgid "Turn use of minimizing windows on/off"
+msgstr "Включите/выключите использование функции сворачивания окон"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:41
+msgid "When off, windows will never be minimized."
+msgstr "Когда он выключен, окна никогда не будут свернуты."
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:45
+msgid "Turn on/off mouse positioning"
+msgstr "Включение/выключение позиционирования мышью"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:46
+msgid ""
+"When on, dragging windows with the mouse will allow placement into the grid."
+msgstr ""
+"Когда он включен, перетаскивание окон с помощью мыши позволит разместить их "
+"в сетке."
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:50
+msgid "Use double width previews on sides in 4 column mode"
+msgstr ""
+"Используйте предварительный просмотр двойной ширины по бокам в режиме с 4 "
+"колонками"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:51
+msgid ""
+"When on, dragging a window to the side will preview 2 columns wide instead "
+"of 1."
+msgstr ""
+"При включении перетаскивание окна в сторону приведет к просмотру 2 столбцов "
+"шириной вместо 1."
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:55
+msgid "Pixels from edge to start preview"
+msgstr "Пиксели от края до начала предварительного просмотра"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:61
+msgid "Delay in ms before preview displays"
+msgstr "Задержка в мс перед предварительным просмотром"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:67
+msgid "Gap width around tiles"
+msgstr "Ширина зазора между плитками"
+
+#: ../schemas/org.gnome.shell.extensions.wintile.gschema.xml:73
+msgid "Turn on/off debug output"
+msgstr "Включение/выключение отладочного вывода"
