@@ -107,5 +107,5 @@ var KeyBindingsManager = class KeyBindingsManager {
         global.display.disconnect(this._acceleratorActivatedId);
         this.removeAll();
     }
-}
+};
 
