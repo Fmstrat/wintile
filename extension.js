@@ -195,15 +195,9 @@ function moveApp(app, loc) {
         if (loc.height === rowCount && loc.width === colCount) {
             // Maximize
             _log('moveApp) maximize');
-            app.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
-        } else if (loc.height === rowCount && !config.gap) {
-            // Maximize vertically
-            _log('moveApp) maximize - v');
-            app.maximize(Meta.MaximizeFlags.VERTICAL);
-        } else if (loc.width === colCount && !config.gap) {
-            // Maximize horizontally
-            _log('moveApp) maximize - h');
-            app.maximize(Meta.MaximizeFlags.HORIZONTAL);
+            app.maximize();
+        } else {
+            moveAppCoordinates(app, x, y, w, h);
         }
     }
 
