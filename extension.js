@@ -221,6 +221,9 @@ function moveApp(app, loc) {
     if (upShift || leftShift)
         moveAppCoordinates(app, x, y, w, h);
 
+    const coords = app.get_frame_rect() || getDefaultFloatingRectangle(app);
+    app.wintile.curFrame = {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height}
+
     _log(`moveApp) window.x: ${window.x} window.y: ${window.y} window.width: ${window.width} window.height: ${window.height}`);
 }
 
@@ -236,6 +239,29 @@ function unMaximizeIfMaximized(app) {
 /**
  *
  * @param {object} app - The window object
+ */
+function validateTile(app) {
+    if (app.wintile && app.wintile.curFrame) {
+        const coords = app.get_frame_rect() || getDefaultFloatingRectangle(app);
+        if (
+            coords.x != app.wintile.curFrame.x &&
+            coords.y != app.wintile.curFrame.y &&
+            coords.width != app.wintile.curFrame.width &&
+            coords.height != app.wintile.curFrame.height
+        ) {
+            _log(`validateTile) window was moved with an external tool, resetting tile`);
+            app.wintile = null;
+        } else {
+            _log(`validateTile) tile location is valid`);
+        }
+    } else {
+        _log(`validateTile) no current frame`);
+    }
+}
+
+/**
+ *
+ * @param {object} app - The window object
  * @param {boolean} maximized - Treat as already maximized
  */
 function initApp(app, maximized = false) {
@@ -244,6 +270,7 @@ function initApp(app, maximized = false) {
         _log('initApp) init as normal');
         app.wintile = {
             origFrame: {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height},
+            curFrame: null,
             row: -1,
             col: -1,
             height: -1,
@@ -253,6 +280,7 @@ function initApp(app, maximized = false) {
         _log('initApp) init as maximize');
         app.wintile = {
             origFrame: {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height},
+            curFrame: null,
             row: 0,
             col: 0,
             height: config.rows,
@@ -360,6 +388,8 @@ function sendMove(direction, ctrlPressed = false) {
 
     var colCount = curMonitor.colCount;
     var rowCount = curMonitor.rowCount;
+
+    validateTile(app);
 
     if (!app.wintile) {
         // We are not in a tile. Reset and find the most logical position
