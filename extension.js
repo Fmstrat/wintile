@@ -6,7 +6,7 @@ const Meta = imports.gi.Meta;
 const Main = imports.ui.main;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const unusedExtension = imports.misc.extensionUtils.getCurrentExtension();
 const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
 const Config = imports.misc.config;
@@ -42,7 +42,7 @@ let settingsStorage = {
     mutterSettings: null,
     shellSettings: null,
     tilingAssistantSettings: null,
-}
+};
 
 /* View logs with
 journalctl -qf | grep -i -e Wintile -e 'js error'
@@ -195,7 +195,7 @@ function moveApp(app, loc) {
         if (loc.height === rowCount && loc.width === colCount) {
             // Maximize
             _log('moveApp) maximize');
-            app.maximize();
+            app.maximize(Meta.MaximizeFlags.BOTH);
         } else {
             moveAppCoordinates(app, x, y, w, h);
         }
@@ -222,7 +222,7 @@ function moveApp(app, loc) {
         moveAppCoordinates(app, x, y, w, h);
 
     const coords = app.get_frame_rect() || getDefaultFloatingRectangle(app);
-    app.wintile.curFrame = {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height}
+    app.wintile.curFrame = {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height};
 
     _log(`moveApp) window.x: ${window.x} window.y: ${window.y} window.width: ${window.width} window.height: ${window.height}`);
 }
@@ -244,18 +244,18 @@ function validateTile(app) {
     if (app.wintile && app.wintile.curFrame) {
         const coords = app.get_frame_rect() || getDefaultFloatingRectangle(app);
         if (
-            coords.x != app.wintile.curFrame.x &&
-            coords.y != app.wintile.curFrame.y &&
-            coords.width != app.wintile.curFrame.width &&
-            coords.height != app.wintile.curFrame.height
+            coords.x !== app.wintile.curFrame.x &&
+            coords.y !== app.wintile.curFrame.y &&
+            coords.width !== app.wintile.curFrame.width &&
+            coords.height !== app.wintile.curFrame.height
         ) {
-            _log(`validateTile) window was moved with an external tool, resetting tile`);
+            _log('validateTile) window was moved with an external tool, resetting tile');
             app.wintile = null;
         } else {
-            _log(`validateTile) tile location is valid`);
+            _log('validateTile) tile location is valid');
         }
     } else {
-        _log(`validateTile) no current frame`);
+        _log('validateTile) no current frame');
     }
 }
 
@@ -741,7 +741,8 @@ function windowGrabEnd(metaWindow, metaGrabOp) {
  */
 function changeBinding(settingsObject, key, oldBinding, newBinding) {
     var binding = oldbindings[key.replace(/-/g, '_')];
-    if (!binding) binding = oldbindings[key];
+    if (!binding)
+        binding = oldbindings[key];
     var _newbindings = [];
     for (var i = 0; i < binding.length; i++) {
         let currentbinding = binding[i];
@@ -1103,9 +1104,9 @@ function getMonitorInfo(monitorIndex) {
 var WintileExtension = class WintileExtension {
 /* END NON-G45 */
 
-/* BEGIN G45 */
-// export default class WintileExtension extends Extension {
-/* END G45 */
+    /* BEGIN G45 */
+    // export default class WintileExtension extends Extension {
+    /* END G45 */
 
 
 
@@ -1254,9 +1255,12 @@ var WintileExtension = class WintileExtension {
         preview = null;
         dragStart = null;
     }
-}
+};
 
 /* BEGIN NON-G45 */
+/**
+ *
+ */
 function init() {
     return new WintileExtension();
 }
