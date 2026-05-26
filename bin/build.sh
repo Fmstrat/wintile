@@ -73,7 +73,11 @@ cp -a metadata-45.json dist/G45/build/metadata.json
 
 cd dist/G43/build
 zip -r9 wintile@nowsci.com.zip extension.js keybindings.js metadata.json prefs.js settings.ui schemas
-mv wintile@nowsci.com.zip ..
+mv wintile@nowsci.com.zip ../wintile@nowsci.com-v19.zip
 cd ../../G45/build
 zip -r9 wintile@nowsci.com.zip extension.js keybindings.js metadata.json prefs.js settings.ui schemas
 mv wintile@nowsci.com.zip ..
+cd ..
+VERSION=$(cat build/metadata.json |grep '"version"' |awk '{print $2}')
+cp -a wintile@nowsci.com.zip wintile@nowsci.com-v${VERSION}.zip
+
