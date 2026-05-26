@@ -51,7 +51,7 @@ NON_G45() {
 }
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd "${SCRIPT_DIR}"
+cd "${SCRIPT_DIR}/.."
 
 rm -rf dist
 mkdir -p dist/G43/build

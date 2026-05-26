@@ -195,9 +195,7 @@ function moveApp(app, loc) {
         if (loc.height === rowCount && loc.width === colCount) {
             // Maximize
             _log('moveApp) maximize');
-            app.maximize();
-        } else {
-            moveAppCoordinates(app, x, y, w, h);
+            app.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
         }
     }
 
@@ -206,20 +204,20 @@ function moveApp(app, loc) {
     app.wintile.width = loc.width;
     app.wintile.height = loc.height;
     let window = app.get_frame_rect();
-    let leftShift = window.width - w + config.gap;
-    let upShift = window.height - h + config.gap;
-    if (leftShift && loc.col === colCount - 1) {
-        _log(`moveApp) window wider than anticipated. Shift left by ${leftShift} px`);
-        x -= leftShift;
-        w = window.width;
-    }
-    if (upShift && loc.row === rowCount - 1) {
-        _log(`moveApp) window lower than anticipated. Shift up by ${upShift} px`);
-        y -= upShift;
-        h = window.height;
-    }
-    if (upShift || leftShift)
-        moveAppCoordinates(app, x, y, w, h);
+    // let leftShift = window.width - w + config.gap;
+    // let upShift = window.height - h + config.gap;
+    // if (leftShift > 0 && loc.col === colCount - 1) {
+    //     _log(`moveApp) window wider than anticipated. Shift left by ${leftShift} px`);
+    //     x -= leftShift;
+    //     w = window.width;
+    // }
+    // if (upShift > 0 && loc.row === rowCount - 1) {
+    //     _log(`moveApp) window lower than anticipated. Shift up by ${upShift} px`);
+    //     y -= upShift;
+    //     h = window.height;
+    // }
+    // if (upShift > 0 || leftShift > 0)
+    //     moveAppCoordinates(app, x, y, w, h);
 
     const coords = app.get_frame_rect() || getDefaultFloatingRectangle(app);
     app.wintile.curFrame = {'x': coords.x, 'y': coords.y, 'width': coords.width, 'height': coords.height}
@@ -649,14 +647,16 @@ function checkForMove(x, y, app) {
  *
  */
 function isResize(mask) {
-    let resizes = [Meta.GrabOp.RESIZING_NW,
-        Meta.GrabOp.RESIZING_N,
-        Meta.GrabOp.RESIZING_NE,
-        Meta.GrabOp.RESIZING_E,
-        Meta.GrabOp.RESIZING_SW,
-        Meta.GrabOp.RESIZING_S,
-        Meta.GrabOp.RESIZING_SE,
-        Meta.GrabOp.RESIZING_W];
+    let resizes = [
+        Meta.GrabOp.RESIZING_NW, Meta.GrabOp.RESIZING_N, Meta.GrabOp.RESIZING_NE,
+        Meta.GrabOp.RESIZING_E, Meta.GrabOp.RESIZING_SW, Meta.GrabOp.RESIZING_S,
+        Meta.GrabOp.RESIZING_SE, Meta.GrabOp.RESIZING_W,
+        Meta.GrabOp.KEYBOARD_RESIZING_UNKNOWN,
+        Meta.GrabOp.KEYBOARD_RESIZING_NW, Meta.GrabOp.KEYBOARD_RESIZING_N,
+        Meta.GrabOp.KEYBOARD_RESIZING_NE, Meta.GrabOp.KEYBOARD_RESIZING_E,
+        Meta.GrabOp.KEYBOARD_RESIZING_SW, Meta.GrabOp.KEYBOARD_RESIZING_S,
+        Meta.GrabOp.KEYBOARD_RESIZING_SE, Meta.GrabOp.KEYBOARD_RESIZING_W,
+    ].filter(v => v !== undefined);
 
     const resize = resizes.some(value => mask === value);
     _log(`isResize) mask: ${mask} resize: ${resize}`);
@@ -679,7 +679,7 @@ function windowGrabBegin(metaWindow, metaGrabOp) {
     _log(`windowGrabBegin) mouse - mouseX:${mouseX} mouseY:${mouseY}`);
     _log(`windowGrabBegin) window - x:${window.x} y:${window.y} w:${window.width} h:${window.height}`);
 
-    if (metaWindow && metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP) {
+    if (metaWindow && (Meta.GrabOp.WAYLAND_POPUP === undefined || metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP)) {
         windowMoving = true;
 
         if (app.wintile) {
@@ -703,7 +703,7 @@ function windowGrabBegin(metaWindow, metaGrabOp) {
  */
 function windowGrabEnd(metaWindow, metaGrabOp) {
     _log('windowGrabEnd)');
-    if (metaWindow && metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP) {
+    if (metaWindow && (Meta.GrabOp.WAYLAND_POPUP === undefined || metaGrabOp !== Meta.GrabOp.WAYLAND_POPUP)) {
         windowMoving = false;
         if (metaWindow.resizeable && config.preview.enabled) {
             if (preview.visible) {
@@ -1244,12 +1244,18 @@ var WintileExtension = class WintileExtension {
         global.display.disconnect(onWindowGrabEnd);
         onWindowGrabBegin = null;
         onWindowGrabEnd = null;
-        GLib.source_remove(requestMoveTimer);
-        GLib.source_remove(checkForMoveTimer);
-        GLib.source_remove(windowGrabBeginTimer);
-        GLib.source_remove(windowGrabEndTimer);
-        GLib.source_remove(checkIfNearGridTimer);
-        GLib.source_remove(keyManagerTimer);
+        if (requestMoveTimer)
+            GLib.source_remove(requestMoveTimer);
+        if (checkForMoveTimer)
+            GLib.source_remove(checkForMoveTimer);
+        if (windowGrabBeginTimer)
+            GLib.source_remove(windowGrabBeginTimer);
+        if (windowGrabEndTimer)
+            GLib.source_remove(windowGrabEndTimer);
+        if (checkIfNearGridTimer)
+            GLib.source_remove(checkIfNearGridTimer);
+        if (keyManagerTimer)
+            GLib.source_remove(keyManagerTimer);
         gsettings = null;
         preview = null;
         dragStart = null;
