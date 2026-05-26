@@ -65,7 +65,9 @@ for FILE in ${FILES}; do
     G45 ${FILE} > dist/G45/build/${FILE}
 done
 cp -a settings.ui schemas dist/G43/build/
-cp -a settings.ui schemas dist/G45/build/
+cp -a settings.ui dist/G45/build/
+mkdir -p dist/G45/build/schemas
+cp -a schemas/org.gnome.shell.extensions.wintile.gschema.xml dist/G45/build/schemas/
 cp -a metadata.json dist/G43/build/metadata.json
 cp -a metadata-45.json dist/G45/build/metadata.json
 
