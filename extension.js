@@ -195,7 +195,12 @@ function moveApp(app, loc) {
         if (loc.height === rowCount && loc.width === colCount) {
             // Maximize
             _log('moveApp) maximize');
-            app.maximize(Meta.MaximizeFlags.HORIZONTAL | Meta.MaximizeFlags.VERTICAL);
+            if (app.set_maximize_flags) { // GNOME 49+
+                app.set_maximize_flags(Meta.MaximizeFlags.BOTH);
+                app.maximize();
+            } else {
+                app.maximize(Meta.MaximizeFlags.BOTH);
+            }
         }
     }
 
@@ -230,8 +235,14 @@ function moveApp(app, loc) {
  * @param {object} app - The window object
  */
 function unMaximizeIfMaximized(app) {
-    if (app.maximized_horizontally || app.maximized_vertically)
-        app.unmaximize(Meta.MaximizeFlags.BOTH);
+    if (app.maximized_horizontally || app.maximized_vertically) {
+        if (app.set_unmaximize_flags) { // GNOME 49+
+            app.set_unmaximize_flags(Meta.MaximizeFlags.BOTH);
+            app.unmaximize();
+        } else {
+            app.unmaximize(Meta.MaximizeFlags.BOTH);
+        }
+    }
 }
 
 /**
